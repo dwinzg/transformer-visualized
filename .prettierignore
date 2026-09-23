@@ -1,0 +1,9 @@
+node_modules/
+dist/
+coverage/
+package-lock.json
+LICENSE-CONTENT
+model/
+models/
+packages/engine/test/fixtures/
+*.safetensors

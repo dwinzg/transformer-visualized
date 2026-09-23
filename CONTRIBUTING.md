@@ -9,6 +9,17 @@ Thank you for helping make transformers easier to understand. This guide covers 
 - **Improve content.** Clearer wording, better examples, new exercises or visuals.
 - **Improve code.** Bug fixes, performance, accessibility and tests.
 
+## Development setup
+
+You need Node.js 24 LTS (see `.nvmrc`) and npm.
+
+```sh
+npm install
+npm run check
+```
+
+`npm run check` runs the format check, lint, type check and tests. `npm run format` fixes formatting.
+
 ## Workflow
 
 1. Open or pick an issue so work is not duplicated.
