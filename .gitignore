@@ -26,3 +26,7 @@ __pycache__/
 # Local-only files
 .local/
 .worktrees/
+
+# Model training
+model/data/
+model/runs/
