@@ -4,7 +4,14 @@ import globals from 'globals';
 import tseslint from 'typescript-eslint';
 
 export default defineConfig([
-  globalIgnores(['**/node_modules/', '**/dist/', '**/coverage/', 'model/']),
+  globalIgnores([
+    '**/node_modules/',
+    '**/dist/',
+    '**/coverage/',
+    'model/',
+    '.local/',
+    '.worktrees/',
+  ]),
   js.configs.recommended,
   tseslint.configs.recommended,
   {
