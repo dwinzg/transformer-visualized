@@ -1,4 +1,7 @@
-/** A row-major grid of float32 values. `data.length === rows * cols`. */
+/**
+ * A row-major grid of float32 values. `data.length === rows * cols`.
+ * Build matrices with `createMatrix` or `matrixFromRows`, which check that invariant.
+ */
 export interface Matrix {
   readonly rows: number;
   readonly cols: number;

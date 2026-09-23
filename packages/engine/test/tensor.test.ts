@@ -22,6 +22,11 @@ describe('createMatrix', () => {
     expect(() => createMatrix(-1, 2)).toThrow(RangeError);
     expect(() => createMatrix(1.5, 2)).toThrow(RangeError);
   });
+
+  it('rejects fractional or NaN column counts', () => {
+    expect(() => createMatrix(2, 1.5)).toThrow(RangeError);
+    expect(() => createMatrix(2, Number.NaN)).toThrow(RangeError);
+  });
 });
 
 describe('matrixFromRows', () => {
@@ -43,6 +48,10 @@ describe('matrixFromRows', () => {
   it('rejects ragged rows', () => {
     expect(() => matrixFromRows([[1, 2], [3]])).toThrow(RangeError);
   });
+
+  it('stores values rounded to float32', () => {
+    expect(matrixFromRows([[0.1]]).data[0]).toBe(Math.fround(0.1));
+  });
 });
 
 describe('rowView', () => {
@@ -61,6 +70,10 @@ describe('rowView', () => {
     expect(() => rowView(matrixFromRows([[1]]), 1)).toThrow(RangeError);
     expect(() => rowView(matrixFromRows([[1]]), -1)).toThrow(RangeError);
   });
+
+  it('rejects fractional rows', () => {
+    expect(() => rowView(matrixFromRows([[1], [2]]), 0.5)).toThrow(RangeError);
+  });
 });
 
 describe('valueAt', () => {
@@ -77,5 +90,14 @@ describe('valueAt', () => {
     const m = matrixFromRows([[1, 2]]);
     expect(() => valueAt(m, 0, 2)).toThrow(RangeError);
     expect(() => valueAt(m, 1, 0)).toThrow(RangeError);
+  });
+
+  it('rejects negative and fractional columns', () => {
+    const m = matrixFromRows([
+      [1, 2],
+      [3, 4],
+    ]);
+    expect(() => valueAt(m, 1, -1)).toThrow(RangeError);
+    expect(() => valueAt(m, 0, 0.5)).toThrow(RangeError);
   });
 });
