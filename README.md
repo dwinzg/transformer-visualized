@@ -1,6 +1,6 @@
 # Transformer Visualized
 
-An interactive, visual guide to how large language models work. Type a sentence and follow it through a real transformer, step by step, until it predicts the next word. Every number on screen traces back to the math that produced it.
+An interactive, visual guide to how transformer language models work. Type a sentence and follow it through a real transformer, step by step, until it predicts what comes next. Every number on screen traces back to the math that produced it.
 
 Built for learners without a technical background, and quick to review for those with one.
 
@@ -8,30 +8,33 @@ Built for learners without a technical background, and quick to review for those
 
 ## What it covers
 
-- **Tokens and embeddings.** How text becomes numbers.
-- **Self-attention.** Queries, keys and values, from a simple story up to the full formula.
-- **The transformer block.** The residual stream, layer normalization and the feed-forward network.
-- **Prediction and generation.** Probabilities, sampling, temperature and the KV cache.
-- **Training.** How a model learns its numbers.
+Four chapters take you from text to the model's prediction.
+
+- **Tokens.** How text is split into tokens, small pieces from a fixed vocabulary, each with an ID number.
+- **Embeddings and position.** How each token becomes a list of numbers, called an embedding, and how information about its position is added.
+- **Attention.** Queries, keys and values, from a simple story up to the full formula.
+- **Prediction.** How the model gives every token in its vocabulary a probability of coming next, and how one is picked. Temperature, top-k and top-p, sampling versus greedy choice, and the generation loop. It also briefly covers what happens between attention and the output (the MLP, the residual stream and stacked layers) and the KV cache.
+
+**Later.** A full chapter on the transformer block, how training works, and a larger GPT-2 class model.
 
 ## How it works
 
-- **Three zoom levels.** A toy example small enough to compute by hand, a tiny real model where every value is visible, and a GPT-2 class model for realistic behavior.
-- **Depth on demand.** Each section reads as a story, as worked numbers, as the formula, or as code.
-- **Grounded in the literature.** Claims link to the exact section, equation or figure of the paper they come from. Simplifications are labeled.
+- **Playground.** Type a short sentence and follow it through tokens, embeddings, every attention head and MLP of every layer, and the output probabilities. Then sample the next token. You can inspect every number and the arithmetic that produced it.
+- **Depth on demand.** Each chapter step reads as a story, as worked numbers, as the formula, or as code.
+- **Two scales.** A toy example small enough to compute by hand, and a tiny real GPT-2 style model where every value is visible. The tiny model is trained on short, simple stories.
+- **Quick review.** A page of formula cards and a glossary.
+- **Grounded in the literature.** A references page lists every source with a pinned link, so each link always opens the same version. Simplifications are labeled. Links to exact sections and equations will follow once the chapters are written.
 - **Runs in the browser.** No server, no account and no tracking. Installable and usable offline.
 
 ## Contributing
 
-Contributions are welcome, especially from people learning the material for the first time.
-
-- **Report an error.** Open an issue naming the section and what looks wrong. Mistakes in math or explanations are the highest priority.
-- **Flag something confusing.** Point to the step where you got lost.
-- **Suggest improvements.** Better examples, visuals, exercises or references.
-- **Contribute code or content.** See [CONTRIBUTING.md](CONTRIBUTING.md) for the workflow, writing standards and citation rules.
+Contributions are welcome, especially from people learning the material for the first time. See [CONTRIBUTING.md](CONTRIBUTING.md) for ways to contribute, the workflow, writing standards and citation rules.
 
 ## License
 
+Copyright (c) 2026 Darwin Zhang
+
 - Code is released under the [MIT License](LICENSE).
-- Written lessons and figures are released under [CC BY 4.0](LICENSE-CONTENT).
+- Written lessons, explanations and figures are released under the [Creative Commons Attribution 4.0 International License](https://creativecommons.org/licenses/by/4.0/) (CC BY 4.0), unless otherwise noted. The full text is in [LICENSE-CONTENT](LICENSE-CONTENT).
+- Code samples inside the lessons are also available under the MIT License.
 - Third-party material keeps its original license.

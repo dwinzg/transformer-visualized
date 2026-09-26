@@ -1,6 +1,6 @@
 # Contributing
 
-Thank you for helping make transformers easier to understand. This guide covers how changes are proposed and the standards for code and content.
+Thank you for helping make transformers easier to understand. This guide covers how changes are proposed and the standards for content.
 
 ## Ways to contribute
 
@@ -15,8 +15,9 @@ Thank you for helping make transformers easier to understand. This guide covers 
 2. Branch from `main` using a type prefix, for example `feat/attention-view` or `fix/softmax-rounding`.
 3. Keep each pull request to one feature or fix. Split large features into several pull requests that each leave `main` working.
 4. Title pull requests with [Conventional Commits](https://www.conventionalcommits.org/), for example `feat: add attention heatmap`.
-5. Complete the pull request template, including screenshots for visual changes.
-6. Pull requests are squash-merged after checks pass and a maintainer approves.
+5. Write commit messages and pull request descriptions for other engineers. Keep them objective and concise.
+6. Complete the pull request template, including screenshots for visual changes.
+7. Pull requests are squash-merged after checks pass and a maintainer approves.
 
 ## Content standards
 
@@ -25,14 +26,16 @@ Thank you for helping make transformers easier to understand. This guide covers 
 - Use short sentences and plain words. Define a term before using it.
 - Avoid em dashes and colons in running text.
 - Prefer precision to vagueness. When simplifying, say so.
+- Stay faithful to the sources you cite.
+- When you use an analogy, say where it breaks.
 
 ### Citations
 
 - Cite a primary source for every non-obvious claim, preferably the original paper.
-- Give the exact location, such as "Vaswani et al. 2017, §3.2.1, Eq. 1".
+- Give the exact location, such as "Vaswani et al. 2017, §3.2.1, Eq. 1". If you do not know it yet, you can add it in a later pull request.
 - Link to a pinned version of the paper, such as `https://arxiv.org/html/1706.03762v7#S3.SS2.SSS1`, so numbering cannot drift.
-- Label each claim as **From the paper**, **Later research** or **Our simplification**.
-- Quote sources exactly and keep quotes short.
+- Label each citation as **From the paper**, **Later research** or **Our simplification**.
+- Give each citation a short, exact quote from the source.
 
 ### Figures and third-party material
 
@@ -41,4 +44,4 @@ Thank you for helping make transformers easier to understand. This guide covers 
 
 ## Licensing of contributions
 
-By contributing, you agree that code is released under the [MIT License](LICENSE) and content under [CC BY 4.0](LICENSE-CONTENT).
+By contributing, you agree that code is released under the [MIT License](LICENSE) and content under [CC BY 4.0](LICENSE-CONTENT). Code samples inside the lessons are also available under the MIT License.
