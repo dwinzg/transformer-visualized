@@ -1,4 +1,5 @@
 import json
+from pathlib import Path
 
 import torch
 from safetensors import safe_open
@@ -8,10 +9,24 @@ from tv_model.fixtures import MICRO_CASES, write_micro_fixtures
 from tv_model.io import load_model
 from tv_model.trace import expected_trace_names
 
+# The engine's committed golden fixtures, addressed relative to this file rather than the
+# working directory so the test runs the same way regardless of where pytest is invoked from.
+COMMITTED_FIXTURES_DIR = (
+    Path(__file__).resolve().parents[2] / "packages" / "engine" / "test" / "fixtures" / "micro"
+)
+
 
 def read_tensors(path):
     with safe_open(str(path), framework="pt") as f:
         return {name: f.get_tensor(name) for name in f.keys()}
+
+
+def _lookup_trace_path(trace, path):
+    """Walk a nested Trace dict/list by its dotted engine path, e.g. `layers.0.heads.1.q`."""
+    node = trace
+    for part in path.split("."):
+        node = node[int(part)] if isinstance(node, list) else node[part]
+    return node
 
 
 def test_cases_are_the_documented_sequences():
@@ -69,3 +84,28 @@ def test_generation_is_deterministic(tmp_path):
         assert a.keys() == b.keys()
         for key in a:
             torch.testing.assert_close(a[key], b[key], rtol=0, atol=0)
+
+
+def test_committed_fixtures_match_a_fresh_trace_of_the_committed_model():
+    """Every other fixture test writes to `tmp_path`; nothing else reads the committed
+    `packages/engine/test/fixtures/micro/` files the engine actually tests against. This loads
+    them, reruns each case, and checks every committed tensor against the value found by
+    walking a fresh trace dict at the same path -- never through `flatten_trace`, so a bug that
+    renamed or reordered paths there could not hide from both the writer and this check.
+    """
+    index = json.loads((COMMITTED_FIXTURES_DIR / "cases.json").read_text())
+    model = load_model(COMMITTED_FIXTURES_DIR / index["model"])
+    names = expected_trace_names(model.cfg)
+    for case in index["cases"]:
+        trace = {}
+        with torch.no_grad():
+            model(torch.tensor([case["tokenIds"]]), trace)
+        committed = read_tensors(COMMITTED_FIXTURES_DIR / case["file"])
+        assert set(committed) == names
+        for path, tensor in committed.items():
+            expected = _lookup_trace_path(trace, path)[0]
+            nonfinite = ~torch.isfinite(expected)
+            assert torch.equal(tensor[nonfinite], expected[nonfinite]), path
+            torch.testing.assert_close(
+                tensor[~nonfinite], expected[~nonfinite], rtol=1e-5, atol=1e-6, msg=path
+            )
