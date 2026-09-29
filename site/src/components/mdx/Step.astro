@@ -1,13 +1,25 @@
 ---
+import { stepId } from '../../lib/stepId';
+
 interface Props {
   title: string;
 }
 
+// Steps on the same page can share a title (or one with no ASCII letters to slugify), so ids are
+// tracked per page and deduplicated there. Astro renders each static page once per build, so
+// keying this module-level state by pathname is enough to scope it to one chapter.
+const takenIdsByPage = ((globalThis as { __tvStepIds?: Map<string, Set<string>> }).__tvStepIds ??=
+  new Map());
+
 const { title } = Astro.props;
-const id = `step-${title
-  .toLowerCase()
-  .replace(/[^a-z0-9]+/g, '-')
-  .replace(/^-|-$/g, '')}`;
+const pathname = Astro.url.pathname;
+let taken = takenIdsByPage.get(pathname);
+if (!taken) {
+  taken = new Set();
+  takenIdsByPage.set(pathname, taken);
+}
+const id = stepId(title, taken);
+taken.add(id);
 ---
 
 <section class="step" id={id} data-step aria-labelledby={`${id}-title`}>
@@ -128,5 +140,11 @@ const id = `step-${title
     background: var(--color-surface);
     box-shadow: var(--shadow-card);
     font-weight: 600;
+  }
+  @media (forced-colors: active) {
+    .step :global(.level-tabs button[aria-selected='true']) {
+      outline: 2px solid CanvasText;
+      outline-offset: -2px;
+    }
   }
 </style>

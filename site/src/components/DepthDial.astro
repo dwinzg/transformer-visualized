@@ -2,7 +2,7 @@
 import { DEPTH_LABELS, DEPTHS } from '../lib/depth';
 ---
 
-<fieldset class="depth-dial" data-depth-dial>
+<fieldset class="depth-dial" data-depth-dial hidden>
   <legend>Explain it as</legend>
   <div class="options">
     {DEPTHS.map((depth) => (
@@ -25,6 +25,7 @@ import { DEPTH_LABELS, DEPTHS } from '../lib/depth';
   } from '../lib/depth';
 
   for (const dial of document.querySelectorAll<HTMLElement>('[data-depth-dial]')) {
+    dial.hidden = false;
     const inputs = Array.from(dial.querySelectorAll<HTMLInputElement>('input[name="depth"]'));
     const select = (depth: Depth) => {
       for (const input of inputs) input.checked = input.value === depth;
@@ -89,5 +90,11 @@ import { DEPTH_LABELS, DEPTHS } from '../lib/depth';
   input:focus-visible + span {
     outline: var(--focus-width) solid var(--color-focus);
     outline-offset: var(--focus-offset);
+  }
+  @media (forced-colors: active) {
+    input:checked + span {
+      outline: 2px solid CanvasText;
+      outline-offset: -2px;
+    }
   }
 </style>

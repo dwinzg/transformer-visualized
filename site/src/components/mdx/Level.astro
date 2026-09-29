@@ -1,12 +1,12 @@
 ---
-import { DEPTH_LABELS, type Depth } from '../../lib/depth';
+import { DEPTH_LABELS, isDepth, type Depth } from '../../lib/depth';
 
 interface Props {
   of: Depth;
 }
 
 const { of } = Astro.props;
-if (!(of in DEPTH_LABELS)) throw new Error(`Unknown level "${String(of)}"`);
+if (!isDepth(of)) throw new Error(`Unknown level "${String(of)}"`);
 ---
 
 <div class="level" data-level={of}>

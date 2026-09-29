@@ -63,10 +63,22 @@ chapter.data.references.forEach((ref, i) => {
       </ul>
     </section>
 
-    <nav class="pager" aria-label="Chapters">
-      {prev && <a href={withBase(`learn/${prev.id}/`)}>Previous. {prev.data.title}</a>}
-      {next && <a href={withBase(`learn/${next.id}/`)}>Next. {next.data.title}</a>}
-    </nav>
+    {(prev || next) && (
+      <nav class="pager" aria-label="Chapters">
+        {prev && (
+          <a class="pager-link" href={withBase(`learn/${prev.id}/`)}>
+            <span class="pager-label">Previous chapter</span>
+            <span class="pager-title">{prev.data.title}</span>
+          </a>
+        )}
+        {next && (
+          <a class="pager-link pager-next" href={withBase(`learn/${next.id}/`)}>
+            <span class="pager-label">Next chapter</span>
+            <span class="pager-title">{next.data.title}</span>
+          </a>
+        )}
+      </nav>
+    )}
   </article>
 </BaseLayout>
 
@@ -112,6 +124,11 @@ chapter.data.references.forEach((ref, i) => {
     border-top: 1px solid var(--color-separator);
     font-size: var(--text-subheadline);
   }
+  .go-deeper a {
+    display: inline-flex;
+    align-items: center;
+    min-height: var(--touch-target);
+  }
   .pager {
     display: flex;
     flex-wrap: wrap;
@@ -119,9 +136,23 @@ chapter.data.references.forEach((ref, i) => {
     gap: var(--space-4);
     margin-top: var(--space-12);
   }
-  .pager a {
-    display: inline-flex;
-    align-items: center;
+  .pager-link {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: var(--space-1);
     min-height: var(--touch-target);
+  }
+  .pager-next {
+    text-align: right;
+    margin-left: auto;
+  }
+  .pager-label {
+    color: var(--color-text-secondary);
+    font-size: var(--text-footnote);
+    font-weight: 600;
+  }
+  .pager-title {
+    font-weight: 600;
   }
 </style>

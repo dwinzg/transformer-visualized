@@ -65,13 +65,28 @@ test('the quick review link opens chapters at the formula level', async ({ page 
   ).toHaveAttribute('aria-selected', 'true');
 });
 
-test('without JavaScript every level is shown in order', async ({ browser }) => {
+test('?depth= also works when it lands directly on a chapter page', async ({ page }) => {
+  await page.goto(`${CHAPTER}?depth=formula`);
+  await expect(
+    page.locator('#step-it-guesses-the-next-piece-of-text').getByRole('tab', { name: 'Formula' }),
+  ).toHaveAttribute('aria-selected', 'true');
+});
+
+test('without JavaScript every level is shown in order and the depth dial is hidden', async ({
+  browser,
+}) => {
   const context = await browser.newContext({ javaScriptEnabled: false });
   const page = await context.newPage();
   await page.goto(CHAPTER);
   const step = page.locator('#step-it-guesses-the-next-piece-of-text');
   await expect(step.locator('.level-label')).toHaveText(LEVELS);
+  await expect(page.locator('[data-depth-dial]').first()).toBeHidden();
   await context.close();
+});
+
+test('the chapter has no pager when there is no other chapter', async ({ page }) => {
+  await page.goto(CHAPTER);
+  await expect(page.getByRole('navigation', { name: 'Chapters' })).toHaveCount(0);
 });
 
 test('the chapter ends with a recap and links to go deeper', async ({ page }) => {

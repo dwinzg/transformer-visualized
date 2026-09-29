@@ -24,8 +24,8 @@ const chapters = (await getCollection('chapters', ({ data }) => !data.draft)).so
       {chapters.map((chapter) => (
         <li>
           <a href={withBase(`learn/${chapter.id}/`)}>
-            <span class="number">Chapter {chapter.data.order}</span>
-            <span class="title">{chapter.data.title}</span>
+            <span class="number">Chapter {chapter.data.order}</span>{' '}
+            <span class="title">{chapter.data.title}</span>{' '}
             <span class="summary">{chapter.data.summary}</span>
           </a>
         </li>

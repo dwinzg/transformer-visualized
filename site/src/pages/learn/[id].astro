@@ -20,3 +20,11 @@ const { Content } = await render(chapter);
 <ChapterLayout chapter={chapter} prev={prev} next={next}>
   <Content components={mdxComponents} />
 </ChapterLayout>
+
+<script>
+  import { chooseDepth, isDepth } from '../../lib/depth';
+
+  // The "Quick review" door can also link straight to a chapter with ?depth=formula.
+  const requested = new URLSearchParams(location.search).get('depth');
+  if (isDepth(requested)) chooseDepth(requested);
+</script>
