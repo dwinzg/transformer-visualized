@@ -24,6 +24,24 @@ test.describe('home page', () => {
 });
 
 test.describe('theme toggle', () => {
+  test('is hidden without JavaScript', async ({ browser }) => {
+    const context = await browser.newContext({ javaScriptEnabled: false });
+    const page = await context.newPage();
+    await page.goto('./');
+    await expect(page.locator('[data-theme-toggle]').first()).toBeHidden();
+    await context.close();
+  });
+
+  test('follows the system theme until the reader picks one', async ({ page }) => {
+    await page.emulateMedia({ colorScheme: 'light' });
+    await page.goto('./');
+    await expect(page.getByRole('button', { name: 'Switch to dark theme' })).toBeVisible();
+    await page.emulateMedia({ colorScheme: 'dark' });
+    await expect(page.getByRole('button', { name: 'Switch to light theme' })).toBeVisible();
+    await page.emulateMedia({ colorScheme: 'light' });
+    await expect(page.getByRole('button', { name: 'Switch to dark theme' })).toBeVisible();
+  });
+
   test('switches the theme and remembers it', async ({ page }) => {
     await page.emulateMedia({ colorScheme: 'light' });
     await page.goto('./');
