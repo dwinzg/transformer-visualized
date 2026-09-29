@@ -1,0 +1,59 @@
+---
+import { getEntry } from 'astro:content';
+import { withBase } from '../../lib/paths';
+
+interface Props {
+  id: string;
+}
+
+const { id } = Astro.props;
+const entry = await getEntry('glossary', id);
+if (!entry) throw new Error(`Unknown glossary term "${id}"`);
+// A per-render counter keeps popover ids unique when a term appears more than once on a page.
+const counter = (Astro.locals as { termCount?: number }).termCount ?? 0;
+(Astro.locals as { termCount?: number }).termCount = counter + 1;
+const popoverId = `term-${id}-${counter}`;
+---
+
+<button type="button" class="term" popovertarget={popoverId}>
+  <slot />
+</button>
+<span id={popoverId} popover class="term-card">
+  <strong class="term-name">{entry.data.term}</strong> <span>{entry.data.short}</span>{' '}
+  <a href={withBase(`glossary/#${entry.id}`)}>Open the glossary</a>
+</span>
+
+<style>
+  .term {
+    padding: 0;
+    border: 0;
+    background: none;
+    color: inherit;
+    font: inherit;
+    text-decoration: underline dotted;
+    text-underline-offset: 0.2em;
+    cursor: help;
+  }
+  .term-card {
+    max-width: min(22rem, 90vw);
+    padding: var(--space-4) var(--space-5);
+    border: 1px solid var(--color-separator);
+    border-radius: var(--radius-md);
+    background: var(--color-surface);
+    color: var(--color-text);
+    box-shadow: var(--shadow-card);
+    font-size: var(--text-subheadline);
+  }
+  .term-card > * {
+    display: block;
+  }
+  .term-name {
+    margin-bottom: var(--space-1);
+  }
+  .term-card a {
+    display: flex;
+    align-items: center;
+    min-height: var(--touch-target);
+    margin-top: var(--space-1);
+  }
+</style>

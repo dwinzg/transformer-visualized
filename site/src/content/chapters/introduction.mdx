@@ -23,7 +23,7 @@ references:
 
 <Level of="story">
 
-When you type a message, your phone suggests the next word. A language model does the same thing, only much better. You give it some text, and it answers with every piece of text that could come next, each with a chance.
+When you type a message, your phone suggests the next word. A <Term id="language-model">language model</Term> does the same thing, only much better. You give it some text, and it answers with every piece of text that could come next, each with a chance.
 
 </Level>
 
@@ -38,7 +38,7 @@ Here is what that answer could look like after "Once upon a". These numbers are 
 | hill | 0.01 |
 | everything else | 0.04 |
 
-The chances always add up to 1, because something has to come next.
+The chances, called <Term id="probability">probabilities</Term>, always add up to 1, because something has to come next.
 
 </Level>
 
@@ -63,6 +63,18 @@ const chances = probabilities(lastRow, 1); // one number per token in the vocabu
 </Level>
 
 </Step>
+
+<PredictReveal question="Which word is most likely to come after &quot;The cat sat on the&quot;?" options={['mat', 'moon', 'because']} answer={0}>
+
+Most people pick "mat", and a model trained on lots of English text usually does too, because that phrase is common in its training text. The model has never seen a cat. It has seen patterns in text. The playground lets you check what our small model predicts.
+
+</PredictReveal>
+
+<Exercise prompt="A model gives &quot;time&quot; a chance of 0.9 and &quot;day&quot; a chance of 0.05. How much chance is left for every other piece together?" answer={0.05} tolerance={0.001}>
+
+All chances add up to 1, so what is left is 1 minus 0.9 minus 0.05, which is 0.05.
+
+</Exercise>
 
 <Step title="Then it does it again">
 
@@ -104,7 +116,7 @@ const result = generate(model, promptIds, { maxNewTokens: 20, temperature: 0.8, 
 
 <Callout kind="note" title="An old idea">
 
-In 1951 Claude Shannon asked people to guess the next letter of English sentences, one letter at a time, to measure how predictable English is. A language model plays the same game with pieces of words.
+In 1951 Claude Shannon (<Ref id="shannon1951" />) asked people to guess the next letter of English sentences, one letter at a time, to measure how predictable English is. A language model plays the same game with pieces of words.
 
 </Callout>
 
@@ -112,7 +124,7 @@ In 1951 Claude Shannon asked people to guess the next letter of English sentence
 
 <Level of="story">
 
-The model that makes these guesses is called a transformer. It turns the text into numbers, passes those numbers through a stack of layers that let each word gather information from the words before it, and ends with a score for every possible next piece. The next chapters open each of those steps.
+The model that makes these guesses is called a <Term id="transformer">transformer</Term> (<Ref id="vaswani2017" />). It turns the text into numbers, passes those numbers through a stack of layers that let each word gather information from the words before it, and ends with a score for every possible next piece. The next chapters open each of those steps.
 
 </Level>
 

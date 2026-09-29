@@ -99,18 +99,20 @@ test('the chapter ends with a recap and links to go deeper', async ({ page }) =>
   ).toHaveAttribute('href', '/transformer-visualized/references/#vaswani2017');
 });
 
-test('the chapter has no accessibility violations at any level in either theme', async ({
-  page,
-}) => {
-  await page.goto(CHAPTER);
-  for (const colorScheme of ['light', 'dark'] as const) {
-    await page.emulateMedia({ colorScheme });
-    for (const level of LEVELS) {
+// One test per depth level, each scanning both themes: running all four levels and both themes
+// in a single test made 8 axe scans, which was slow enough to hit Firefox's 30s test timeout.
+for (const level of LEVELS) {
+  test(`the chapter has no accessibility violations at the ${level} level in either theme`, async ({
+    page,
+  }) => {
+    await page.goto(CHAPTER);
+    for (const colorScheme of ['light', 'dark'] as const) {
+      await page.emulateMedia({ colorScheme });
       await page.getByRole('radio', { name: level }).check();
       await expectNoA11yViolations(page);
     }
-  }
-});
+  });
+}
 
 test.describe('at 320px wide', () => {
   test.use({ viewport: { width: 320, height: 640 } });

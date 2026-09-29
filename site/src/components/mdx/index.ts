@@ -1,7 +1,11 @@
 import Callout from './Callout.astro';
+import Exercise from './Exercise.astro';
 import Level from './Level.astro';
+import PredictReveal from './PredictReveal.astro';
+import Ref from './Ref.astro';
 import Step from './Step.astro';
+import Term from './Term.astro';
 import Tex from './Tex.astro';
 
 /** Components every chapter can use without importing them. */
-export const mdxComponents = { Callout, Level, Step, Tex };
+export const mdxComponents = { Callout, Exercise, Level, PredictReveal, Ref, Step, Tex, Term };

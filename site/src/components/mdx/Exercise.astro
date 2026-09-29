@@ -1,0 +1,17 @@
+---
+import Island from '../islands/Exercise.tsx';
+
+interface Props {
+  prompt: string;
+  answer: number;
+  tolerance?: number;
+}
+
+const { prompt, answer, tolerance } = Astro.props;
+---
+
+<div class="island">
+  <Island client:visible prompt={prompt} answer={answer} tolerance={tolerance}>
+    <slot />
+  </Island>
+</div>
