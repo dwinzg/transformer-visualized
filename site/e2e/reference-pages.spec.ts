@@ -7,6 +7,8 @@ test('the glossary lists terms alphabetically with anchors', async ({ page }) =>
   expect(terms).toEqual([...terms].sort((a, b) => a.localeCompare(b)));
   await expect(page.locator('#token dt')).toHaveText('Token');
   await expectNoA11yViolations(page);
+  await page.emulateMedia({ colorScheme: 'dark' });
+  await expectNoA11yViolations(page);
 });
 
 test('the references page groups sources and links to them', async ({ page }) => {
@@ -22,6 +24,8 @@ test('the references page groups sources and links to them', async ({ page }) =>
   await expect(page.locator('#shannon1951')).toContainText(
     'doi:10.1002/j.1538-7305.1951.tb01366.x',
   );
+  await expectNoA11yViolations(page);
+  await page.emulateMedia({ colorScheme: 'dark' });
   await expectNoA11yViolations(page);
 });
 
