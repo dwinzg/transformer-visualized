@@ -83,7 +83,10 @@ import { DEPTH_LABELS, DEPTHS } from '../lib/depth';
     font-size: var(--text-subheadline);
   }
   input:checked + span {
-    background: var(--color-surface);
+    background: var(--color-segment-selected);
+    /* The border is a non-color cue: it keeps the selected segment identifiable even where its
+       fill is close to the track's, such as older screens that render dark colors flatter. */
+    border: 1px solid var(--color-control-border);
     box-shadow: var(--shadow-card);
     font-weight: 600;
   }

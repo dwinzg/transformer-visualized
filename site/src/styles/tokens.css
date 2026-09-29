@@ -100,6 +100,7 @@
   --color-danger-text: #c0342b;
   --color-material: rgb(251 251 253 / 0.72);
   --shadow-card: 0 1px 2px rgb(0 0 0 / 0.04), 0 8px 24px rgb(0 0 0 / 0.06);
+  --color-segment-selected: #ffffff;
 
   --code-comment: #5f6770;
   --code-keyword: #9b2393;
@@ -138,6 +139,9 @@
     --color-danger-text: #ff6b5e;
     --color-material: rgb(11 11 13 / 0.72);
     --shadow-card: 0 1px 2px rgb(0 0 0 / 0.3), 0 8px 24px rgb(0 0 0 / 0.35);
+    /* Lighter than both --color-surface and the dial's track (--color-surface-2), so the
+       selected segment stands out in dark mode instead of blending into the track. */
+    --color-segment-selected: #4a4a4c;
 
     --code-comment: #9b9ba1;
     --code-keyword: #ff7ab2;
@@ -176,6 +180,7 @@
   --color-danger-text: #ff6b5e;
   --color-material: rgb(11 11 13 / 0.72);
   --shadow-card: 0 1px 2px rgb(0 0 0 / 0.3), 0 8px 24px rgb(0 0 0 / 0.35);
+  --color-segment-selected: #4a4a4c;
 
   --code-comment: #9b9ba1;
   --code-keyword: #ff7ab2;
