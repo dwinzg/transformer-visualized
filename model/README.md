@@ -33,7 +33,16 @@ The engine's parity tests compare every intermediate value with this model. Rege
 Text fed to the tiny model needs the same cleaning the training data went through; see the
 "Input text" section in `models/tiny/README.md`.
 
-This downloads about 2.2 GB of TinyStories into `model/data/` and trains for about 47 minutes on an Apple M4.
+This downloads about 2.2 GB of TinyStories into `model/data/`, which reaches about 3.1 GB once
+the tokenized train and validation files are written, and trains for about 47 minutes on an
+Apple M4. Without an MPS or CUDA device, training falls back to CPU and is much slower.
+
+Retraining is not bit-reproducible on MPS, so a retrain gives a model that is comparable but
+not identical to the committed one. After retraining, regenerate the model card, `models/tiny/`
+and the engine fixtures, since they all describe this exact run. Running `prepare` also
+overwrites the committed `models/tiny/tokenizer.json` and
+`packages/engine/test/fixtures/tokenizer/cases.json`; they come out byte-identical when run
+against the same revision of the dataset, but check before committing.
 
 ```sh
 .venv/bin/python -m tv_model.prepare --data-dir data --tokenizer-out ../models/tiny/tokenizer.json --cases-out ../packages/engine/test/fixtures/tokenizer/cases.json
