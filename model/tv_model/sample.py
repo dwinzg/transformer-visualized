@@ -1,6 +1,14 @@
-"""Generate text from a trained model, for sanity checks and the model card."""
+"""Generate text from a trained model, for sanity checks and the model card.
+
+python -m tv_model.sample --weights ../models/tiny/model.safetensors \
+    --tokenizer ../models/tiny/tokenizer.json --prompt "Once upon a time" \
+    --tokens 80 --temperature 0.8 --top-k 40 --seed 0
+"""
 
 from __future__ import annotations
+
+import argparse
+from pathlib import Path
 
 import torch
 
@@ -34,3 +42,36 @@ def generate_text(
             break
         ids.append(next_id)
     return tokenizer.decode(ids, skip_special_tokens=False)
+
+
+def main(argv: list[str] | None = None) -> None:
+    from .io import load_model
+    from .tokenizer import load_tokenizer
+    from .train import load_checkpoint
+
+    parser = argparse.ArgumentParser(description="Generate text from a trained model.")
+    weights_group = parser.add_mutually_exclusive_group(required=True)
+    weights_group.add_argument("--checkpoint", type=Path, help="a training checkpoint (ckpt.pt)")
+    weights_group.add_argument("--weights", type=Path, help="a shipped model.safetensors file")
+    parser.add_argument("--tokenizer", type=Path, required=True)
+    parser.add_argument("--prompt", required=True)
+    parser.add_argument("--tokens", type=int, default=80)
+    parser.add_argument("--temperature", type=float, default=0.8)
+    parser.add_argument("--top-k", type=int, default=40)
+    parser.add_argument("--seed", type=int, default=0)
+    args = parser.parse_args(argv)
+
+    model = (
+        load_model(args.weights)
+        if args.weights is not None
+        else load_checkpoint(args.checkpoint)[0]
+    )
+    tokenizer = load_tokenizer(args.tokenizer)
+    text = generate_text(
+        model, tokenizer, args.prompt, args.tokens, args.temperature, args.top_k, args.seed
+    )
+    print(text)
+
+
+if __name__ == "__main__":
+    main()

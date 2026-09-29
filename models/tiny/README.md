@@ -38,7 +38,12 @@ was trained on. The engine does not apply this mapping yet; that is planned for 
 
 ## Samples
 
-Temperature 0.8, top-k 40.
+Temperature 0.8, top-k 40. Prompts "Once upon a time", "Lily wanted to" and "The little dog",
+80 tokens each, in that order with seeds 0, 1 and 2. Reproduce the first one with:
+
+```sh
+.venv/bin/python -m tv_model.sample --weights ../models/tiny/model.safetensors --tokenizer ../models/tiny/tokenizer.json --prompt "Once upon a time" --tokens 80 --temperature 0.8 --top-k 40 --seed 0
+```
 
 ```text
 Once upon a time, in a small town, there was a girl named Sue. Sue liked to play with her ball. One sunny day, she went outside to play with her ball.

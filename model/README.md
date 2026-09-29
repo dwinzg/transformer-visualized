@@ -41,3 +41,10 @@ This downloads about 2.2 GB of TinyStories into `model/data/` and trains for abo
 .venv/bin/python -m tv_model.export --run runs/tiny --out ../models/tiny
 .venv/bin/python -m tv_model.fixtures tiny --model ../models/tiny/model.safetensors --tokenizer ../models/tiny/tokenizer.json --out ../packages/engine/test/fixtures/tiny
 ```
+
+To generate the samples on the model card, run `tv_model.sample` with the shipped weights, one
+of the card's prompts and one of its seeds:
+
+```sh
+.venv/bin/python -m tv_model.sample --weights ../models/tiny/model.safetensors --tokenizer ../models/tiny/tokenizer.json --prompt "Once upon a time" --tokens 80 --temperature 0.8 --top-k 40 --seed 0
+```
