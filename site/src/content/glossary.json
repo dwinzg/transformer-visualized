@@ -1,0 +1,44 @@
+[
+  {
+    "id": "language-model",
+    "term": "Language model",
+    "short": "A program that reads text and gives every possible next piece of text a probability.",
+    "related": ["token", "probability"]
+  },
+  {
+    "id": "token",
+    "term": "Token",
+    "short": "One piece of text from a fixed list the model knows, often a whole word or part of one.",
+    "related": ["language-model"]
+  },
+  {
+    "id": "probability",
+    "term": "Probability",
+    "short": "A number from 0 to 1 that says how likely something is. The probabilities of all options add up to 1.",
+    "related": []
+  },
+  {
+    "id": "transformer",
+    "term": "Transformer",
+    "short": "The design behind most modern language models. It passes text through layers of attention and feed-forward steps.",
+    "related": ["attention", "parameter"]
+  },
+  {
+    "id": "attention",
+    "term": "Attention",
+    "short": "The step where each token gathers information from itself and the tokens before it, taking more from the ones that match what it is looking for.",
+    "related": ["transformer"]
+  },
+  {
+    "id": "parameter",
+    "term": "Parameter",
+    "short": "One of the numbers inside a model that is set during training. Our tiny model has about 1.3 million.",
+    "related": ["training"]
+  },
+  {
+    "id": "training",
+    "term": "Training",
+    "short": "Adjusting a model's parameters, a little at a time, so its predictions on example text get better.",
+    "related": ["parameter"]
+  }
+]
