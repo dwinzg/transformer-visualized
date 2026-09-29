@@ -29,18 +29,22 @@ def make_fixture_model(cfg: ModelConfig, seed: int) -> GPT:
     """Random weights large enough to exercise softmax, GELU and LayerNorm.
 
     The default initialization (std 0.02) keeps every activation tiny, which would let
-    an engine bug in a nonlinearity pass the parity tests unnoticed.
+    an engine bug in a nonlinearity pass the parity tests unnoticed. Drawn from a local
+    generator, not the global RNG: `GPT(cfg)`'s own default init already consumes an
+    architecture-dependent number of draws from the global stream, so seeding it globally would
+    make the fixture depend on that unrelated detail and would also reseed the caller's RNG.
     """
-    torch.manual_seed(seed)
     model = GPT(cfg)
+    generator = torch.Generator().manual_seed(seed)
     with torch.no_grad():
         for name, param in model.named_parameters():
+            noise = torch.randn(param.shape, generator=generator)
             if name.endswith(("ln_1.weight", "ln_2.weight", "ln_f.weight")):
-                param.copy_(1.0 + 0.1 * torch.randn_like(param))
+                param.copy_(1.0 + 0.1 * noise)
             elif name.endswith(".bias"):
-                param.copy_(0.1 * torch.randn_like(param))
+                param.copy_(0.1 * noise)
             else:
-                param.copy_(0.3 * torch.randn_like(param))
+                param.copy_(0.3 * noise)
     return model.eval()
 
 

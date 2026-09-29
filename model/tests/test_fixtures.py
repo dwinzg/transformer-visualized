@@ -7,7 +7,7 @@ import torch
 from safetensors import safe_open
 
 from tv_model.config import MICRO
-from tv_model.fixtures import MICRO_CASES, write_micro_fixtures
+from tv_model.fixtures import MICRO_CASES, MICRO_SEED, make_fixture_model, write_micro_fixtures
 from tv_model.io import load_model
 from tv_model.trace import expected_trace_names
 
@@ -129,3 +129,21 @@ def test_committed_fixtures_match_a_fresh_trace_of_the_committed_model():
             torch.testing.assert_close(
                 tensor[~nonfinite], expected[~nonfinite], rtol=1e-5, atol=1e-6, msg=path
             )
+
+
+def test_make_fixture_model_advances_rather_than_resets_the_callers_global_rng():
+    """`GPT(cfg)`'s own default init unavoidably draws from the global RNG; that's ordinary.
+    The bug was that `make_fixture_model` used to also call `torch.manual_seed(seed)`, which
+    forces the caller's subsequent draws to a fixed sequence no matter what its RNG state was
+    beforehand. After the fix, two different starting states must still lead to different
+    draws afterward -- the function may advance the caller's RNG, but must not reset it.
+    """
+    torch.manual_seed(1)
+    make_fixture_model(MICRO, MICRO_SEED)
+    after_seed_1 = torch.randn(5)
+
+    torch.manual_seed(2)
+    make_fixture_model(MICRO, MICRO_SEED)
+    after_seed_2 = torch.randn(5)
+
+    assert not torch.equal(after_seed_1, after_seed_2)
