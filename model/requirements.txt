@@ -1,4 +1,7 @@
 torch==2.14.0
+numpy==2.5.3
 safetensors==0.8.0
+tokenizers==0.23.2
+huggingface_hub==1.32.0
 pytest==9.1.1
 ruff==0.16.8
