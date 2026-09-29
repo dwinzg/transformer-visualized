@@ -11,12 +11,19 @@ from tv_model.config import MICRO
 from tv_model.fixtures import MICRO_CASES, MICRO_SEED, make_fixture_model, write_micro_fixtures
 from tv_model.gpt import GPT
 from tv_model.io import load_model
+from tv_model.tokenizer import load_tokenizer
 from tv_model.trace import expected_trace_names
 
 # The engine's committed golden fixtures, addressed relative to this file rather than the
 # working directory so the test runs the same way regardless of where pytest is invoked from.
 COMMITTED_FIXTURES_DIR = (
     Path(__file__).resolve().parents[2] / "packages" / "engine" / "test" / "fixtures" / "micro"
+)
+REPO_ROOT = Path(__file__).resolve().parents[2]
+TINY_MODEL_DIR = REPO_ROOT / "models" / "tiny"
+TINY_FIXTURES_DIR = REPO_ROOT / "packages" / "engine" / "test" / "fixtures" / "tiny"
+TOKENIZER_CASES_PATH = (
+    REPO_ROOT / "packages" / "engine" / "test" / "fixtures" / "tokenizer" / "cases.json"
 )
 
 
@@ -174,3 +181,38 @@ def test_model_fixtures_record_text_ids_and_traces(tmp_path):
     assert case["tokenIds"] == tokenizer.encode("Lily ran").ids
     tensors = read_tensors(tmp_path / "out" / case["file"])
     assert set(tensors) == expected_trace_names(cfg)
+
+
+def test_committed_tiny_artifacts_are_mutually_consistent():
+    """The shipped tiny model, tokenizer and both fixture files must agree with each other.
+
+    Mirrors `test_committed_fixtures_match_a_fresh_trace_of_the_committed_model` for the tiny
+    preset: the model's vocabulary and context length must match the tokenizer and the
+    fixtures, the tokenizer must encode every fixture and tokenizer case exactly as recorded,
+    and a fresh forward pass of the shipped model must match a committed trace.
+    """
+    model = load_model(TINY_MODEL_DIR / "model.safetensors")
+    tokenizer = load_tokenizer(TINY_MODEL_DIR / "tokenizer.json")
+    assert model.cfg.vocab_size == tokenizer.get_vocab_size()
+
+    tokenizer_cases = json.loads(TOKENIZER_CASES_PATH.read_text())
+    for case in tokenizer_cases:
+        assert tokenizer.encode(case["text"]).ids == case["ids"], case["text"]
+
+    index = json.loads((TINY_FIXTURES_DIR / "cases.json").read_text())
+    model_path = (TINY_FIXTURES_DIR / index["model"]).resolve()
+    assert model_path == (TINY_MODEL_DIR / "model.safetensors").resolve()
+
+    names = expected_trace_names(model.cfg)
+    for case in index["cases"]:
+        assert len(case["tokenIds"]) <= model.cfg.context_length
+        assert tokenizer.encode(case["text"]).ids == case["tokenIds"]
+        committed = read_tensors(TINY_FIXTURES_DIR / case["file"])
+        assert set(committed) == names
+
+    case = index["cases"][0]
+    trace = {}
+    with torch.no_grad():
+        model(torch.tensor([case["tokenIds"]]), trace)
+    committed = read_tensors(TINY_FIXTURES_DIR / case["file"])
+    torch.testing.assert_close(committed["logits"], trace["logits"][0], rtol=1e-5, atol=1e-6)
