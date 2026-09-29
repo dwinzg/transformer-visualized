@@ -76,6 +76,9 @@ const current = Astro.url.pathname;
     border-radius: var(--radius-pill);
     color: var(--color-text);
     font-size: var(--text-subheadline);
+    /* Overrides global.css's prose-link underline: nav items sit inside <li>, but they are
+       standalone controls, not links inline in running text, so they stay underline-free. */
+    text-decoration: none;
   }
   .links a[aria-current='page'] {
     background: var(--color-surface-2);

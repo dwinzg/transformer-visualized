@@ -62,6 +62,13 @@ a:hover {
   text-decoration: underline;
 }
 
+/* Links inside running text need a non-color affordance to meet WCAG 1.4.1 (axe's
+   link-in-text-block rule). Navigation, buttons and other UI links stay underline-free. */
+:where(p, li, dd, blockquote, figcaption, td) a {
+  text-decoration: underline;
+  text-underline-offset: 0.15em;
+}
+
 :focus-visible {
   outline: var(--focus-width) solid var(--color-focus);
   outline-offset: var(--focus-offset);
