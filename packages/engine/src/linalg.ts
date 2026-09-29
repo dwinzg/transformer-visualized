@@ -58,8 +58,12 @@ export function add(a: Matrix, b: Matrix): Matrix {
 
 /** Copies columns [start, end) of every row into a new matrix. */
 export function sliceColumns(m: Matrix, start: number, end: number): Matrix {
-  const valid = Number.isInteger(start) && Number.isInteger(end) && start >= 0;
-  if (!valid || end > m.cols || start > end) {
+  const isInteger = Number.isInteger(start) && Number.isInteger(end);
+  if (isInteger && start > end) {
+    throw new RangeError(`sliceColumns: start ${start} is greater than end ${end}`);
+  }
+  const valid = isInteger && start >= 0 && end <= m.cols;
+  if (!valid) {
     throw new RangeError(`sliceColumns: [${start}, ${end}) is out of range for ${m.cols} columns`);
   }
   const width = end - start;
@@ -91,11 +95,15 @@ export function concatColumns(parts: readonly Matrix[]): Matrix {
 
 /** Copies the listed rows into a new matrix, for example token ids from an embedding table. */
 export function gatherRows(m: Matrix, indices: readonly number[]): Matrix {
-  const out = createMatrix(indices.length, m.cols);
-  indices.forEach((index, i) => {
+  // Validate every index before allocating the output, so a bad index never pays for a
+  // (potentially large) allocation it is about to throw away.
+  for (const index of indices) {
     if (!Number.isInteger(index) || index < 0 || index >= m.rows) {
       throw new RangeError(`gatherRows: row ${index} is out of range for ${m.rows} rows`);
     }
+  }
+  const out = createMatrix(indices.length, m.cols);
+  indices.forEach((index, i) => {
     out.data.set(m.data.subarray(index * m.cols, (index + 1) * m.cols), i * m.cols);
   });
   return out;

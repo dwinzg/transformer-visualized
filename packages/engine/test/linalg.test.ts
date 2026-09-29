@@ -89,6 +89,10 @@ describe('sliceColumns', () => {
     expect(() => sliceColumns(m, 2, 5)).toThrow(RangeError);
     expect(() => sliceColumns(m, 3, 2)).toThrow(RangeError);
   });
+
+  it('gives a precise message when start is greater than end', () => {
+    expect(() => sliceColumns(m, 3, 2)).toThrow(/start 3 is greater than end 2/);
+  });
 });
 
 describe('concatColumns', () => {

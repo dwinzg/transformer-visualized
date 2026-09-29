@@ -108,6 +108,13 @@ describe('modelFromTensors', () => {
     tensors.set('lm_head.weight', { shape: [1], data: new Float32Array(1) });
     expect(() => modelFromTensors(MICRO, tensors)).toThrow(/lm_head\.weight/);
   });
+
+  it('rejects a tensor with the wrong rank', () => {
+    const tensors = syntheticTensors(MICRO);
+    // wpe.weight should be rank 2, [contextLength, dModel].
+    tensors.set('wpe.weight', { shape: [16 * 16], data: new Float32Array(256) });
+    expect(() => modelFromTensors(MICRO, tensors)).toThrow(/wpe\.weight/);
+  });
 });
 
 describe('loadModel', () => {
