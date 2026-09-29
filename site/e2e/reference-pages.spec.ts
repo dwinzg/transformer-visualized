@@ -11,6 +11,20 @@ test('the glossary lists terms alphabetically with anchors', async ({ page }) =>
   await expectNoA11yViolations(page);
 });
 
+test('a glossary entry reached by its anchor is highlighted, like a reference', async ({
+  page,
+}) => {
+  await page.goto('glossary/#token');
+  const targeted = page.locator('#token');
+  const untargeted = page.locator('.entry:not(#token)').first();
+  await expect(targeted).toHaveCSS('border-radius', /[1-9]/);
+  const targetedBackground = await targeted.evaluate((el) => getComputedStyle(el).backgroundColor);
+  const untargetedBackground = await untargeted.evaluate(
+    (el) => getComputedStyle(el).backgroundColor,
+  );
+  expect(targetedBackground).not.toBe(untargetedBackground);
+});
+
 test('the references page groups sources and links to them', async ({ page }) => {
   await page.goto('references/');
   await expect(page.getByRole('heading', { name: 'The transformer' })).toBeVisible();
