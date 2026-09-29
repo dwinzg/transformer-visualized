@@ -14,6 +14,8 @@ const IS_LITTLE_ENDIAN = new Uint8Array(new Uint16Array([1]).buffer)[0] === 1;
 /**
  * Parses a safetensors file: an 8-byte little-endian header length, a JSON header, then raw
  * little-endian tensor bytes (https://github.com/huggingface/safetensors). Only F32 is supported.
+ * The returned tensors' `data` may be views into `buffer`, so it must not be transferred (for
+ * example to a Worker) or mutated afterward.
  */
 export function parseSafetensors(buffer: ArrayBuffer): SafetensorsFile {
   if (!IS_LITTLE_ENDIAN) throw new Error('safetensors: big-endian platforms are not supported');
@@ -29,8 +31,8 @@ export function parseSafetensors(buffer: ArrayBuffer): SafetensorsFile {
   const dataStart = 8 + Number(headerLength);
   const dataLength = buffer.byteLength - dataStart;
   const header = parseHeader(new Uint8Array(buffer, 8, Number(headerLength)));
-  const tensors = new Map<string, Tensor>();
   let metadata: Record<string, string> = {};
+  const entries: { name: string; shape: number[]; begin: number; end: number }[] = [];
   for (const [name, entry] of Object.entries(header)) {
     if (name === '__metadata__') {
       metadata = parseMetadata(entry);
@@ -48,6 +50,19 @@ export function parseSafetensors(buffer: ArrayBuffer): SafetensorsFile {
         `safetensors: tensor "${name}" ends at byte ${end}, past the end of the data (${dataLength})`,
       );
     }
+    entries.push({ name, shape, begin, end });
+  }
+  // Model files are trusted exports, but a hand-edited file could alias two weights onto the
+  // same bytes. Sort by start and require each range to begin at or after the previous one's end.
+  const byBegin = [...entries].sort((a, b) => a.begin - b.begin);
+  for (let i = 1; i < byBegin.length; i++) {
+    if (byBegin[i].begin < byBegin[i - 1].end) {
+      throw new Error(`safetensors: tensor "${byBegin[i].name}" overlaps "${byBegin[i - 1].name}"`);
+    }
+  }
+  const tensors = new Map<string, Tensor>();
+  for (const { name, shape, begin } of entries) {
+    const count = shape.reduce((product, size) => product * size, 1);
     const offset = dataStart + begin;
     // Float32Array views need 4-byte alignment; copy when the header leaves the data unaligned.
     const data =

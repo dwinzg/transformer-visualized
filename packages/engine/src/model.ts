@@ -137,7 +137,10 @@ export function modelFromTensors(config: ModelConfig, tensors: ReadonlyMap<strin
   return model;
 }
 
-/** Loads a model file written by the Python exporter. */
+/**
+ * Loads a model file written by the Python exporter. The returned weights are views into
+ * `buffer`, so it must not be transferred (for example to a Worker) or mutated afterward.
+ */
 export function loadModel(buffer: ArrayBuffer): Model {
   const { tensors, metadata } = parseSafetensors(buffer);
   if (metadata.format !== MODEL_FORMAT) {

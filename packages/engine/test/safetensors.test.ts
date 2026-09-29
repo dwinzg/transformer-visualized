@@ -76,4 +76,21 @@ describe('parseSafetensors', () => {
     const header = JSON.stringify({ __metadata__: { n: 1 } });
     expect(() => parseSafetensors(rawSafetensors(header))).toThrow(/must be a string/);
   });
+
+  it('rejects tensors whose byte ranges overlap', () => {
+    const header = JSON.stringify({
+      x: { dtype: 'F32', shape: [2], data_offsets: [0, 8] },
+      y: { dtype: 'F32', shape: [2], data_offsets: [4, 12] },
+    });
+    expect(() => parseSafetensors(rawSafetensors(header, 12))).toThrow(/overlap/);
+  });
+
+  it('accepts tensors listed out of order as long as their ranges do not overlap', () => {
+    const header = JSON.stringify({
+      y: { dtype: 'F32', shape: [2], data_offsets: [8, 16] },
+      x: { dtype: 'F32', shape: [2], data_offsets: [0, 8] },
+    });
+    const file = parseSafetensors(rawSafetensors(header, 16));
+    expect([...file.tensors.keys()].sort()).toEqual(['x', 'y']);
+  });
 });
