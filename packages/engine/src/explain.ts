@@ -5,8 +5,8 @@ import { rowView, valueAt, type Matrix } from './tensor';
 import type { Trace } from './trace';
 
 export interface DotProductExplanation {
-  /** a[i] × b[i] for every i. */
-  readonly products: Float32Array;
+  /** a[i] × b[i] for every i, kept at full precision so the terms add up to `sum` exactly. */
+  readonly products: Float64Array;
   /** The sum of the products. */
   readonly sum: number;
 }
@@ -16,7 +16,7 @@ export function explainDot(a: ArrayLike<number>, b: ArrayLike<number>): DotProdu
   if (a.length !== b.length) {
     throw new RangeError(`explainDot: lengths ${a.length} and ${b.length} differ`);
   }
-  const products = new Float32Array(a.length);
+  const products = new Float64Array(a.length);
   let sum = 0;
   for (let i = 0; i < a.length; i++) {
     const product = a[i] * b[i];
@@ -41,8 +41,11 @@ export interface AttentionWeightExplanation {
   readonly scaledScores: Float32Array;
   /** The largest scaled score in the row, subtracted before exponentiating. */
   readonly rowMax: number;
-  /** exp(score - rowMax) for every key in the row, 0 where hidden. */
-  readonly exps: Float32Array;
+  /**
+   * exp(score - rowMax) for every key in the row, 0 where hidden. Kept at full precision so
+   * the terms add up to `expSum` exactly.
+   */
+  readonly exps: Float64Array;
   readonly expSum: number;
   /** exps[key] / expSum, the attention weight. */
   readonly weight: number;
@@ -71,7 +74,7 @@ export function explainAttentionWeight(
   const scaledScores = rowView(headTrace.scaledMasked, queryIndex).slice();
   let rowMax = -Infinity;
   for (const score of scaledScores) if (score > rowMax) rowMax = score;
-  const exps = new Float32Array(length);
+  const exps = new Float64Array(length);
   let expSum = 0;
   for (let j = 0; j < length; j++) {
     const e = Math.exp(scaledScores[j] - rowMax);
@@ -107,7 +110,10 @@ export interface ProbabilityExplanation {
   readonly probability: number;
 }
 
-/** Explains one next-token probability from the logits. */
+/**
+ * Explains one next-token probability from the logits. This is the temperature softmax only,
+ * before any top-k or top-p filtering, so it can differ from a filtered `nextTokenDistribution`.
+ */
 export function explainProbability(
   logits: ArrayLike<number>,
   tokenId: number,
@@ -158,6 +164,16 @@ export function explainLayerNorm(
   row: number,
   col: number,
 ): LayerNormExplanation {
+  if (norm.mean.length !== input.rows || norm.variance.length !== input.rows) {
+    throw new RangeError(
+      `explainLayerNorm: norm has ${norm.mean.length} rows but the input has ${input.rows}`,
+    );
+  }
+  if (weights.weight.length !== input.cols || weights.bias.length !== input.cols) {
+    throw new RangeError(
+      `explainLayerNorm: weights have ${weights.weight.length} columns but the input has ${input.cols}`,
+    );
+  }
   const value = valueAt(input, row, col);
   const mean = norm.mean[row];
   const variance = norm.variance[row];

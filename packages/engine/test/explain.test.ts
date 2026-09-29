@@ -26,6 +26,17 @@ describe('explainDot', () => {
   it('rejects vectors of different lengths', () => {
     expect(() => explainDot([1], [1, 2])).toThrow(RangeError);
   });
+
+  it('adds the displayed products up to exactly the displayed sum', () => {
+    // Values chosen so float32 rounding of each product would not add up to sum exactly.
+    const a = [0.1, 0.2, 0.3, 0.4, 0.123456789, 0.987654321, 0.333333, 0.5];
+    const b = [1.1, 1.2, 1.3, 1.4, 1.523456789, 1.187654321, 1.633333, 1.7];
+    const { products, sum } = explainDot(a, b);
+    expect(products).toBeInstanceOf(Float64Array);
+    let total = 0;
+    for (const product of products) total += product;
+    expect(total).toBe(sum);
+  });
 });
 
 describe('explainAttentionWeight', () => {
@@ -52,6 +63,14 @@ describe('explainAttentionWeight', () => {
     expect(e.masked).toBe(true);
     expect(e.weight).toBe(0);
     expect(e.scaledScores[3]).toBe(-Infinity);
+  });
+
+  it('adds the displayed exps up to exactly the displayed expSum', () => {
+    const e = explainAttentionWeight(trace, 1, 0, 3, 1);
+    expect(e.exps).toBeInstanceOf(Float64Array);
+    let total = 0;
+    for (const exp of e.exps) total += exp;
+    expect(total).toBe(e.expSum);
   });
 
   it('rejects layers, heads or tokens that do not exist', () => {
@@ -82,13 +101,31 @@ describe('explainProbability', () => {
 });
 
 describe('explainLayerNorm', () => {
+  const layer = trace.layers[0];
+  const norm = layer.ln1;
+  const weights = model.blocks[0].ln1;
+
   it('rebuilds one LayerNorm output from its row statistics', () => {
-    const layer = trace.layers[0];
-    const e = explainLayerNorm(layer.input, layer.ln1, model.blocks[0].ln1, 1e-5, 2, 7);
+    const e = explainLayerNorm(layer.input, norm, weights, 1e-5, 2, 7);
     expect(e.input).toBe(valueAt(layer.input, 2, 7));
-    expect(e.mean).toBe(layer.ln1.mean[2]);
-    expect(e.variance).toBe(layer.ln1.variance[2]);
-    expect(e.gamma).toBe(model.blocks[0].ln1.weight[7]);
+    expect(e.mean).toBe(norm.mean[2]);
+    expect(e.variance).toBe(norm.variance[2]);
+    expect(e.gamma).toBe(weights.weight[7]);
     expectAllClose('out', [e.output], [valueAt(layer.ln1.out, 2, 7)], tight);
+  });
+
+  it('rejects a norm trace whose row count does not match the input', () => {
+    const shortNorm = { ...norm, mean: norm.mean.slice(0, 1) };
+    expect(() => explainLayerNorm(layer.input, shortNorm, weights, 1e-5, 2, 7)).toThrow(RangeError);
+  });
+
+  it('rejects weights whose column count does not match the input', () => {
+    const shortWeights = { weight: weights.weight.slice(0, 1), bias: weights.bias };
+    expect(() => explainLayerNorm(layer.input, norm, shortWeights, 1e-5, 2, 7)).toThrow(RangeError);
+  });
+
+  it('rejects a row or column outside the input', () => {
+    expect(() => explainLayerNorm(layer.input, norm, weights, 1e-5, -1, 7)).toThrow(RangeError);
+    expect(() => explainLayerNorm(layer.input, norm, weights, 1e-5, 2, 999)).toThrow(RangeError);
   });
 });
