@@ -2,7 +2,16 @@ import { forward, runMlp, validateTokenIds } from './forward';
 import { add, concatColumns, gatherRows, linear } from './linalg';
 import type { Model } from './model';
 import { layerNorm, softmax } from './ops';
-import { argmax, createRng, nextTokenDistribution, sample, type SamplingOptions } from './sampling';
+import {
+  argmax,
+  assertTemperature,
+  assertTopK,
+  assertTopP,
+  createRng,
+  nextTokenDistribution,
+  sample,
+  type SamplingOptions,
+} from './sampling';
 import { createMatrix, rowView, type Matrix } from './tensor';
 
 /** Processes a sequence one token at a time, reusing earlier keys and values (the KV cache). */
@@ -140,8 +149,20 @@ export function generate(
   if (!Number.isInteger(maxNewTokens) || maxNewTokens < 0) {
     throw new RangeError(`maxNewTokens must be a non-negative integer, got ${maxNewTokens}`);
   }
-  const decoder = createDecoder(model, prompt);
+  // Validate every option before the (possibly expensive) forward pass, so a bad option always
+  // fails the same way instead of only when a later step happens to compute a distribution.
+  if (options.greedy !== true) assertTemperature(options.temperature);
+  if (options.topK !== undefined) assertTopK(options.topK);
+  if (options.topP !== undefined) assertTopP(options.topP);
+  if (options.stopTokenId !== undefined) {
+    const { stopTokenId } = options;
+    const { vocabSize } = model.config;
+    if (!Number.isInteger(stopTokenId) || stopTokenId < 0 || stopTokenId >= vocabSize) {
+      throw new RangeError(`stopTokenId ${stopTokenId} is outside the vocabulary of ${vocabSize}`);
+    }
+  }
   const random = createRng(options.seed);
+  const decoder = createDecoder(model, prompt);
   const tokenIds = [...prompt];
   const steps: GenerateStep[] = [];
   let logits = decoder.logits;

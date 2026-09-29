@@ -149,4 +149,15 @@ describe('createRng', () => {
     expect(sum / 10000).toBeGreaterThan(0.48);
     expect(sum / 10000).toBeLessThan(0.52);
   });
+
+  it('rejects seeds that are not safe integers', () => {
+    expect(() => createRng(Number.NaN)).toThrow(RangeError);
+    expect(() => createRng(1.5)).toThrow(RangeError);
+    expect(() => createRng(2 ** 53)).toThrow(RangeError);
+  });
+
+  it('wraps a seed modulo 2^32, as documented', () => {
+    const first = Array.from({ length: 5 }, createRng(5));
+    expect(Array.from({ length: 5 }, createRng(5 + 2 ** 32))).toEqual(first);
+  });
 });

@@ -24,16 +24,26 @@ export function probabilities(logits: ArrayLike<number>, temperature: number): F
   return softmax(scaled);
 }
 
-/** Keeps the k most likely tokens (ties go to the lower id) and renormalizes. */
-export function topKFilter(probs: Float32Array, k: number): Float32Array {
+/** Throws unless k is a positive integer. */
+export function assertTopK(k: number): void {
   if (!Number.isInteger(k) || k < 1)
     throw new RangeError(`topK must be a positive integer, got ${k}`);
+}
+
+/** Throws unless p is in (0, 1]. */
+export function assertTopP(p: number): void {
+  if (!(p > 0 && p <= 1)) throw new RangeError(`topP must be in (0, 1], got ${p}`);
+}
+
+/** Keeps the k most likely tokens (ties go to the lower id) and renormalizes. */
+export function topKFilter(probs: Float32Array, k: number): Float32Array {
+  assertTopK(k);
   return renormalize(probs, rankByProbability(probs).slice(0, k));
 }
 
 /** Keeps the most likely tokens until their total reaches p (always at least one), renormalized. */
 export function topPFilter(probs: Float32Array, p: number): Float32Array {
-  if (!(p > 0 && p <= 1)) throw new RangeError(`topP must be in (0, 1], got ${p}`);
+  assertTopP(p);
   const keep: number[] = [];
   let total = 0;
   for (const id of rankByProbability(probs)) {
@@ -81,8 +91,15 @@ export function sample(probs: ArrayLike<number>, random: () => number): number {
   return last;
 }
 
-/** A small seedable random number generator (mulberry32). Returns numbers in [0, 1). */
+/**
+ * A small seedable random number generator (mulberry32). Returns numbers in [0, 1).
+ * The seed must be a safe integer. It is reduced modulo 2^32 before use, so seeds that
+ * differ by a multiple of 2^32 produce the same sequence.
+ */
 export function createRng(seed: number): () => number {
+  if (!Number.isSafeInteger(seed)) {
+    throw new RangeError(`seed must be a safe integer, got ${seed}`);
+  }
   let state = seed >>> 0;
   return () => {
     state = (state + 0x6d2b79f5) >>> 0;

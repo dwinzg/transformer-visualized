@@ -19,11 +19,13 @@ function greedyByForward(prompt: number[], count: number): number[] {
   return ids;
 }
 
+const EXACT = { atol: 0, rtol: 0 };
+
 describe('createDecoder', () => {
   it('starts with the logits of the last prompt position', () => {
     const decoder = createDecoder(model, [1, 2, 3]);
     expect(decoder.length).toBe(3);
-    expectAllClose('logits', decoder.logits, lastLogits([1, 2, 3]));
+    expectAllClose('logits', decoder.logits, lastLogits([1, 2, 3]), EXACT);
   });
 
   it('matches a full forward pass after every cached step', () => {
@@ -33,7 +35,7 @@ describe('createDecoder', () => {
       ids.push(next);
       const logits = decoder.step(next);
       expect(decoder.length).toBe(ids.length);
-      expectAllClose(`logits after ${ids.length} tokens`, logits, lastLogits(ids));
+      expectAllClose(`logits after ${ids.length} tokens`, logits, lastLogits(ids), EXACT);
       expect(decoder.logits).toBe(logits);
     }
   });
@@ -49,6 +51,10 @@ describe('createDecoder', () => {
     const decoder = createDecoder(model, [1]);
     expect(() => decoder.step(64)).toThrow(RangeError);
     expect(() => decoder.step(-1)).toThrow(RangeError);
+  });
+
+  it('rejects an empty prompt', () => {
+    expect(() => createDecoder(model, [])).toThrow(RangeError);
   });
 });
 
@@ -120,5 +126,21 @@ describe('generate', () => {
     expect(() => generate(model, [1], { maxNewTokens: 1.5, temperature: 1, seed: 0 })).toThrow(
       RangeError,
     );
+  });
+
+  it('rejects an empty prompt', () => {
+    expect(() => generate(model, [], { maxNewTokens: 1, temperature: 1, seed: 0 })).toThrow(
+      RangeError,
+    );
+  });
+
+  it('validates options up front, even for a prompt that already fills the context', () => {
+    const prompt = new Array<number>(16).fill(1);
+    const options = { maxNewTokens: 1, temperature: 1, seed: 0 };
+    expect(() => generate(model, prompt, { ...options, temperature: 0 })).toThrow(RangeError);
+    expect(() => generate(model, prompt, { ...options, topK: 0 })).toThrow(RangeError);
+    expect(() => generate(model, prompt, { ...options, topP: 0 })).toThrow(RangeError);
+    expect(() => generate(model, prompt, { ...options, stopTokenId: 64 })).toThrow(RangeError);
+    expect(() => generate(model, prompt, { ...options, seed: 1.5 })).toThrow(RangeError);
   });
 });
