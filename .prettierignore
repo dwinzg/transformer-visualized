@@ -7,3 +7,6 @@ LICENSE-CONTENT
 /models/
 packages/engine/test/fixtures/
 *.safetensors
+
+# Prettier's MDX parser follows MDX 1. It re-indents closing tags that follow a list, which breaks Astro 7 MDX.
+*.mdx

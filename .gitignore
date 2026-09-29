@@ -30,3 +30,8 @@ __pycache__/
 # Model training
 model/data/
 model/runs/
+
+# Site build output
+.astro/
+test-results/
+playwright-report/
