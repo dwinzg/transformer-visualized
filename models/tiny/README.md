@@ -17,9 +17,12 @@ A small GPT-2 style language model that runs in the browser on this site. It is 
 ## Training
 
 - Data. TinyStories V2, the GPT-4 generated split (Eldan and Li 2023), revision `f54c09f`. Curly quotes and dashes were mapped to ASCII, and stories with other non-ASCII characters were dropped (291 of 2,717,495 training stories).
+- Tokenizer. Fit on the first 300,000 cleaned training stories.
 - Tokens. 552,202,462 training tokens, 5,574,483 validation tokens.
 - Run. 25,000 steps of 64 sequences of 128 tokens (204,800,000 tokens seen), AdamW, learning rate 2e-3 with warmup and cosine decay, on an Apple M4.
-- Result. Validation loss 1.8494 (cross-entropy per token).
+- Result. Validation loss 1.8494 (cross-entropy per token), estimated on 40 fixed batches of
+  64 sequences of 128 tokens each, 327,680 of the 5,574,483 validation tokens. Those same
+  batches picked which checkpoint was saved.
 
 ## Input text
 
