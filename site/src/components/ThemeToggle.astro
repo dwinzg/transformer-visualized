@@ -1,7 +1,7 @@
 ---
 ---
 
-<button type="button" class="theme-toggle" data-theme-toggle aria-label="Switch color theme">
+<button type="button" class="theme-toggle" data-theme-toggle hidden aria-label="Switch color theme">
   <svg class="icon icon-sun" viewBox="0 0 24 24" aria-hidden="true">
     <circle cx="12" cy="12" r="4.5"></circle>
     <path d="M12 2.5v2M12 19.5v2M2.5 12h2M19.5 12h2M5.3 5.3l1.4 1.4M17.3 17.3l1.4 1.4M5.3 18.7l1.4-1.4M17.3 6.7l1.4-1.4"></path>
@@ -40,7 +40,10 @@
   }
 
   syncThemeColor();
+  const systemScheme = matchMedia('(prefers-color-scheme: dark)');
   for (const button of document.querySelectorAll<HTMLButtonElement>('[data-theme-toggle]')) {
+    // Like the depth dial, the toggle only works with JS, so it stays hidden without it.
+    button.hidden = false;
     const label = () =>
       button.setAttribute(
         'aria-label',
@@ -58,10 +61,18 @@
       syncThemeColor();
       label();
     });
+    // Without an explicit choice, the label follows the system theme, so it stays correct if the
+    // reader's OS switches (for example at sunset) while the page is open.
+    systemScheme.addEventListener('change', () => {
+      if (!explicitTheme()) label();
+    });
   }
 </script>
 
 <style>
+  .theme-toggle[hidden] {
+    display: none;
+  }
   .theme-toggle {
     display: inline-grid;
     place-items: center;
