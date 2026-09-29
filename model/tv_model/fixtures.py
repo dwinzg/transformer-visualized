@@ -1,6 +1,10 @@
 """Golden fixtures for the TypeScript engine's parity tests.
 
 Run `python -m tv_model.fixtures micro --out ../packages/engine/test/fixtures/micro`.
+
+For a shipped model, run `python -m tv_model.fixtures tiny --model
+../models/tiny/model.safetensors --tokenizer ../models/tiny/tokenizer.json --out
+../packages/engine/test/fixtures/tiny`.
 """
 
 from __future__ import annotations
