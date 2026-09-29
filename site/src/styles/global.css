@@ -172,6 +172,19 @@ pre {
   cursor: default;
 }
 
+/* PredictReveal locks its options with aria-disabled, not the disabled attribute, so the chosen
+   button keeps focus. The dashed border and lower opacity are a non-color cue that the option is
+   locked, for readers who cannot see the accent fill on the chosen one. */
+.island button[aria-disabled='true'] {
+  border-style: dashed;
+  opacity: 0.6;
+  cursor: default;
+}
+
+.island button[aria-pressed='true'][aria-disabled='true'] {
+  opacity: 1;
+}
+
 .island input {
   min-height: var(--touch-target);
   width: 8rem;

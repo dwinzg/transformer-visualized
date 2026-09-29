@@ -23,8 +23,13 @@ export default function PredictReveal({ question, options, answer, children }: P
             key={option}
             type="button"
             aria-pressed={choice === i}
-            disabled={revealed}
-            onClick={() => setChoice(i)}
+            aria-disabled={revealed}
+            onClick={() => {
+              // aria-disabled (not the disabled attribute) keeps the button focusable, so the
+              // reader's focus ring stays put after they answer instead of dropping to body.
+              if (revealed) return;
+              setChoice(i);
+            }}
           >
             {option}
           </button>
