@@ -6,18 +6,11 @@ interface Props {
 }
 
 // Steps on the same page can share a title (or one with no ASCII letters to slugify), so ids are
-// tracked per page and deduplicated there. Astro renders each static page once per build, so
-// keying this module-level state by pathname is enough to scope it to one chapter.
-const takenIdsByPage = ((globalThis as { __tvStepIds?: Map<string, Set<string>> }).__tvStepIds ??=
-  new Map());
-
+// deduplicated against the others on the page. Astro.locals is fresh for every request (one
+// request per static page), so this needs no keying by pathname, the same way Term.astro counts
+// its popovers.
 const { title } = Astro.props;
-const pathname = Astro.url.pathname;
-let taken = takenIdsByPage.get(pathname);
-if (!taken) {
-  taken = new Set();
-  takenIdsByPage.set(pathname, taken);
-}
+const taken = ((Astro.locals as { stepIds?: Set<string> }).stepIds ??= new Set());
 const id = stepId(title, taken);
 taken.add(id);
 ---
