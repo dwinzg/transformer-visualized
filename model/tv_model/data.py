@@ -15,14 +15,14 @@ EOT = "<|endoftext|>"
 # which keeps a small vocabulary for plain English.
 _ASCII_EQUIVALENTS = str.maketrans(
     {
-        "‘": "'",
-        "’": "'",
-        "“": '"',
-        "”": '"',
-        "–": "-",
-        "—": "-",
-        "…": "...",
-        " ": " ",
+        "\u2018": "'",
+        "\u2019": "'",
+        "\u201c": '"',
+        "\u201d": '"',
+        "\u2013": "-",
+        "\u2014": "-",
+        "\u2026": "...",
+        "\u00a0": " ",
     }
 )
 
