@@ -1,3 +1,4 @@
+import dataclasses
 import json
 import subprocess
 import sys
@@ -8,6 +9,7 @@ from safetensors import safe_open
 
 from tv_model.config import MICRO
 from tv_model.fixtures import MICRO_CASES, MICRO_SEED, make_fixture_model, write_micro_fixtures
+from tv_model.gpt import GPT
 from tv_model.io import load_model
 from tv_model.trace import expected_trace_names
 
@@ -147,3 +149,28 @@ def test_make_fixture_model_advances_rather_than_resets_the_callers_global_rng()
     after_seed_2 = torch.randn(5)
 
     assert not torch.equal(after_seed_1, after_seed_2)
+
+
+def test_model_fixtures_record_text_ids_and_traces(tmp_path):
+    from tv_model.fixtures import write_model_fixtures
+    from tv_model.io import save_model
+    from tv_model.tokenizer import save_tokenizer, train_tokenizer
+
+    tokenizer = train_tokenizer(["Lily ran home.", "Tom ate a red apple."] * 30, vocab_size=280)
+    save_tokenizer(tokenizer, tmp_path / "tokenizer.json")
+    cfg = dataclasses.replace(MICRO, vocab_size=tokenizer.get_vocab_size())
+    torch.manual_seed(0)
+    save_model(GPT(cfg), tmp_path / "model.safetensors")
+    write_model_fixtures(
+        tmp_path / "model.safetensors",
+        tmp_path / "tokenizer.json",
+        {"a": "Lily ran"},
+        tmp_path / "out",
+    )
+    index = json.loads((tmp_path / "out" / "cases.json").read_text())
+    assert index["model"] == "../model.safetensors"
+    case = index["cases"][0]
+    assert case["text"] == "Lily ran"
+    assert case["tokenIds"] == tokenizer.encode("Lily ran").ids
+    tensors = read_tensors(tmp_path / "out" / case["file"])
+    assert set(tensors) == expected_trace_names(cfg)

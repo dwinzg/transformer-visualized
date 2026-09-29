@@ -7,6 +7,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import os
 from pathlib import Path
 
 import torch
@@ -70,12 +71,47 @@ def write_micro_fixtures(out_dir: Path) -> None:
     (out_dir / "cases.json").write_text(json.dumps(index, indent=2) + "\n")
 
 
+TINY_PROMPTS: dict[str, str] = {
+    "story": "Once upon a time, there was a little",
+    "cat": "The cat sat on the",
+    "because": "Lily was sad because",
+}
+
+
+def write_model_fixtures(
+    model_path: Path, tokenizer_path: Path, prompts: dict[str, str], out_dir: Path
+) -> None:
+    """Golden traces of a shipped model for fixed prompts."""
+    from .io import load_model
+    from .tokenizer import load_tokenizer
+
+    out_dir.mkdir(parents=True, exist_ok=True)
+    model = load_model(model_path)
+    tokenizer = load_tokenizer(tokenizer_path)
+    cases = []
+    for name, text in prompts.items():
+        token_ids = tokenizer.encode(text).ids
+        file = f"trace-{name}.safetensors"
+        _write_trace(model, token_ids, out_dir / file)
+        cases.append({"name": name, "text": text, "tokenIds": token_ids, "file": file})
+    model_rel = Path(os.path.relpath(model_path.resolve(), out_dir.resolve())).as_posix()
+    index = {"model": model_rel, "cases": cases}
+    (out_dir / "cases.json").write_text(json.dumps(index, indent=2) + "\n")
+
+
 def main(argv: list[str] | None = None) -> None:
     parser = argparse.ArgumentParser(description="Write golden fixtures for the engine tests.")
-    parser.add_argument("preset", choices=["micro"])
+    parser.add_argument("preset", choices=["micro", "tiny"])
     parser.add_argument("--out", type=Path, required=True)
+    parser.add_argument("--model", type=Path)
+    parser.add_argument("--tokenizer", type=Path)
     args = parser.parse_args(argv)
-    write_micro_fixtures(args.out)
+    if args.preset == "micro":
+        write_micro_fixtures(args.out)
+    else:
+        if args.model is None or args.tokenizer is None:
+            parser.error("the tiny preset needs --model and --tokenizer")
+        write_model_fixtures(args.model, args.tokenizer, TINY_PROMPTS, args.out)
 
 
 if __name__ == "__main__":

@@ -1,0 +1,44 @@
+{
+  "model": "../../../../../models/tiny/model.safetensors",
+  "cases": [
+    {
+      "name": "story",
+      "text": "Once upon a time, there was a little",
+      "tokenIds": [
+        430,
+        439,
+        259,
+        398,
+        12,
+        401,
+        283,
+        259,
+        391
+      ],
+      "file": "trace-story.safetensors"
+    },
+    {
+      "name": "cat",
+      "text": "The cat sat on the",
+      "tokenIds": [
+        412,
+        459,
+        1087,
+        354,
+        263
+      ],
+      "file": "trace-cat.safetensors"
+    },
+    {
+      "name": "because",
+      "text": "Lily was sad because",
+      "tokenIds": [
+        665,
+        283,
+        494,
+        708
+      ],
+      "file": "trace-because.safetensors"
+    }
+  ]
+}

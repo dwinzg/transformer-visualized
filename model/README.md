@@ -27,3 +27,14 @@ The engine's parity tests compare every intermediate value with this model. Rege
 ```sh
 .venv/bin/python -m tv_model.fixtures micro --out ../packages/engine/test/fixtures/micro
 ```
+
+## Training the tiny model
+
+This downloads about 2.2 GB of TinyStories into `model/data/` and trains for about 47 minutes on an Apple M4.
+
+```sh
+.venv/bin/python -m tv_model.prepare --data-dir data --tokenizer-out ../models/tiny/tokenizer.json --cases-out ../packages/engine/test/fixtures/tokenizer/cases.json
+.venv/bin/python -m tv_model.train --preset tiny --data-dir data --out-dir runs/tiny
+.venv/bin/python -m tv_model.export --run runs/tiny --out ../models/tiny
+.venv/bin/python -m tv_model.fixtures tiny --model ../models/tiny/model.safetensors --tokenizer ../models/tiny/tokenizer.json --out ../packages/engine/test/fixtures/tiny
+```
