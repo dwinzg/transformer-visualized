@@ -1,0 +1,127 @@
+---
+import type { CollectionEntry } from 'astro:content';
+import { getEntries } from 'astro:content';
+import DepthDial from '../components/DepthDial.astro';
+import { citationLabel } from '../lib/citations';
+import { withBase } from '../lib/paths';
+import BaseLayout from './BaseLayout.astro';
+
+interface Props {
+  chapter: CollectionEntry<'chapters'>;
+  prev?: CollectionEntry<'chapters'>;
+  next?: CollectionEntry<'chapters'>;
+}
+
+const { chapter, prev, next } = Astro.props;
+const { title, summary, goals, minutes, recap } = chapter.data;
+const sources = await getEntries(chapter.data.references);
+chapter.data.references.forEach((ref, i) => {
+  if (!sources[i]) throw new Error(`Chapter "${chapter.id}" cites unknown reference "${ref.id}"`);
+});
+---
+
+<BaseLayout title={title} description={summary}>
+  <article class="prose chapter">
+    <header class="chapter-header">
+      <p class="eyebrow">
+        Chapter {chapter.data.order} · About {minutes} minutes
+      </p>
+      <h1>{title}</h1>
+      <p class="summary">{summary}</p>
+      <section class="goals" aria-labelledby="goals-title">
+        <h2 id="goals-title">You will learn</h2>
+        <ul>
+          {goals.map((goal) => (
+            <li>{goal}</li>
+          ))}
+        </ul>
+      </section>
+      <DepthDial />
+    </header>
+
+    <slot />
+
+    <section class="recap" aria-labelledby="recap-title">
+      <h2 id="recap-title">Recap</h2>
+      <ul>
+        {recap.map((point) => (
+          <li>{point}</li>
+        ))}
+      </ul>
+    </section>
+
+    <section class="go-deeper" aria-labelledby="go-deeper-title">
+      <h2 id="go-deeper-title">Go deeper</h2>
+      <ul>
+        {sources.map((ref) => (
+          <li>
+            <a href={withBase(`references/#${ref.id}`)}>{citationLabel(ref.data)}</a>
+            {'. '}
+            {ref.data.title}
+          </li>
+        ))}
+      </ul>
+    </section>
+
+    <nav class="pager" aria-label="Chapters">
+      {prev && <a href={withBase(`learn/${prev.id}/`)}>Previous. {prev.data.title}</a>}
+      {next && <a href={withBase(`learn/${next.id}/`)}>Next. {next.data.title}</a>}
+    </nav>
+  </article>
+</BaseLayout>
+
+<style>
+  .chapter {
+    padding-block: var(--space-12);
+  }
+  .eyebrow {
+    color: var(--color-text-secondary);
+    font-size: var(--text-footnote);
+    font-weight: 600;
+  }
+  .summary {
+    font-size: var(--text-title-3);
+    color: var(--color-text-secondary);
+  }
+  .goals {
+    margin-block: var(--space-6);
+    padding: var(--space-4) var(--space-5);
+    border-radius: var(--radius-md);
+    background: var(--color-surface);
+    box-shadow: var(--shadow-card);
+  }
+  .recap {
+    margin-top: var(--space-16);
+    padding: var(--space-4) var(--space-5);
+    border-radius: var(--radius-md);
+    background: var(--color-surface);
+    box-shadow: var(--shadow-card);
+  }
+  .goals h2,
+  .recap h2 {
+    font-size: var(--text-headline);
+    margin-bottom: var(--space-2);
+  }
+  .goals ul,
+  .recap ul {
+    margin: 0;
+  }
+  .go-deeper {
+    margin-top: var(--space-8);
+    padding-top: var(--space-6);
+    border-top: 1px solid var(--color-separator);
+    font-size: var(--text-subheadline);
+  }
+  .pager {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    gap: var(--space-4);
+    margin-top: var(--space-12);
+  }
+  .pager a {
+    display: inline-flex;
+    align-items: center;
+    min-height: var(--touch-target);
+  }
+</style>

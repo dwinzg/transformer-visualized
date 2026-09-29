@@ -1,0 +1,132 @@
+---
+interface Props {
+  title: string;
+}
+
+const { title } = Astro.props;
+const id = `step-${title
+  .toLowerCase()
+  .replace(/[^a-z0-9]+/g, '-')
+  .replace(/^-|-$/g, '')}`;
+---
+
+<section class="step" id={id} data-step aria-labelledby={`${id}-title`}>
+  <h2 id={`${id}-title`}>{title}</h2>
+  <div class="step-levels">
+    <slot />
+  </div>
+</section>
+
+<script>
+  import {
+    browserStorage,
+    chooseDepth,
+    closestAvailable,
+    DEPTH_EVENT,
+    DEPTH_LABELS,
+    isDepth,
+    readStoredDepth,
+    type Depth,
+  } from '../../lib/depth';
+
+  function enhance(step: HTMLElement): void {
+    const panels = Array.from(
+      step.querySelectorAll<HTMLElement>(':scope > .step-levels > .level'),
+    ).filter((panel) => isDepth(panel.dataset.level));
+    if (panels.length < 2) return;
+    const levels = panels.map((panel) => panel.dataset.level as Depth);
+    const tablist = document.createElement('div');
+    tablist.className = 'level-tabs';
+    tablist.setAttribute('role', 'tablist');
+    tablist.setAttribute('aria-label', 'Explanation level');
+    const tabs = panels.map((panel, i) => {
+      const level = levels[i];
+      panel.id = `${step.id}-${level}`;
+      const tab = document.createElement('button');
+      tab.type = 'button';
+      tab.id = `${panel.id}-tab`;
+      tab.setAttribute('role', 'tab');
+      tab.setAttribute('aria-controls', panel.id);
+      tab.textContent = DEPTH_LABELS[level];
+      panel.setAttribute('role', 'tabpanel');
+      panel.setAttribute('aria-labelledby', tab.id);
+      panel.tabIndex = 0;
+      tablist.append(tab);
+      return tab;
+    });
+
+    const show = (depth: Depth): void => {
+      const chosen = closestAvailable(depth, levels);
+      panels.forEach((panel, i) => {
+        const selected = levels[i] === chosen;
+        panel.hidden = !selected;
+        tabs[i].setAttribute('aria-selected', String(selected));
+        tabs[i].tabIndex = selected ? 0 : -1;
+      });
+    };
+
+    tabs.forEach((tab, i) => {
+      // chooseDepth dispatches DEPTH_EVENT, and the listener below updates every step.
+      tab.addEventListener('click', () => chooseDepth(levels[i]));
+      tab.addEventListener('keydown', (event) => {
+        const last = tabs.length - 1;
+        const target =
+          event.key === 'ArrowRight'
+            ? (i + 1) % tabs.length
+            : event.key === 'ArrowLeft'
+              ? (i - 1 + tabs.length) % tabs.length
+              : event.key === 'Home'
+                ? 0
+                : event.key === 'End'
+                  ? last
+                  : -1;
+        if (target === -1) return;
+        event.preventDefault();
+        chooseDepth(levels[target]);
+        tabs[target].focus();
+      });
+    });
+
+    document.addEventListener(DEPTH_EVENT, (event) => {
+      const depth = (event as CustomEvent<unknown>).detail;
+      if (isDepth(depth)) show(depth);
+    });
+
+    step.querySelector('.step-levels')?.before(tablist);
+    step.classList.add('is-enhanced');
+    show(readStoredDepth(browserStorage()));
+  }
+
+  document.querySelectorAll<HTMLElement>('[data-step]').forEach(enhance);
+</script>
+
+<style>
+  .step {
+    margin-block: var(--space-12);
+  }
+  .step :global(.level-tabs) {
+    display: inline-flex;
+    flex-wrap: wrap;
+    gap: var(--space-1);
+    padding: var(--space-1);
+    margin-bottom: var(--space-4);
+    border-radius: var(--radius-lg);
+    background: var(--color-surface-2);
+  }
+  .step :global(.level-tabs button) {
+    min-height: var(--touch-target);
+    padding: 0 var(--space-4);
+    border: 0;
+    border-radius: var(--radius-pill);
+    background: transparent;
+    color: var(--color-text);
+    font: inherit;
+    font-size: var(--text-subheadline);
+    cursor: pointer;
+  }
+  .step :global(.level-tabs button[aria-selected='true']) {
+    background: var(--color-surface);
+    box-shadow: var(--shadow-card);
+    font-weight: 600;
+  }
+</style>

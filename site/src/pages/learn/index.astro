@@ -1,0 +1,83 @@
+---
+import { getCollection } from 'astro:content';
+import DepthDial from '../../components/DepthDial.astro';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { withBase } from '../../lib/paths';
+
+const chapters = (await getCollection('chapters', ({ data }) => !data.draft)).sort(
+  (a, b) => a.data.order - b.data.order,
+);
+---
+
+<BaseLayout
+  title="Learn"
+  description="Chapters that follow one sentence through a transformer, step by step."
+>
+  <section class="prose page">
+    <h1>Learn</h1>
+    <p class="intro">
+      Each chapter follows the same sentence through one part of the model. Pick how you want things
+      explained. You can change it at any step.
+    </p>
+    <DepthDial />
+    <ol class="chapters">
+      {chapters.map((chapter) => (
+        <li>
+          <a href={withBase(`learn/${chapter.id}/`)}>
+            <span class="number">Chapter {chapter.data.order}</span>
+            <span class="title">{chapter.data.title}</span>
+            <span class="summary">{chapter.data.summary}</span>
+          </a>
+        </li>
+      ))}
+    </ol>
+  </section>
+</BaseLayout>
+
+<script>
+  import { chooseDepth, isDepth } from '../../lib/depth';
+
+  // The "Quick review" door links here with ?depth=formula.
+  const requested = new URLSearchParams(location.search).get('depth');
+  if (isDepth(requested)) chooseDepth(requested);
+</script>
+
+<style>
+  .page {
+    padding-block: var(--space-12);
+  }
+  .intro {
+    color: var(--color-text-secondary);
+  }
+  .chapters {
+    list-style: none;
+    padding: 0;
+    margin-top: var(--space-8);
+    display: grid;
+    gap: var(--space-4);
+  }
+  .chapters a {
+    display: grid;
+    gap: var(--space-1);
+    padding: var(--space-5) var(--space-6);
+    border-radius: var(--radius-lg);
+    background: var(--color-surface);
+    box-shadow: var(--shadow-card);
+    color: var(--color-text);
+  }
+  .chapters a:hover {
+    text-decoration: none;
+  }
+  .number {
+    color: var(--color-text-secondary);
+    font-size: var(--text-footnote);
+    font-weight: 600;
+  }
+  .title {
+    font-size: var(--text-title-3);
+    font-weight: 600;
+  }
+  .summary {
+    color: var(--color-text-secondary);
+  }
+</style>

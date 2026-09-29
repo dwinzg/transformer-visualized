@@ -1,5 +1,5 @@
 import { defineCollection, reference } from 'astro:content';
-import { file } from 'astro/loaders';
+import { file, glob } from 'astro/loaders';
 import { z } from 'astro/zod';
 
 const author = z.union([
@@ -32,4 +32,18 @@ const glossary = defineCollection({
   }),
 });
 
-export const collections = { references, glossary };
+const chapters = defineCollection({
+  loader: glob({ pattern: '*.mdx', base: './src/content/chapters' }),
+  schema: z.object({
+    title: z.string().min(1),
+    order: z.number().int().min(0),
+    summary: z.string().min(1),
+    goals: z.array(z.string().min(1)).min(2).max(4),
+    minutes: z.number().int().positive(),
+    recap: z.array(z.string().min(1)).min(2).max(5),
+    references: z.array(reference('references')).min(1),
+    draft: z.boolean().default(false),
+  }),
+});
+
+export const collections = { references, glossary, chapters };
