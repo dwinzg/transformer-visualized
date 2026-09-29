@@ -57,12 +57,9 @@ test('the depth dial changes every step', async ({ page }) => {
   ).toHaveAttribute('aria-selected', 'true');
 });
 
-test('the quick review link opens chapters at the formula level', async ({ page }) => {
+test('the quick review link opens that page at the formula level', async ({ page }) => {
   await page.goto('learn/?depth=formula');
-  await page.goto(CHAPTER);
-  await expect(
-    page.locator('#step-it-guesses-the-next-piece-of-text').getByRole('tab', { name: 'Formula' }),
-  ).toHaveAttribute('aria-selected', 'true');
+  await expect(page.getByRole('radio', { name: 'Formula' })).toBeChecked();
 });
 
 test('?depth= also works when it lands directly on a chapter page', async ({ page }) => {
@@ -70,6 +67,17 @@ test('?depth= also works when it lands directly on a chapter page', async ({ pag
   await expect(
     page.locator('#step-it-guesses-the-next-piece-of-text').getByRole('tab', { name: 'Formula' }),
   ).toHaveAttribute('aria-selected', 'true');
+});
+
+test('?depth= sets the level for that page view only, and is not saved', async ({ page }) => {
+  await page.goto(`${CHAPTER}?depth=formula`);
+  await expect(
+    page.locator('#step-it-guesses-the-next-piece-of-text').getByRole('tab', { name: 'Formula' }),
+  ).toHaveAttribute('aria-selected', 'true');
+  await expect(page).toHaveURL(new RegExp(`${CHAPTER}$`));
+
+  await page.goto('learn/');
+  await expect(page.getByRole('radio', { name: 'Story' })).toBeChecked();
 });
 
 test('without JavaScript every level is shown in order and the depth dial is hidden', async ({
@@ -127,7 +135,6 @@ test.describe('at 320px wide', () => {
     }
   });
 });
-
 
 test.describe('anchored links land below the sticky header', () => {
   // The nav wraps to more rows at these widths (see SiteHeader.astro), which is what pushed
