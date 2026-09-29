@@ -1,4 +1,4 @@
-import { expect, test } from '@playwright/test';
+import { expect, test, type Page } from '@playwright/test';
 import { expectNoA11yViolations, expectNoHorizontalScroll } from './a11y';
 
 const CHAPTER = 'learn/introduction/';
@@ -127,3 +127,40 @@ test.describe('at 320px wide', () => {
     }
   });
 });
+
+
+test.describe('anchored links land below the sticky header', () => {
+  // The nav wraps to more rows at these widths (see SiteHeader.astro), which is what pushed
+  // anchor targets under the header before the fix.
+  for (const width of [390, 320]) {
+    test(`a glossary link and a reference link at ${width}px`, async ({ page }) => {
+      await page.setViewportSize({ width, height: 700 });
+
+      await page.goto(CHAPTER);
+      await page.getByRole('button', { name: 'language model' }).first().click();
+      await page
+        .locator('.term-card:popover-open')
+        .getByRole('link', { name: 'Open the glossary' })
+        .click();
+      await expect(page).toHaveURL(/glossary\/#language-model$/);
+      await expectBelowHeader(page, '#language-model');
+
+      await page.goto(CHAPTER);
+      await page.locator('a.ref', { hasText: 'Shannon, 1951' }).first().click();
+      await expect(page).toHaveURL(/references\/#shannon1951$/);
+      await expectBelowHeader(page, '#shannon1951');
+    });
+  }
+});
+
+async function expectBelowHeader(page: Page, targetSelector: string): Promise<void> {
+  const header = page.locator('.site-header');
+  const target = page.locator(targetSelector);
+  const headerBox = await header.boundingBox();
+  const targetBox = await target.boundingBox();
+  if (!headerBox || !targetBox)
+    throw new Error('Expected both the header and the target to be visible');
+  expect(targetBox.y, `${targetSelector} top vs header bottom`).toBeGreaterThanOrEqual(
+    headerBox.y + headerBox.height,
+  );
+}
