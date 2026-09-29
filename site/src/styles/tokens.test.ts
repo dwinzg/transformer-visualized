@@ -115,3 +115,21 @@ describe('dark theme', () => {
     expect(media).toEqual(themes.dark);
   });
 });
+
+describe('depth dial selected segment', () => {
+  const depthDialSource = readFileSync(
+    new URL('../components/DepthDial.astro', import.meta.url),
+    'utf8',
+  );
+  // Passes either way: a strong enough contrast against the track, or a non-color cue such as a
+  // border on the selected segment (checked once, since the same rule applies in both themes).
+  const hasNonColorCue = /input:checked \+ span\s*{[^}]*\bborder:/s.test(depthDialSource);
+
+  it.each(Object.entries(themes))(
+    'is distinguishable from the track in the %s theme',
+    (_name, tokens) => {
+      const ratio = contrastRatio(tokens['--color-segment-selected'], tokens['--color-surface-2']);
+      expect(ratio >= 1.5 || hasNonColorCue).toBe(true);
+    },
+  );
+});
