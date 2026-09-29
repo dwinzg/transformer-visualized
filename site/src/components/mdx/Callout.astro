@@ -15,10 +15,12 @@ const { kind, title } = Astro.props;
 const heading = title ?? DEFAULT_TITLES[kind];
 ---
 
-<aside class={`callout callout-${kind}`} aria-label={heading}>
+{/* A named aside here would be exposed as a nested complementary landmark for every callout on
+    the page. role="note" keeps the visual and semantic grouping without that. */}
+<div class={`callout callout-${kind}`} role="note" aria-label={heading}>
   <p class="callout-title">{heading}</p>
   <slot />
-</aside>
+</div>
 
 <style>
   .callout {
