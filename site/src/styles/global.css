@@ -104,6 +104,13 @@ pre {
   border: 0;
 }
 
+/* Shared by the glossary and references pages, so a reader arriving from a link can see which
+   entry is theirs. */
+.target-highlight:target {
+  background: var(--color-surface-2);
+  border-radius: var(--radius-sm);
+}
+
 .container {
   width: min(100% - 2 * var(--space-4), var(--wide));
   margin-inline: auto;

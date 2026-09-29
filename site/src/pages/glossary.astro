@@ -20,7 +20,7 @@ for (const entry of entries) {
     <h1>Glossary</h1>
     <dl class="glossary">
       {entries.map((entry) => (
-        <div class="entry" id={entry.id}>
+        <div class="entry target-highlight" id={entry.id}>
           <dt>{entry.data.term}</dt>
           <dd>
             <p>{entry.data.short}</p>

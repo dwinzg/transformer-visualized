@@ -36,7 +36,7 @@ if (unlisted.length > 0) {
         <h2 id={`topic-${section.topic}`}>{section.label}</h2>
         <ol class="refs">
           {section.items.map((ref) => (
-            <li id={ref.id}>
+            <li id={ref.id} class="target-highlight">
               <span class="authors">{formatAuthors(ref.data.authors)}</span>{' '}
               <span class="year">({ref.data.year}).</span>{' '}
               <a href={ref.data.url}>{ref.data.title}</a>.
@@ -67,10 +67,6 @@ if (unlisted.length > 0) {
     padding-block: var(--space-3);
     border-bottom: 1px solid var(--color-separator);
     overflow-wrap: anywhere;
-  }
-  .refs li:target {
-    background: var(--color-surface-2);
-    border-radius: var(--radius-sm);
   }
   .venue,
   .id,
