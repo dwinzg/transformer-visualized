@@ -45,6 +45,18 @@ test('predict then reveal', async ({ page }) => {
   await expect(block.getByRole('button', { name: 'mat' })).toBeDisabled();
 });
 
+test('predict then reveal keeps focus after answering by keyboard', async ({ page }) => {
+  await page.goto(CHAPTER);
+  const block = page.locator('.predict');
+  await hydrated(page, block);
+  await block.getByRole('button', { name: 'moon' }).focus();
+  await page.keyboard.press('Enter');
+  await expect(block).toContainText('The likeliest answer is "mat".');
+  const activeElementIsBody = await page.evaluate(() => document.activeElement === document.body);
+  expect(activeElementIsBody).toBe(false);
+  await expect(block.getByRole('button', { name: 'moon' })).toBeFocused();
+});
+
 test('exercise checks the answer', async ({ page }) => {
   await page.goto(CHAPTER);
   const form = page.locator('.exercise');
