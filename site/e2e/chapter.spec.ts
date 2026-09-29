@@ -29,6 +29,24 @@ test('each step starts at the story level with tabs for the others', async ({ pa
   await expect(step.getByRole('tabpanel')).toContainText('your phone suggests the next word');
 });
 
+test('the selected level tab is visually distinct from the others in both themes', async ({
+  page,
+}) => {
+  for (const colorScheme of ['light', 'dark'] as const) {
+    await page.emulateMedia({ colorScheme });
+    await page.goto(CHAPTER);
+    const step = page.locator('#step-it-guesses-the-next-piece-of-text');
+    const selected = step.getByRole('tab', { name: 'Story' });
+    const unselected = step.getByRole('tab', { name: 'Numbers' });
+    await expect(selected).toHaveAttribute('aria-selected', 'true');
+    const [selectedBackground, unselectedBackground] = await Promise.all([
+      selected.evaluate((el) => getComputedStyle(el).backgroundColor),
+      unselected.evaluate((el) => getComputedStyle(el).backgroundColor),
+    ]);
+    expect(selectedBackground, colorScheme).not.toBe(unselectedBackground);
+  }
+});
+
 test('arrow keys move between levels and the choice applies to every step', async ({ page }) => {
   await page.goto(CHAPTER);
   const first = page.locator('#step-it-guesses-the-next-piece-of-text');

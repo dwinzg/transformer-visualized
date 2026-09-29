@@ -82,22 +82,10 @@ import { DEPTH_LABELS, DEPTHS } from '../lib/depth';
     border-radius: var(--radius-pill);
     font-size: var(--text-subheadline);
   }
-  input:checked + span {
-    background: var(--color-segment-selected);
-    /* The border is a non-color cue: it keeps the selected segment identifiable even where its
-       fill is close to the track's, such as older screens that render dark colors flatter. */
-    border: 1px solid var(--color-control-border);
-    box-shadow: var(--shadow-card);
-    font-weight: 600;
-  }
+  /* The selected segment's fill, border and shadow are shared with the level tabs in
+     global.css's "picked" rule, so a selected depth control looks the same everywhere. */
   input:focus-visible + span {
     outline: var(--focus-width) solid var(--color-focus);
     outline-offset: var(--focus-offset);
-  }
-  @media (forced-colors: active) {
-    input:checked + span {
-      outline: 2px solid CanvasText;
-      outline-offset: -2px;
-    }
   }
 </style>

@@ -116,14 +116,18 @@ describe('dark theme', () => {
   });
 });
 
-describe('depth dial selected segment', () => {
-  const depthDialSource = readFileSync(
-    new URL('../components/DepthDial.astro', import.meta.url),
-    'utf8',
-  );
+describe('selected depth segment (the depth dial and each step level tabs)', () => {
+  // Both controls share this one rule in global.css instead of each declaring their own selected
+  // look, so checking it once covers the depth dial's segment and every step's level tabs.
+  const sharedRuleSource = readFileSync(new URL('./global.css', import.meta.url), 'utf8');
+  const selectedRule =
+    /\[data-depth-dial\] input:checked \+ span,\s*\n\s*\[data-step\] button\[role='tab'\]\[aria-selected='true'\]\s*{([^}]*)}/.exec(
+      sharedRuleSource,
+    );
+  if (!selectedRule) throw new Error('Expected a shared selected-segment rule in global.css');
   // Passes either way: a strong enough contrast against the track, or a non-color cue such as a
   // border on the selected segment (checked once, since the same rule applies in both themes).
-  const hasNonColorCue = /input:checked \+ span\s*{[^}]*\bborder:/s.test(depthDialSource);
+  const hasNonColorCue = /\bborder:/.test(selectedRule[1]);
 
   it.each(Object.entries(themes))(
     'is distinguishable from the track in the %s theme',

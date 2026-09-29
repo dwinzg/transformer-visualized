@@ -129,15 +129,6 @@ taken.add(id);
     font-size: var(--text-subheadline);
     cursor: pointer;
   }
-  .step :global(.level-tabs button[aria-selected='true']) {
-    background: var(--color-surface);
-    box-shadow: var(--shadow-card);
-    font-weight: 600;
-  }
-  @media (forced-colors: active) {
-    .step :global(.level-tabs button[aria-selected='true']) {
-      outline: 2px solid CanvasText;
-      outline-offset: -2px;
-    }
-  }
+  /* The selected tab's fill, border and shadow are shared with the depth dial's segment in
+     global.css's "picked" rule, so a selected depth control looks the same everywhere. */
 </style>
