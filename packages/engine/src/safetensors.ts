@@ -53,8 +53,9 @@ export function parseSafetensors(buffer: ArrayBuffer): SafetensorsFile {
     entries.push({ name, shape, begin, end });
   }
   // Model files are trusted exports, but a hand-edited file could alias two weights onto the
-  // same bytes. Sort by start and require each range to begin at or after the previous one's end.
-  const byBegin = [...entries].sort((a, b) => a.begin - b.begin);
+  // same bytes. Sort by start, then end, so an empty tensor sorts before a range starting at the
+  // same byte whatever the header order, and require each range to begin at or after the previous end.
+  const byBegin = [...entries].sort((a, b) => a.begin - b.begin || a.end - b.end);
   for (let i = 1; i < byBegin.length; i++) {
     if (byBegin[i].begin < byBegin[i - 1].end) {
       throw new Error(`safetensors: tensor "${byBegin[i].name}" overlaps "${byBegin[i - 1].name}"`);

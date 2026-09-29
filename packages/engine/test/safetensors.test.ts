@@ -93,4 +93,16 @@ describe('parseSafetensors', () => {
     const file = parseSafetensors(rawSafetensors(header, 16));
     expect([...file.tensors.keys()].sort()).toEqual(['x', 'y']);
   });
+
+  it('accepts an empty tensor at the start of another range, in either header order', () => {
+    const empty = { dtype: 'F32', shape: [0], data_offsets: [0, 0] };
+    const full = { dtype: 'F32', shape: [2], data_offsets: [0, 8] };
+    for (const header of [
+      { e: empty, x: full },
+      { x: full, e: empty },
+    ]) {
+      const file = parseSafetensors(rawSafetensors(JSON.stringify(header), 8));
+      expect([...file.tensors.keys()].sort()).toEqual(['e', 'x']);
+    }
+  });
 });
