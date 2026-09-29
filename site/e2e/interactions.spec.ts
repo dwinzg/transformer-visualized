@@ -71,6 +71,22 @@ test('exercise checks the answer', async ({ page }) => {
   await expect(form).toContainText('1 minus 0.9 minus 0.05');
 });
 
+test('exercise announces a repeated wrong answer again', async ({ page }) => {
+  await page.goto(CHAPTER);
+  const form = page.locator('.exercise');
+  await hydrated(page, form);
+  const input = form.getByRole('textbox');
+  const feedback = form.locator('.exercise-feedback');
+  await input.fill('0.1');
+  await form.getByRole('button', { name: 'Check' }).click();
+  const firstMessage = await feedback.textContent();
+  await input.fill('0.2');
+  await form.getByRole('button', { name: 'Check' }).click();
+  const secondMessage = await feedback.textContent();
+  expect(secondMessage).not.toBe(firstMessage);
+  expect(secondMessage).toMatch(/2nd try/);
+});
+
 test('the chapter stays accessible with the new components', async ({ page }) => {
   await page.goto(CHAPTER);
   await expectNoA11yViolations(page);
