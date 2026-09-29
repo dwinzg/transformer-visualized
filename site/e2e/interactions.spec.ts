@@ -93,3 +93,36 @@ test('the chapter stays accessible with the new components', async ({ page }) =>
   await page.emulateMedia({ colorScheme: 'dark' });
   await expectNoA11yViolations(page);
 });
+
+test.describe('accessibility with an interactive state open', () => {
+  for (const colorScheme of ['light', 'dark'] as const) {
+    test(`a Term popover is accessible in the ${colorScheme} theme`, async ({ page }) => {
+      await page.emulateMedia({ colorScheme });
+      await page.goto(CHAPTER);
+      await page.getByRole('button', { name: 'language model' }).first().click();
+      await expect(page.locator('.term-card:popover-open')).toBeVisible();
+      await expectNoA11yViolations(page);
+    });
+
+    test(`a revealed PredictReveal is accessible in the ${colorScheme} theme`, async ({ page }) => {
+      await page.emulateMedia({ colorScheme });
+      await page.goto(CHAPTER);
+      const block = page.locator('.predict');
+      await hydrated(page, block);
+      await block.getByRole('button', { name: 'moon' }).click();
+      await expect(block).toContainText('The likeliest answer is "mat".');
+      await expectNoA11yViolations(page);
+    });
+
+    test(`Exercise feedback is accessible in the ${colorScheme} theme`, async ({ page }) => {
+      await page.emulateMedia({ colorScheme });
+      await page.goto(CHAPTER);
+      const form = page.locator('.exercise');
+      await hydrated(page, form);
+      await form.getByRole('textbox').fill('0.1');
+      await form.getByRole('button', { name: 'Check' }).click();
+      await expect(form).toContainText('Not quite');
+      await expectNoA11yViolations(page);
+    });
+  }
+});
