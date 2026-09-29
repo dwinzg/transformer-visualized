@@ -22,9 +22,8 @@ const { Content } = await render(chapter);
 </ChapterLayout>
 
 <script>
-  import { chooseDepth, isDepth } from '../../lib/depth';
+  import { applyDepthFromQuery } from '../../lib/depth';
 
   // The "Quick review" door can also link straight to a chapter with ?depth=formula.
-  const requested = new URLSearchParams(location.search).get('depth');
-  if (isDepth(requested)) chooseDepth(requested);
+  applyDepthFromQuery();
 </script>

@@ -48,6 +48,14 @@ export function browserStorage(): Storage | undefined {
   }
 }
 
+/** Drops a `depth` query parameter from the address bar without reloading the page. */
+function clearDepthQueryParam(): void {
+  const url = new URL(location.href);
+  if (!url.searchParams.has('depth')) return;
+  url.searchParams.delete('depth');
+  history.replaceState(history.state, '', url);
+}
+
 /** Remembers the reader's level and tells every step and dial on the page. */
 export function chooseDepth(depth: Depth): void {
   try {
@@ -56,4 +64,18 @@ export function chooseDepth(depth: Depth): void {
     // Storage can be full or blocked. The choice then lasts for this page only.
   }
   document.dispatchEvent(new CustomEvent<Depth>(DEPTH_EVENT, { detail: depth }));
+  clearDepthQueryParam();
+}
+
+/**
+ * Applies a `?depth=` link (for example the "Quick review" door) to the current page view only.
+ * Unlike chooseDepth, it does not save the level, so it never overrides a level the reader picked
+ * earlier or will pick later. It also drops the parameter from the address bar so reloading the
+ * page does not reapply it.
+ */
+export function applyDepthFromQuery(): void {
+  const requested = new URL(location.href).searchParams.get('depth');
+  if (!isDepth(requested)) return;
+  document.dispatchEvent(new CustomEvent<Depth>(DEPTH_EVENT, { detail: requested }));
+  clearDepthQueryParam();
 }

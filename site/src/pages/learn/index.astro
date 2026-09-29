@@ -35,11 +35,10 @@ const chapters = (await getCollection('chapters', ({ data }) => !data.draft)).so
 </BaseLayout>
 
 <script>
-  import { chooseDepth, isDepth } from '../../lib/depth';
+  import { applyDepthFromQuery } from '../../lib/depth';
 
   // The "Quick review" door links here with ?depth=formula.
-  const requested = new URLSearchParams(location.search).get('depth');
-  if (isDepth(requested)) chooseDepth(requested);
+  applyDepthFromQuery();
 </script>
 
 <style>
