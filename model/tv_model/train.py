@@ -61,7 +61,7 @@ def get_batch(
     rng: np.random.Generator,
     device: torch.device,
 ) -> tuple[torch.Tensor, torch.Tensor]:
-    starts = rng.integers(0, len(tokens) - context - 1, size=batch_size)
+    starts = rng.integers(0, len(tokens) - context, size=batch_size)
     x = np.stack([tokens[s : s + context] for s in starts]).astype(np.int64)
     y = np.stack([tokens[s + 1 : s + 1 + context] for s in starts]).astype(np.int64)
     return torch.from_numpy(x).to(device), torch.from_numpy(y).to(device)

@@ -34,6 +34,12 @@ def test_batches_pair_each_token_with_the_next():
     torch.testing.assert_close(y, x + 1)
 
 
+def test_batches_can_start_at_the_last_valid_index():
+    tokens = np.arange(100, dtype=np.uint16)
+    _, y = get_batch(tokens, 4000, 8, np.random.default_rng(0), torch.device("cpu"))
+    assert int(y.max()) == 99  # the last token is reachable as a batch target
+
+
 def test_weight_decay_applies_only_to_matrices():
     optimizer = configure_optimizer(GPT(MICRO), TrainConfig(weight_decay=0.1))
     decayed, plain = optimizer.param_groups
