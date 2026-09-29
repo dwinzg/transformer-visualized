@@ -30,6 +30,9 @@ The engine's parity tests compare every intermediate value with this model. Rege
 
 ## Training the tiny model
 
+Text fed to the tiny model needs the same cleaning the training data went through; see the
+"Input text" section in `models/tiny/README.md`.
+
 This downloads about 2.2 GB of TinyStories into `model/data/` and trains for about 47 minutes on an Apple M4.
 
 ```sh

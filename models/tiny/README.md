@@ -21,6 +21,21 @@ A small GPT-2 style language model that runs in the browser on this site. It is 
 - Run. 25,000 steps of 64 sequences of 128 tokens (204,800,000 tokens seen), AdamW, learning rate 2e-3 with warmup and cosine decay, on an Apple M4.
 - Result. Validation loss 1.8494 (cross-entropy per token).
 
+## Input text
+
+The model only ever saw plain ASCII text. Before tokenizing anything you feed it, apply the
+same mapping the training data went through, or phone punctuation and other typography turns
+into rare byte tokens the model never trained on:
+
+- Curly quotes (U+2018, U+2019, U+201C, U+201D, left and right single and double quotes) to
+  the straight ASCII quotes `'` and `"`.
+- En dash (U+2013) and em dash (U+2014) to a hyphen `-`.
+- The ellipsis character (U+2026) to three periods `...`.
+- No-break space (U+00A0) to a regular space.
+
+Text that still has other non-ASCII characters after this mapping falls outside what the model
+was trained on. The engine does not apply this mapping yet; that is planned for a later stage.
+
 ## Samples
 
 Temperature 0.8, top-k 40.
