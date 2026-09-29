@@ -1,4 +1,6 @@
 import json
+import subprocess
+import sys
 from pathlib import Path
 
 import torch
@@ -84,6 +86,24 @@ def test_generation_is_deterministic(tmp_path):
         assert a.keys() == b.keys()
         for key in a:
             torch.testing.assert_close(a[key], b[key], rtol=0, atol=0)
+
+
+def test_generated_files_are_byte_identical_across_processes(tmp_path):
+    """safetensors' `__metadata__` key order is randomized per process (stable within one
+    process), so a same-process double write can't see it: this spawns two real processes.
+    """
+    model_dir = Path(__file__).resolve().parents[1]
+    dest_a, dest_b = tmp_path / "a", tmp_path / "b"
+    for dest in (dest_a, dest_b):
+        subprocess.run(
+            [sys.executable, "-m", "tv_model.fixtures", "micro", "--out", str(dest)],
+            cwd=model_dir,
+            check=True,
+        )
+    names = {p.name for p in dest_a.iterdir()}
+    assert names == {p.name for p in dest_b.iterdir()}
+    for name in names:
+        assert (dest_a / name).read_bytes() == (dest_b / name).read_bytes(), name
 
 
 def test_committed_fixtures_match_a_fresh_trace_of_the_committed_model():

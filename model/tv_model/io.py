@@ -16,6 +16,35 @@ from .gpt import GPT
 FORMAT_ID = "transformer-visualized/gpt2/1"
 
 
+def _sort_metadata_header(path: Path) -> None:
+    """Rewrite a safetensors file's header so its `__metadata__` keys are sorted.
+
+    safetensors 0.8.0 serializes `__metadata__` from a Rust HashMap, whose iteration order is
+    randomized per process (stable within one process, different across separate runs). That
+    turns every regeneration into a spurious diff. Sorting the keys and re-encoding the header
+    compactly reproduces exactly the same bytes every tensor entry already had -- only the
+    key/value pairs inside `__metadata__` are permuted, so the encoded length before padding is
+    unchanged; the trailing space padding that keeps the tensor data 8-byte aligned is
+    recomputed to fill the same header length, so the 8-byte length prefix and every data
+    offset stay correct.
+    """
+    data = bytearray(path.read_bytes())
+    header_len = int.from_bytes(data[:8], "little")
+    header = json.loads(bytes(data[8 : 8 + header_len]))
+    if "__metadata__" not in header:
+        return
+    header["__metadata__"] = dict(sorted(header["__metadata__"].items()))
+    new_header = json.dumps(header, separators=(",", ":")).encode("utf-8")
+    if len(new_header) > header_len:
+        raise AssertionError(
+            f"{path}: sorting metadata keys grew the header from {header_len} to "
+            f"{len(new_header)} bytes"
+        )
+    new_header += b" " * (header_len - len(new_header))
+    data[8 : 8 + header_len] = new_header
+    path.write_bytes(bytes(data))
+
+
 def save_model(model: GPT, path: Path, extra_metadata: Mapping[str, str] | None = None) -> None:
     metadata = {"format": FORMAT_ID, "config": json.dumps(model.cfg.to_engine_json())}
     if extra_metadata:
@@ -29,6 +58,7 @@ def save_model(model: GPT, path: Path, extra_metadata: Mapping[str, str] | None 
     }
     path.parent.mkdir(parents=True, exist_ok=True)
     save_file(tensors, str(path), metadata=metadata)
+    _sort_metadata_header(path)
 
 
 def load_model(path: Path) -> GPT:
