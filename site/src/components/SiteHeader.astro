@@ -28,6 +28,20 @@ const current = Astro.url.pathname;
   </nav>
 </header>
 
+<script>
+  // The nav can wrap to two or three rows on narrow screens, so its height is not one of the
+  // fixed breakpoints in tokens.css. Measuring it keeps anchored links (glossary terms,
+  // citations, "Go deeper") from landing underneath the sticky header at any width.
+  const header = document.querySelector<HTMLElement>('.site-header');
+  if (header) {
+    const setHeaderHeight = () => {
+      document.documentElement.style.setProperty('--header-height', `${header.offsetHeight}px`);
+    };
+    setHeaderHeight();
+    new ResizeObserver(setHeaderHeight).observe(header);
+  }
+</script>
+
 <style>
   .site-header {
     position: sticky;

@@ -53,6 +53,10 @@
   --focus-width: 3px;
   --focus-offset: 2px;
 
+  /* SiteHeader's script measures the header's real height into this property. This value is the
+     no-JS fallback for a single-row header. */
+  --header-height: 3.75rem;
+
   /* Shiki's css-variables theme reads these, so code blocks follow the site theme. */
   --astro-code-foreground: var(--color-text);
   --astro-code-background: var(--color-surface-2);
@@ -68,6 +72,15 @@
   --astro-code-token-inserted: var(--color-success-text);
   --astro-code-token-deleted: var(--color-danger-text);
   --astro-code-token-changed: var(--code-constant);
+}
+
+@media (max-width: 30rem) {
+  :root {
+    /* Below this width the header's nav can wrap to three rows (see SiteHeader.astro), so the
+       no-JS fallback has to cover that worst case too, or an anchored heading lands underneath
+       the sticky header. */
+    --header-height: 9.5rem;
+  }
 }
 
 :root,
