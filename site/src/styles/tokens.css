@@ -46,6 +46,12 @@
   --ease-standard: cubic-bezier(0.25, 0.1, 0.25, 1);
   --ease-emphasized: cubic-bezier(0.2, 0.8, 0.2, 1);
 
+  /* Spring-like curves built with linear(). Snappy for presses and toggles, gentle for things
+     that move across the screen. */
+  --spring-snappy: linear(0, 0.45 12%, 0.82 25%, 1.02 40%, 1.04 50%, 1.01 65%, 1);
+  --spring-gentle: linear(0, 0.2 10%, 0.55 25%, 0.85 45%, 0.98 65%, 1.01 80%, 1);
+  --figure-wide: 60rem;
+
   --measure: 42rem;
   --wide: 64rem;
   --nav-height: 3.25rem;
@@ -120,6 +126,9 @@
   --concept-output-text: #ad4c00;
   --concept-position: #f0e442;
   --concept-position-text: #6d6800;
+
+  --stage-bg: #f2f2f6;
+  --stage-dot: rgb(0 0 0 / 0.06);
 }
 
 @media (prefers-color-scheme: dark) {
@@ -161,6 +170,9 @@
     --concept-output-text: #ff8a4c;
     --concept-position: #f0e442;
     --concept-position-text: #f0e442;
+
+    --stage-bg: #151518;
+    --stage-dot: rgb(255 255 255 / 0.07);
   }
 }
 
@@ -200,6 +212,9 @@
   --concept-output-text: #ff8a4c;
   --concept-position: #f0e442;
   --concept-position-text: #f0e442;
+
+  --stage-bg: #151518;
+  --stage-dot: rgb(255 255 255 / 0.07);
 }
 
 @media (prefers-reduced-motion: reduce) {

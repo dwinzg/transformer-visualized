@@ -36,6 +36,7 @@ const fullTitle = title === 'Transformer Visualized' ? title : `${title} · Tran
       data-scheme="dark"
     />
     <script is:inline>
+      document.documentElement.classList.add('js');
       try {
         const saved = localStorage.getItem('tv-theme');
         if (saved === 'light' || saved === 'dark') document.documentElement.dataset.theme = saved;

@@ -241,3 +241,42 @@ pre {
 .island [data-status='invalid'] {
   color: var(--color-danger-text);
 }
+
+/* Press: buttons and chips dip slightly while held. */
+.press {
+  transition: transform var(--duration-fast) var(--spring-snappy);
+}
+.press:active {
+  transform: scale(0.97);
+}
+
+/* Enter: figures fade in and rise the first time they scroll into view (motion.ts adds
+   .is-visible). Without JavaScript the class never arrives, so the hidden state only applies
+   once the page is scripted. */
+:root.js [data-enter] {
+  opacity: 0;
+  transform: translateY(8px);
+  transition:
+    opacity var(--duration-slow) var(--ease-standard),
+    transform var(--duration-slow) var(--spring-gentle);
+}
+:root.js [data-enter].is-visible {
+  opacity: 1;
+  transform: none;
+}
+
+/* The surface every figure sits on, with a faint dot grid. */
+.stage {
+  border-radius: var(--radius-lg);
+  background-color: var(--stage-bg);
+  background-image: radial-gradient(var(--stage-dot) 1px, transparent 1px);
+  background-size: 16px 16px;
+}
+
+/* Page: crossfade between pages, with the header held still. */
+@view-transition {
+  navigation: auto;
+}
+.site-header {
+  view-transition-name: site-header;
+}

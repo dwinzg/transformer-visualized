@@ -22,7 +22,7 @@ const themes = {
   dark: block(":root[data-theme='dark']"),
 };
 
-const backgrounds = ['--color-bg', '--color-surface', '--color-surface-2'];
+const backgrounds = ['--color-bg', '--color-surface', '--color-surface-2', '--stage-bg'];
 
 const textTokens = [
   '--color-text',
