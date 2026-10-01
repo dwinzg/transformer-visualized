@@ -9,7 +9,7 @@
   "scripts": {
     "typecheck": "tsc -p tsconfig.json && tsc -p tsconfig.src.json",
     "test": "vitest run",
-    "bench": "vitest bench --run"
+    "bench": "vitest bench --run --reporter=verbose"
   },
   "devDependencies": {
     "@types/node": "^24.13.6",
