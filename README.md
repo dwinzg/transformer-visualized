@@ -1,40 +1,60 @@
 # Transformer Visualized
 
-An interactive, visual guide to how transformer language models work. Type a sentence and follow it through a real transformer, step by step, until it predicts what comes next. Every number on screen traces back to the math that produced it.
+A friendly, visual guide to how language models like GPT work.
 
-Built for learners without a technical background, and quick to review for those with one.
-
-> **Status.** Early development. The sections below describe the planned first release.
-
-## Screenshots
+You type a sentence and follow it through a real transformer, one step at a time, until it guesses the next word. Every number on screen comes from a real model, and you can always see the math behind it.
 
 ![The home page, with two ways to start: Learn from scratch or Quick review](docs/images/home-desktop-light.png)
 
-![A chapter page in the Story view, with the depth dial set to Story](docs/images/chapter-story-desktop-light.png)
+## Who it's for
+
+This is a learning resource. It is the guide we wish we had when we were first learning how transformers work.
+
+- **Learning it for the first time.** No math background needed. Each idea starts as a short story, and you can go deeper whenever you're ready.
+- **Refreshing what you know.** Jump straight to the formulas, tensor shapes and code. The glossary is there when you need a quick reminder.
+- **Teaching it.** Use the pages in a class, a study group or a talk. The lessons are free to share and adapt under CC BY 4.0, as long as you give credit.
+
+## What you can do
+
+Some of this is still being built. The next section shows what is ready today.
+
+- **Pick your depth.** Every step can be read four ways, as a story, as worked numbers, as the formula or as code. Switch at any time.
+- **Look inside a real model.** A tiny GPT-2 style model, trained on short children's stories, runs right in your browser. You can inspect every number it produces.
+- **Start small.** A toy example is small enough to work out by hand before you meet the real thing.
+- **Check the sources.** The references page lists every paper with a pinned link, and simplifications are labeled as ours.
+- **Use it anywhere.** It runs in the browser with no account, no server and no tracking.
+
+## What's ready and what's next
+
+The project is in early development.
+
+**Ready now**
+
+- The site, with light and dark mode, and layouts for phone and desktop.
+- The first chapter, "What a language model does".
+- The glossary and the references page.
+- The tiny trained model and the engine that runs it.
+
+**Coming next**
+
+- Four chapters that take you from text to a prediction. They cover tokens, embeddings and position, attention, and how the model picks the next word.
+- The playground, where you type your own sentence and watch it move through the model.
+- Quick review cards with every formula in one place.
+- Offline use, so you can install the site and study without internet.
+
+**Later**
+
+- A chapter on the full transformer block.
+- How training works.
+- A bigger GPT-2 sized model.
+
+## Screenshots
+
+![A chapter page in the Story view](docs/images/chapter-story-desktop-light.png)
 
 ![The same chapter in dark mode, switched to the Formula view](docs/images/chapter-formula-desktop-dark.png)
 
 <img src="docs/images/chapter-story-phone-light.png" alt="A chapter page on a phone" width="300">
-
-## What it covers
-
-Four chapters take you from text to the model's prediction.
-
-- **Tokens.** How text is split into tokens, small pieces from a fixed vocabulary, each with an ID number.
-- **Embeddings and position.** How each token becomes a list of numbers, called an embedding, and how information about its position is added.
-- **Attention.** Queries, keys and values, from a simple story up to the full formula.
-- **Prediction.** How the model gives every token in its vocabulary a probability of coming next, and how one is picked. Temperature, top-k and top-p, sampling versus greedy choice, and the generation loop. It also briefly covers what happens between attention and the output (the MLP, the residual stream and stacked layers) and the KV cache.
-
-**Later.** A full chapter on the transformer block, how training works, and a larger GPT-2 class model.
-
-## How it works
-
-- **Playground.** Type a short sentence and follow it through tokens, embeddings, every attention head and MLP of every layer, and the output probabilities. Then sample the next token. You can inspect every number and the arithmetic that produced it.
-- **Depth on demand.** Each chapter step reads as a story, as worked numbers, as the formula, or as code.
-- **Two scales.** A toy example small enough to compute by hand, and a tiny real GPT-2 style model where every value is visible. The tiny model is trained on short, simple stories.
-- **Quick review.** A page of formula cards and a glossary.
-- **Grounded in the literature.** A references page lists every source with a pinned link, so each link always opens the same version. Simplifications are labeled. Links to exact sections and equations will follow once the chapters are written.
-- **Runs in the browser.** No server, no account and no tracking. Installable and usable offline.
 
 ## How to run
 
@@ -66,11 +86,11 @@ You need [Node.js](https://nodejs.org/) 22.13 or newer (24 is recommended) and G
 
 To build the site the way it is published, run `npm run build`. The finished pages land in `site/dist/`.
 
-The model in this project is trained with Python. You only need that to retrain it. The steps are in [model/README.md](model/README.md).
+The model is trained with Python, which you only need if you want to retrain it. The steps are in [model/README.md](model/README.md).
 
 ## Contributing
 
-Contributions are welcome, especially from people learning the material for the first time. See [CONTRIBUTING.md](CONTRIBUTING.md) for ways to contribute, the workflow, writing standards and citation rules.
+Contributions are welcome, especially from people who are learning this for the first time. If something confused you, that's useful to hear. See [CONTRIBUTING.md](CONTRIBUTING.md) for how to help, the writing style and how we cite sources.
 
 ## License
 
