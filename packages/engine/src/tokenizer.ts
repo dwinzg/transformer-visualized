@@ -9,13 +9,13 @@ export interface TokenizerJson {
 // GPT-2's pre-tokenization pattern: contractions, letters, numbers, other symbols, whitespace.
 const PRETOKENIZE = /'s|'t|'re|'ve|'m|'ll|'d| ?\p{L}+| ?\p{N}+| ?[^\s\p{L}\p{N}]+|\s+(?!\S)|\s+/gu;
 
-let byteTable: string[] | undefined;
+let byteTable: readonly string[] | undefined;
 
 /**
  * GPT-2's map from each byte to a printable character, so every byte sequence can be written as
  * text. Printable Latin-1 bytes map to themselves; the rest map to characters from U+0100 up.
  */
-export function bytesToUnicode(): string[] {
+export function bytesToUnicode(): readonly string[] {
   if (byteTable) return byteTable;
   const table = new Array<string>(256);
   const printable = (byte: number) =>
@@ -24,8 +24,8 @@ export function bytesToUnicode(): string[] {
   for (let byte = 0; byte < 256; byte++) {
     table[byte] = String.fromCharCode(printable(byte) ? byte : 256 + next++);
   }
-  byteTable = table;
-  return table;
+  byteTable = Object.freeze(table);
+  return byteTable;
 }
 
 function isTokenizerJson(value: unknown): value is TokenizerJson {
@@ -53,7 +53,7 @@ export class Tokenizer {
   private readonly special: Map<string, number>;
   private readonly specialIds: Map<number, string>;
   private readonly specialPattern: RegExp | null;
-  private readonly byteToChar: string[];
+  private readonly byteToChar: readonly string[];
   private readonly charToByte: Map<string, number>;
   private readonly cache = new Map<string, number[]>();
   private readonly decoder = new TextDecoder('utf-8', { fatal: false });
@@ -96,6 +96,16 @@ export class Tokenizer {
       this.ranks.set(`${left} ${right}`, rank);
     });
     this.special = new Map(Object.entries(json.specialTokens));
+    for (const [text, id] of this.special) {
+      if (!Number.isInteger(id) || id < 0 || id >= this.vocabSize) {
+        throw new Error(`Special token "${text}" has an id ${id} outside the vocabulary`);
+      }
+      const vocabId = this.vocab.get(text);
+      if (vocabId !== id) {
+        const found = vocabId === undefined ? 'no vocab entry' : `vocab id ${vocabId}`;
+        throw new Error(`Special token "${text}" has id ${id} but the vocab has ${found}`);
+      }
+    }
     this.specialIds = new Map([...this.special].map(([text, id]) => [id, text]));
     this.specialPattern =
       this.special.size === 0

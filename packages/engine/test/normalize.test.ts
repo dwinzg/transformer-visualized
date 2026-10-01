@@ -26,6 +26,13 @@ describe('normalizeText', () => {
     for (const [, code, value] of block[1].matchAll(/"\\u([0-9a-f]{4})": ("[^"]*"|'[^']*')/g)) {
       python[String.fromCharCode(parseInt(code, 16))] = value.slice(1, -1);
     }
+    // Count entry lines independently of the key regex above, so an entry written another way
+    // (a different quote style, uppercase hex, a key that is not a "\uXXXX" escape) still makes
+    // the parsed key count visibly wrong instead of silently being skipped.
+    const entryLines = block[1]
+      .split('\n')
+      .filter((line) => line.includes(':') && line.trim() !== '');
+    expect(Object.keys(python)).toHaveLength(entryLines.length);
     expect(ASCII_EQUIVALENTS).toEqual(python);
   });
 });

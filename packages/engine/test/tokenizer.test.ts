@@ -35,6 +35,10 @@ describe('bytesToUnicode', () => {
     expect(table[32]).toBe('Ġ');
     expect(table[10]).toBe('Ċ');
   });
+
+  it('returns a frozen array, so callers cannot mutate the shared table', () => {
+    expect(Object.isFrozen(table)).toBe(true);
+  });
 });
 
 describe('Tokenizer', () => {
@@ -57,36 +61,14 @@ describe('Tokenizer', () => {
   });
 
   it('matches the longest special token first when one is a prefix of another', () => {
-    // Create a tokenizer with two special tokens where one is a prefix of the other.
-    // Use '<|a|>' and '<|a|>b' where the first is a true prefix of the second.
-    // Insert shorter token first to ensure regex alternation would match shorter without sort.
-    const vocab: Record<string, number> = { '<|endoftext|>': 0 };
-    table.forEach((char, i) => {
-      vocab[char] = i + 1;
-    });
-    const merges: [string, string][] = [
-      [b('h'), b('i')],
-      [b(' '), b('hi')],
-      [b('a'), b('a')],
-    ];
-    merges.forEach(([left, right], i) => {
-      vocab[left + right] = 257 + i;
-    });
-    vocab['<|a|>'] = 260;
-    vocab['<|a|>b'] = 261;
-    // Insert shorter token first in specialTokens to trigger the bug if not fixed
-    const specialTokens: Record<string, number> = {};
-    specialTokens['<|a|>'] = 260;
-    specialTokens['<|a|>b'] = 261;
-    const json: TokenizerJson = {
-      type: 'gpt2-byte-bpe',
-      vocab,
-      merges,
-      specialTokens,
-    };
+    // '<|a|>' is a prefix of '<|a|>b'. The special-token pattern must try the
+    // longer alternative first, or '<|a|>b' would split into '<|a|>' plus 'b'.
+    const json = tinyJson();
+    json.vocab['<|a|>'] = 260;
+    json.vocab['<|a|>b'] = 261;
+    json.specialTokens['<|a|>'] = 260;
+    json.specialTokens['<|a|>b'] = 261;
     const tokenizerWithPrefix = Tokenizer.fromJSON(json);
-    // Without the sort, regex would be (<|a|>|<|a|>b) and match only '<|a|>' in '<|a|>b'
-    // With the sort, regex is (<|a|>b|<|a|>) and correctly matches the longer token
     expect(tokenizerWithPrefix.encode('<|a|>b')).toEqual([261]);
     expect(tokenizerWithPrefix.encode('<|a|>')).toEqual([260]);
   });
@@ -149,6 +131,19 @@ describe('Tokenizer', () => {
     const badMerges3 = badSecond.merges as unknown[];
     badMerges3.push([b('x'), null]);
     expect(() => Tokenizer.fromJSON(badSecond)).toThrow(/merge/i);
+  });
+
+  it('rejects a special token id outside the vocabulary', () => {
+    const outOfRange = tinyJson();
+    const vocabSize = Object.keys(outOfRange.vocab).length;
+    outOfRange.specialTokens['<|endoftext|>'] = vocabSize;
+    expect(() => Tokenizer.fromJSON(outOfRange)).toThrow(/endoftext.*outside the vocabulary/);
+  });
+
+  it('rejects a special token id that does not match the vocab entry', () => {
+    const mismatched = tinyJson();
+    mismatched.specialTokens['<|endoftext|>'] = 1;
+    expect(() => Tokenizer.fromJSON(mismatched)).toThrow(/endoftext.*has id 1/);
   });
 
   it('reports the vocabulary size', () => {

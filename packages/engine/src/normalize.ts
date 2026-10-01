@@ -13,7 +13,14 @@ export const ASCII_EQUIVALENTS: Readonly<Record<string, string>> = {
   '\u00a0': ' ',
 };
 
-const PATTERN = new RegExp(`[${Object.keys(ASCII_EQUIVALENTS).join('')}]`, 'g');
+// Escape characters that are special inside a [...] character class, so a future key
+// (such as `]`, `^`, `-` or `\`) cannot break the pattern.
+const escapeForCharClass = (char: string): string => char.replace(/[\\\]^-]/g, '\\$&');
+
+const PATTERN = new RegExp(
+  `[${Object.keys(ASCII_EQUIVALENTS).map(escapeForCharClass).join('')}]`,
+  'g',
+);
 
 /** Maps curly quotes, dashes, the ellipsis and no-break spaces to ASCII. Does not trim. */
 export function normalizeText(text: string): string {
