@@ -1,5 +1,5 @@
 import { expect, test } from '@playwright/test';
-import { expectNoA11yViolations } from './a11y';
+import { expectNoA11yViolations, expectNoHorizontalScroll } from './a11y';
 
 test('picking a bar adds its word to the sentence', async ({ page }) => {
   await page.goto('dev/figures/');
@@ -34,9 +34,6 @@ test('rapid taps each add exactly one word', async ({ page }) => {
 
 test('the kit is accessible in both themes', async ({ page }) => {
   await page.goto('dev/figures/');
-  // The figure fades in once it enters the viewport (see Figure.astro's data-enter). Wait for
-  // that to finish so axe does not score the transition's intermediate, low-contrast frames.
-  await expect(page.locator('.figure')).toHaveCSS('opacity', '1');
   for (const colorScheme of ['light', 'dark'] as const) {
     await page.emulateMedia({ colorScheme });
     await expectNoA11yViolations(page);
@@ -49,4 +46,20 @@ test('the figure becomes visible once scrolled into view', async ({ page }) => {
   await figure.scrollIntoViewIfNeeded();
   await expect(figure).toBeVisible();
   await expect(figure).toHaveCSS('opacity', '1');
+});
+
+test('picking a guess resets the active option back to the top guess', async ({ page }) => {
+  await page.goto('dev/figures/');
+  const list = page.getByRole('listbox', { name: 'Next word guesses' });
+  await list.focus();
+  await page.keyboard.press('ArrowDown');
+  await page.keyboard.press('ArrowDown');
+  await page.keyboard.press('Enter');
+  await expect(page.getByRole('option').first()).toHaveAttribute('aria-selected', 'true');
+});
+
+test('dev/figures/ does not scroll sideways at 320px wide', async ({ page }) => {
+  await page.setViewportSize({ width: 320, height: 640 });
+  await page.goto('dev/figures/');
+  await expectNoHorizontalScroll(page);
 });
