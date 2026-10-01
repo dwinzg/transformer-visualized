@@ -83,7 +83,13 @@ export class Tokenizer {
     }
     this.ranks = new Map();
     json.merges.forEach((pair, rank) => {
+      if (!Array.isArray(pair) || pair.length !== 2) {
+        throw new Error(`Tokenizer merge ${rank} is not a [string, string] pair`);
+      }
       const [left, right] = pair;
+      if (typeof left !== 'string' || typeof right !== 'string') {
+        throw new Error(`Tokenizer merge ${rank} is not a [string, string] pair`);
+      }
       if (!this.vocab.has(left + right)) {
         throw new Error(`Tokenizer merge ${rank} ("${left}" + "${right}") has no vocab entry`);
       }
@@ -94,7 +100,13 @@ export class Tokenizer {
     this.specialPattern =
       this.special.size === 0
         ? null
-        : new RegExp(`(${[...this.special.keys()].map(escapeRegExp).join('|')})`, 'g');
+        : new RegExp(
+            `(${[...this.special.keys()]
+              .sort((a, b) => b.length - a.length)
+              .map(escapeRegExp)
+              .join('|')})`,
+            'g',
+          );
   }
 
   static fromJSON(json: unknown): Tokenizer {
