@@ -1,4 +1,4 @@
-import { useId, useState, type KeyboardEvent } from 'react';
+import { useEffect, useId, useState, type KeyboardEvent } from 'react';
 import { percent, type Guess } from '../../lib/guess-tree';
 import './figures.css';
 
@@ -13,6 +13,11 @@ interface Props {
 export function ProbabilityBars({ guesses, label, onPick, exact = false }: Props) {
   const id = useId();
   const [active, setActive] = useState(0);
+  // guessesAt returns the same array reference for the same tree node, and a new one whenever
+  // the path changes, so this fires exactly when the reader picks a new guess: without it, a
+  // keyboard user who picked option 2 would land on option 2 of the next list instead of the
+  // top guess.
+  useEffect(() => setActive(0), [guesses]);
   const value = (p: number) => (exact ? `${(p * 100).toFixed(1)}%` : percent(p));
   const fill = (p: number) => ({ '--p': `${Math.max(p * 100, 1)}%` }) as React.CSSProperties;
   const wordClass = (g: Guess) => `prob-word${g.token.special ? ' is-special' : ''}`;
