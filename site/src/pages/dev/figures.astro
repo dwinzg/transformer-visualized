@@ -1,0 +1,18 @@
+---
+import Figure from '../../components/Figure.astro';
+import KitDemo from '../../components/figures/KitDemo.tsx';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { guessTree } from '../../lib/demo-data';
+
+const tree = guessTree('Once upon a time, there was a');
+---
+
+<BaseLayout title="Figure kit" description="Test page for the figure components.">
+  <meta name="robots" content="noindex" slot="head" />
+  <div class="prose">
+    <h1>Figure kit</h1>
+    <Figure caption="Kit demo" description="Token chips and next word guesses.">
+      <KitDemo client:load tree={tree} />
+    </Figure>
+  </div>
+</BaseLayout>

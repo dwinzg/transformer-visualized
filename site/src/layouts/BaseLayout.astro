@@ -44,6 +44,7 @@ const fullTitle = title === 'Transformer Visualized' ? title : `${title} · Tran
         // Storage can be unavailable; fall back to the system theme.
       }
     </script>
+    <slot name="head" />
   </head>
   <body>
     <a class="skip-link" href="#main">

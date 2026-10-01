@@ -1,0 +1,53 @@
+---
+interface Props {
+  caption: string;
+  description: string;
+  wide?: boolean;
+}
+
+const { caption, description, wide = true } = Astro.props;
+// Astro.locals is fresh for every request (one request per static page), so a simple counter
+// gives deterministic ids across the whole page, the same way Step.astro dedupes its ids.
+const locals = Astro.locals as { figureCount?: number };
+locals.figureCount = (locals.figureCount ?? 0) + 1;
+const descId = `fig-desc-${locals.figureCount}`;
+---
+
+<figure class:list={['figure', { wide }]} data-enter aria-describedby={descId}>
+  <div class="stage figure-stage">
+    <slot />
+  </div>
+  <figcaption>{caption}</figcaption>
+  <p class="visually-hidden" id={descId}>
+    {description}
+  </p>
+</figure>
+
+<script>
+  import { enterOnView } from '../lib/motion';
+  enterOnView(document);
+</script>
+
+<style>
+  .figure {
+    margin: var(--space-8) 0;
+  }
+  .figure.wide {
+    width: min(100vw - 2 * var(--space-4), var(--figure-wide));
+    margin-inline: calc((min(100vw - 2 * var(--space-4), var(--figure-wide)) - 100%) / -2);
+  }
+  .figure-stage {
+    padding: var(--space-6);
+  }
+  figcaption {
+    margin-top: var(--space-2);
+    color: var(--color-text-secondary);
+    font-size: var(--text-footnote);
+    text-align: center;
+  }
+  @media (max-width: 30rem) {
+    .figure-stage {
+      padding: var(--space-4);
+    }
+  }
+</style>
