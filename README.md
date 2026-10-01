@@ -6,6 +6,16 @@ Built for learners without a technical background, and quick to review for those
 
 > **Status.** Early development. The sections below describe the planned first release.
 
+## Screenshots
+
+![The home page, with two ways to start: Learn from scratch or Quick review](docs/images/home-desktop-light.png)
+
+![A chapter page in the Story view, with the depth dial set to Story](docs/images/chapter-story-desktop-light.png)
+
+![The same chapter in dark mode, switched to the Formula view](docs/images/chapter-formula-desktop-dark.png)
+
+<img src="docs/images/chapter-story-phone-light.png" alt="A chapter page on a phone" width="300">
+
 ## What it covers
 
 Four chapters take you from text to the model's prediction.
@@ -25,6 +35,38 @@ Four chapters take you from text to the model's prediction.
 - **Quick review.** A page of formula cards and a glossary.
 - **Grounded in the literature.** A references page lists every source with a pinned link, so each link always opens the same version. Simplifications are labeled. Links to exact sections and equations will follow once the chapters are written.
 - **Runs in the browser.** No server, no account and no tracking. Installable and usable offline.
+
+## How to run
+
+You need [Node.js](https://nodejs.org/) 22.13 or newer (24 is recommended) and Git.
+
+1. Get the code and install everything.
+
+   ```sh
+   git clone https://github.com/dwinzg/transformer-visualized.git
+   cd transformer-visualized
+   npm install
+   ```
+
+2. Start the site.
+
+   ```sh
+   npm run dev --workspace @transformer-visualized/site
+   ```
+
+   Then open http://localhost:4321/transformer-visualized/ in your browser. The page reloads as you edit.
+
+3. Check your changes before opening a pull request.
+
+   ```sh
+   npm run check
+   ```
+
+   This runs the format check, lint, type checks and unit tests. To run the browser tests too, install the test browsers once with `npx playwright install` and then run `npm run e2e`.
+
+To build the site the way it is published, run `npm run build`. The finished pages land in `site/dist/`.
+
+The model in this project is trained with Python. You only need that to retrain it. The steps are in [model/README.md](model/README.md).
 
 ## Contributing
 
