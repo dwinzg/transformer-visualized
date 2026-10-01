@@ -40,3 +40,5 @@ export type {
   LayerNormExplanation,
   ProbabilityExplanation,
 } from './explain';
+export { bytesToUnicode, Tokenizer } from './tokenizer';
+export type { TokenizerJson } from './tokenizer';

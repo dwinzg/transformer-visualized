@@ -37,6 +37,7 @@ const functions = [
   'explainAttentionWeight',
   'explainProbability',
   'explainLayerNorm',
+  'bytesToUnicode',
 ] as const;
 
 describe('public API', () => {
@@ -46,5 +47,9 @@ describe('public API', () => {
 
   it('exports the model format id', () => {
     expect(engine.MODEL_FORMAT).toBe('transformer-visualized/gpt2/1');
+  });
+
+  it('exports the Tokenizer class', () => {
+    expect(typeof engine.Tokenizer.fromJSON).toBe('function');
   });
 });
