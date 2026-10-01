@@ -1,0 +1,121 @@
+[
+  {
+    "id": "vaswani2017",
+    "type": "paper",
+    "authors": [
+      { "family": "Vaswani", "given": "Ashish" },
+      { "family": "Shazeer", "given": "Noam" },
+      { "family": "Parmar", "given": "Niki" },
+      { "family": "Uszkoreit", "given": "Jakob" },
+      { "family": "Jones", "given": "Llion" },
+      { "family": "Gomez", "given": "Aidan N." },
+      { "family": "Kaiser", "given": "Łukasz" },
+      { "family": "Polosukhin", "given": "Illia" }
+    ],
+    "title": "Attention Is All You Need",
+    "year": 2017,
+    "venue": "Advances in Neural Information Processing Systems 30 (NIPS 2017)",
+    "url": "https://arxiv.org/abs/1706.03762v7",
+    "arxiv": "1706.03762v7",
+    "note": "The paper that introduced the transformer.",
+    "topics": ["architecture", "attention"]
+  },
+  {
+    "id": "radford2018",
+    "type": "report",
+    "authors": [
+      { "family": "Radford", "given": "Alec" },
+      { "family": "Narasimhan", "given": "Karthik" },
+      { "family": "Salimans", "given": "Tim" },
+      { "family": "Sutskever", "given": "Ilya" }
+    ],
+    "title": "Improving Language Understanding by Generative Pre-Training",
+    "year": 2018,
+    "venue": "OpenAI",
+    "url": "https://cdn.openai.com/research-covers/language-unsupervised/language_understanding_paper.pdf",
+    "note": "GPT, a decoder-only transformer pre-trained to predict the next token on a large collection of books, then fine-tuned for other tasks.",
+    "topics": ["architecture", "training"]
+  },
+  {
+    "id": "radford2019",
+    "type": "report",
+    "authors": [
+      { "family": "Radford", "given": "Alec" },
+      { "family": "Wu", "given": "Jeffrey" },
+      { "family": "Child", "given": "Rewon" },
+      { "family": "Luan", "given": "David" },
+      { "family": "Amodei", "given": "Dario" },
+      { "family": "Sutskever", "given": "Ilya" }
+    ],
+    "title": "Language Models are Unsupervised Multitask Learners",
+    "year": 2019,
+    "venue": "OpenAI",
+    "url": "https://cdn.openai.com/better-language-models/language_models_are_unsupervised_multitask_learners.pdf",
+    "note": "GPT-2, the architecture our tiny model follows.",
+    "topics": ["architecture", "training"]
+  },
+  {
+    "id": "shannon1951",
+    "type": "paper",
+    "authors": [{ "family": "Shannon", "given": "Claude E." }],
+    "title": "Prediction and Entropy of Printed English",
+    "year": 1951,
+    "venue": "Bell System Technical Journal 30(1), 50 to 64",
+    "url": "https://doi.org/10.1002/j.1538-7305.1951.tb01366.x",
+    "doi": "10.1002/j.1538-7305.1951.tb01366.x",
+    "note": "People guessing the next letter of English text, an early look at next-token prediction.",
+    "topics": ["prediction"]
+  },
+  {
+    "id": "bengio2003",
+    "type": "paper",
+    "authors": [
+      { "family": "Bengio", "given": "Yoshua" },
+      { "family": "Ducharme", "given": "Réjean" },
+      { "family": "Vincent", "given": "Pascal" },
+      { "family": "Jauvin", "given": "Christian" }
+    ],
+    "title": "A Neural Probabilistic Language Model",
+    "year": 2003,
+    "venue": "Journal of Machine Learning Research 3, 1137 to 1155",
+    "url": "https://www.jmlr.org/papers/volume3/bengio03a/bengio03a.pdf",
+    "note": "An early neural network that predicts the next word using learned word vectors.",
+    "topics": ["tokens", "prediction"]
+  },
+  {
+    "id": "eldan2023",
+    "type": "paper",
+    "authors": [
+      { "family": "Eldan", "given": "Ronen" },
+      { "family": "Li", "given": "Yuanzhi" }
+    ],
+    "title": "TinyStories: How Small Can Language Models Be and Still Speak Coherent English?",
+    "year": 2023,
+    "venue": "arXiv preprint",
+    "url": "https://arxiv.org/abs/2305.07759v2",
+    "arxiv": "2305.07759v2",
+    "note": "The dataset of simple stories our tiny model learns from.",
+    "topics": ["training"]
+  },
+  {
+    "id": "cho2025",
+    "type": "paper",
+    "authors": [
+      { "family": "Cho", "given": "Aeree" },
+      { "family": "Kim", "given": "Grace C." },
+      { "family": "Karpekov", "given": "Alexander" },
+      { "family": "Helbling", "given": "Alec" },
+      { "family": "Wang", "given": "Zijie J." },
+      { "family": "Lee", "given": "Seongmin" },
+      { "family": "Hoover", "given": "Benjamin" },
+      { "family": "Chau", "given": "Duen Horng" }
+    ],
+    "title": "Transformer Explainer: Interactive Learning of Text-Generative Models",
+    "year": 2025,
+    "venue": "Proceedings of the AAAI Conference on Artificial Intelligence 39(28), 29625 to 29627",
+    "url": "https://doi.org/10.1609/aaai.v39i28.35347",
+    "doi": "10.1609/aaai.v39i28.35347",
+    "note": "An interactive visualization that runs GPT-2 in the browser.",
+    "topics": ["tools"]
+  }
+]

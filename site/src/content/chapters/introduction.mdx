@@ -1,0 +1,162 @@
+---
+title: What a language model does
+order: 0
+summary: A language model does one thing over and over. It guesses what comes next.
+goals:
+  - Say in one sentence what a language model does
+  - See how guessing one piece at a time produces whole sentences
+  - Know the parts of a transformer the next chapters cover
+minutes: 8
+recap:
+  - A language model gives every possible next piece of text a probability.
+  - It writes by picking a likely piece, adding it to the text and guessing again.
+  - A transformer computes those probabilities from numbers it learned in training.
+references:
+  - shannon1951
+  - bengio2003
+  - vaswani2017
+  - radford2019
+  - eldan2023
+---
+
+<Step title="It guesses the next piece of text">
+
+<Level of="story">
+
+When you type a message, your phone suggests the next word. A <Term id="language-model">language model</Term> does the same thing, only much better. You give it some text, and it answers with every piece of text that could come next, each with a chance.
+
+</Level>
+
+<Level of="numbers">
+
+Here is what that answer could look like after "Once upon a". These numbers are made up to show the idea.
+
+| Next piece | Chance |
+| --- | --- |
+| time | 0.92 |
+| day | 0.03 |
+| hill | 0.01 |
+| everything else | 0.04 |
+
+The chances, called <Term id="probability">probabilities</Term>, always add up to 1, because something has to come next.
+
+</Level>
+
+<Level of="formula">
+
+The model assigns a probability to each possible next token, given all the tokens before it.
+
+<Tex display tex="P(\text{next token} \mid \text{previous tokens})" />
+
+For each position the probabilities over the whole vocabulary sum to 1.
+
+</Level>
+
+<Level of="code">
+
+```ts
+const trace = forward(model, tokenIds);
+const lastRow = rowView(trace.logits, tokenIds.length - 1);
+const chances = probabilities(lastRow, 1); // one number per token in the vocabulary
+```
+
+</Level>
+
+</Step>
+
+<PredictReveal question="Which word is most likely to come after &quot;The cat sat on the&quot;?" options={['mat', 'moon', 'because']} answer={0}>
+
+Most people pick "mat", and a model trained on lots of English text usually does too, because that phrase is common in its training text. The model has never seen a cat. It has seen patterns in text. The playground lets you check what our small model predicts.
+
+</PredictReveal>
+
+<Exercise prompt="A model gives &quot;time&quot; a chance of 0.9 and &quot;day&quot; a chance of 0.05. How much chance is left for every other piece together?" answer={0.05} tolerance={0.001}>
+
+All chances add up to 1, so what is left is 1 minus 0.9 minus 0.05, which is 0.05.
+
+</Exercise>
+
+<Step title="Then it does it again">
+
+<Level of="story">
+
+To write more than one word, the model picks one of the likely pieces, adds it to the text, and guesses again. Repeat this a few hundred times and you have a paragraph. Chatbots like ChatGPT write their answers this way, one piece at a time.
+
+</Level>
+
+<Level of="numbers">
+
+Starting from "Once upon a", three rounds could go like this.
+
+1. "Once upon a" gives "time" the highest chance. The text becomes "Once upon a time".
+2. "Once upon a time" makes "," likely. The text becomes "Once upon a time,".
+3. "Once upon a time," makes "there" likely. The text becomes "Once upon a time, there".
+
+</Level>
+
+<Level of="formula">
+
+The probability of a whole sequence is the product of the next-token probabilities, one position at a time.
+
+<Tex display tex="P(t_1, \dots, t_n) = \prod_{i=1}^{n} P(t_i \mid t_1, \dots, t_{i-1})" />
+
+Generating text means choosing each <Tex tex="t_i" /> from that distribution and feeding it back in.
+
+</Level>
+
+<Level of="code">
+
+```ts
+const result = generate(model, promptIds, { maxNewTokens: 20, temperature: 0.8, seed: 1 });
+```
+
+</Level>
+
+</Step>
+
+<Callout kind="note" title="An old idea">
+
+In 1951 Claude Shannon (<Ref id="shannon1951" />) asked people to guess the next letter of English sentences, one letter at a time, to measure how predictable English is. A language model plays the same game with pieces of words.
+
+</Callout>
+
+<Step title="Inside, a transformer does the guessing">
+
+<Level of="story">
+
+The model that makes these guesses is called a <Term id="transformer">transformer</Term> (<Ref id="vaswani2017" />). It turns the text into numbers, passes those numbers through a stack of layers that let each word gather information from the words before it, and ends with a score for every possible next piece. The next chapters open each of those steps.
+
+</Level>
+
+<Level of="numbers">
+
+The small model on this site has a vocabulary of 4,096 pieces. It turns each piece into a list of 128 numbers, runs them through 4 layers, and has about 1.3 million numbers it learned during training. Large chat models follow the same plan with tens of thousands of times more numbers, or more.
+
+</Level>
+
+<Level of="formula">
+
+A transformer computes scores for every token in the vocabulary, called logits, from the tokens so far. Softmax turns the logits into probabilities.
+
+<Tex display tex="\text{logits} = f_\theta(t_1, \dots, t_{i-1}), \qquad P(t_i \mid t_{<i}) = \operatorname{softmax}(\text{logits})" />
+
+Here <Tex tex="\theta" /> stands for all of the model's learned parameters.
+
+</Level>
+
+<Level of="code">
+
+```ts
+const model = loadModel(await (await fetch('/transformer-visualized/models/tiny/model.safetensors')).arrayBuffer());
+console.log(model.config); // { vocabSize: 4096, dModel: 128, nLayers: 4, ... }
+```
+
+</Level>
+
+</Step>
+
+<Callout kind="analogy">
+
+Phone suggestions are a helpful picture, but the model does not look up its answer in a list of phrases it has seen. It computes each guess from numbers it learned, which is why it can continue sentences it has never seen before.
+
+</Callout>

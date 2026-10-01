@@ -1,0 +1,50 @@
+---
+import 'katex/dist/katex.min.css';
+import katex from 'katex';
+
+interface Props {
+  tex: string;
+  display?: boolean;
+}
+
+const { tex, display = false } = Astro.props;
+const html = katex.renderToString(tex, {
+  displayMode: display,
+  throwOnError: true,
+  output: 'htmlAndMathml',
+  // \htmlClass is how formulas pick up the shared concept colors; nothing else is trusted.
+  trust: (context) => context.command === '\\htmlClass',
+  strict: (errorCode: string) => (errorCode === 'htmlExtension' ? 'ignore' : 'error'),
+});
+---
+
+{display ? (
+  <div class="tex tex-display" role="group" aria-label="Formula" tabindex="0" set:html={html} />
+) : (
+  <span class="tex" set:html={html} />
+)}
+
+<style>
+  .tex-display {
+    overflow-x: auto;
+    padding-block: var(--space-2);
+  }
+  .tex :global(.tv-q) {
+    color: var(--concept-query-text);
+  }
+  .tex :global(.tv-k) {
+    color: var(--concept-key-text);
+  }
+  .tex :global(.tv-v) {
+    color: var(--concept-value-text);
+  }
+  .tex :global(.tv-r) {
+    color: var(--concept-residual-text);
+  }
+  .tex :global(.tv-o) {
+    color: var(--concept-output-text);
+  }
+  .tex :global(.tv-p) {
+    color: var(--concept-position-text);
+  }
+</style>

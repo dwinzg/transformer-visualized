@@ -1,0 +1,112 @@
+---
+import { withBase } from '../lib/paths';
+import ThemeToggle from './ThemeToggle.astro';
+
+const links = [
+  { href: withBase('learn/'), label: 'Learn' },
+  { href: withBase('glossary/'), label: 'Glossary' },
+  { href: withBase('references/'), label: 'References' },
+];
+const current = Astro.url.pathname;
+---
+
+<header class="site-header">
+  <nav class="container nav" aria-label="Main">
+    <a class="wordmark" href={withBase('')}>
+      Transformer Visualized
+    </a>
+    <ul class="links">
+      {links.map((link) => (
+        <li>
+          <a href={link.href} aria-current={current.startsWith(link.href) ? 'page' : undefined}>
+            {link.label}
+          </a>
+        </li>
+      ))}
+    </ul>
+    <ThemeToggle />
+  </nav>
+</header>
+
+<script>
+  // The nav can wrap to two or three rows on narrow screens, so its height is not one of the
+  // fixed breakpoints in tokens.css. Measuring it keeps anchored links (glossary terms,
+  // citations, "Go deeper") from landing underneath the sticky header at any width.
+  const header = document.querySelector<HTMLElement>('.site-header');
+  if (header) {
+    const setHeaderHeight = () => {
+      document.documentElement.style.setProperty('--header-height', `${header.offsetHeight}px`);
+    };
+    setHeaderHeight();
+    new ResizeObserver(setHeaderHeight).observe(header);
+  }
+</script>
+
+<style>
+  .site-header {
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    background: var(--color-material);
+    backdrop-filter: saturate(180%) blur(20px);
+    -webkit-backdrop-filter: saturate(180%) blur(20px);
+    border-bottom: 1px solid var(--color-separator);
+  }
+  @media (prefers-reduced-transparency: reduce) {
+    .site-header {
+      background: var(--color-bg);
+      backdrop-filter: none;
+      -webkit-backdrop-filter: none;
+    }
+  }
+  .nav {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--space-1) var(--space-4);
+    min-height: var(--nav-height);
+  }
+  .wordmark {
+    display: inline-flex;
+    align-items: center;
+    min-height: var(--touch-target);
+    font-weight: 600;
+    color: var(--color-text);
+    margin-right: auto;
+  }
+  .links {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-1);
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+  .links a {
+    display: inline-flex;
+    align-items: center;
+    min-height: var(--touch-target);
+    padding: 0 var(--space-3);
+    border-radius: var(--radius-pill);
+    color: var(--color-text);
+    font-size: var(--text-subheadline);
+    /* Overrides global.css's prose-link underline: nav items sit inside <li>, but they are
+       standalone controls, not links inline in running text, so they stay underline-free. */
+    text-decoration: none;
+  }
+  .links a[aria-current='page'] {
+    background: var(--color-surface-2);
+  }
+  .links a:hover {
+    text-decoration: none;
+    background: var(--color-surface-2);
+  }
+  @media (max-width: 30rem) {
+    .wordmark {
+      font-size: var(--text-subheadline);
+    }
+    .links a {
+      padding: 0 var(--space-2);
+    }
+  }
+</style>

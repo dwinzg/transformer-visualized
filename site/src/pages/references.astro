@@ -1,0 +1,80 @@
+---
+import { getCollection } from 'astro:content';
+import BaseLayout from '../layouts/BaseLayout.astro';
+import { formatAuthors, TOPIC_LABELS } from '../lib/citations';
+
+const all = await getCollection('references');
+const byYearThenName = (a: (typeof all)[number], b: (typeof all)[number]) =>
+  a.data.year - b.data.year || a.id.localeCompare(b.id);
+const sections = Object.entries(TOPIC_LABELS)
+  .map(([topic, label]) => ({
+    topic,
+    label,
+    items: all.filter((ref) => ref.data.topics[0] === topic).sort(byYearThenName),
+  }))
+  .filter((section) => section.items.length > 0);
+const unlisted = all.filter((ref) => !(ref.data.topics[0] in TOPIC_LABELS));
+if (unlisted.length > 0) {
+  throw new Error(
+    `References with an unknown first topic: ${unlisted.map((r) => r.id).join(', ')}`,
+  );
+}
+---
+
+<BaseLayout
+  title="References"
+  description="The papers, books and tools this site draws on, grouped by topic."
+>
+  <section class="prose page">
+    <h1>References</h1>
+    <p class="intro">
+      Everything this site draws on, grouped by topic. Each chapter also lists its own sources under
+      Go deeper.
+    </p>
+    {sections.map((section) => (
+      <section aria-labelledby={`topic-${section.topic}`}>
+        <h2 id={`topic-${section.topic}`}>{section.label}</h2>
+        <ol class="refs">
+          {section.items.map((ref) => (
+            <li id={ref.id} class="target-highlight">
+              <span class="authors">{formatAuthors(ref.data.authors)}</span>{' '}
+              <span class="year">({ref.data.year}).</span>{' '}
+              <a href={ref.data.url}>{ref.data.title}</a>.
+              {ref.data.venue && <span class="venue"> {ref.data.venue}.</span>}
+              {ref.data.arxiv && <span class="id"> arXiv:{ref.data.arxiv}.</span>}
+              {ref.data.doi && <span class="id"> doi:{ref.data.doi}.</span>}
+              {ref.data.note && <p class="note">{ref.data.note}</p>}
+            </li>
+          ))}
+        </ol>
+      </section>
+    ))}
+  </section>
+</BaseLayout>
+
+<style>
+  .page {
+    padding-block: var(--space-12);
+  }
+  .intro {
+    color: var(--color-text-secondary);
+  }
+  .refs {
+    padding-left: 0;
+    list-style: none;
+  }
+  .refs li {
+    padding-block: var(--space-3);
+    border-bottom: 1px solid var(--color-separator);
+    overflow-wrap: anywhere;
+  }
+  .venue,
+  .id,
+  .note {
+    color: var(--color-text-secondary);
+  }
+  .note {
+    margin: var(--space-1) 0 0;
+    font-size: var(--text-subheadline);
+  }
+</style>

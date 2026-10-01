@@ -1,0 +1,32 @@
+---
+import { DEPTH_LABELS, isDepth, type Depth } from '../../lib/depth';
+
+interface Props {
+  of: Depth;
+}
+
+const { of } = Astro.props;
+if (!isDepth(of)) throw new Error(`Unknown level "${String(of)}"`);
+---
+
+<div class="level" data-level={of}>
+  <p class="level-label">{DEPTH_LABELS[of]}</p>
+  <slot />
+</div>
+
+<style>
+  .level-label {
+    margin: var(--space-4) 0 var(--space-2);
+    color: var(--color-text-secondary);
+    font-size: var(--text-footnote);
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+  }
+  :global(.step.is-enhanced) .level-label {
+    display: none;
+  }
+  :global(.step.is-enhanced) .level[hidden] {
+    display: none;
+  }
+</style>

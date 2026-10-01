@@ -1,0 +1,29 @@
+---
+import { getCollection, render } from 'astro:content';
+import { mdxComponents } from '../../components/mdx';
+import ChapterLayout from '../../layouts/ChapterLayout.astro';
+
+export async function getStaticPaths() {
+  const chapters = (await getCollection('chapters', ({ data }) => !data.draft)).sort(
+    (a, b) => a.data.order - b.data.order,
+  );
+  return chapters.map((chapter, i) => ({
+    params: { id: chapter.id },
+    props: { chapter, prev: chapters[i - 1], next: chapters[i + 1] },
+  }));
+}
+
+const { chapter, prev, next } = Astro.props;
+const { Content } = await render(chapter);
+---
+
+<ChapterLayout chapter={chapter} prev={prev} next={next}>
+  <Content components={mdxComponents} />
+</ChapterLayout>
+
+<script>
+  import { applyDepthFromQuery } from '../../lib/depth';
+
+  // The "Quick review" door can also link straight to a chapter with ?depth=formula.
+  applyDepthFromQuery();
+</script>
