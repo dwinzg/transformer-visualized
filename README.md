@@ -38,3 +38,5 @@ Copyright (c) 2026 dwinzg
 - Written lessons, explanations and figures are released under the [Creative Commons Attribution 4.0 International License](https://creativecommons.org/licenses/by/4.0/) (CC BY 4.0), unless otherwise noted. The full text is in [LICENSE-CONTENT](LICENSE-CONTENT).
 - Code samples inside the lessons are also available under the MIT License.
 - Third-party material keeps its original license.
+- The trained model in `models/` is released under the MIT License, like the code.
+- The dataset it was trained on is credited in [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md).
