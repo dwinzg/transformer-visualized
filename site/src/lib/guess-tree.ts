@@ -2,6 +2,8 @@
 export interface DisplayToken {
   id: number;
   text: string;
+  /** True for a non-text token, such as the end-of-story marker, shown in square brackets. */
+  special?: boolean;
 }
 
 /** One possible next token, its probability and the guesses that follow it. */
@@ -44,9 +46,13 @@ export function percent(p: number): string {
   return p < 0.005 ? '<1%' : `${Math.round(p * 100)}%`;
 }
 
+function spoken(token: DisplayToken): string {
+  return token.special ? token.text.replace(/^\[|\]$/g, '') : token.text.trim();
+}
+
 export function describeGuesses(guesses: readonly Guess[], count = 3): string {
   return guesses
     .slice(0, count)
-    .map((g) => `${g.token.text.trim()} ${percent(g.p).replace('%', ' percent')}`)
+    .map((g) => `${spoken(g.token)} ${percent(g.p).replace('%', ' percent')}`)
     .join(', ');
 }
