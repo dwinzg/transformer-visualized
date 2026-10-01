@@ -34,4 +34,13 @@ describe('guess tree helpers', () => {
     expect(percent(0.344)).toBe('34%');
     expect(percent(0.004)).toBe('<1%');
   });
+
+  it('reads a special guess naturally, without its brackets', () => {
+    const special = {
+      token: { id: 6, text: '[end of story]', special: true },
+      p: 0.05,
+      next: [],
+    };
+    expect(describeGuesses([special])).toBe('end of story 5 percent');
+  });
 });
