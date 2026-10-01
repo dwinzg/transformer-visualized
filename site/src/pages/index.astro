@@ -1,0 +1,80 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import { withBase } from '../lib/paths';
+
+// Interim target for the Quick review door. The /review/ page of formula cards replaces it once
+// that page exists.
+const quickReviewHref = withBase('learn/?depth=formula');
+---
+
+<BaseLayout
+  title="Transformer Visualized"
+  description="Follow a sentence through a real transformer, step by step, from a simple story to the exact math."
+>
+  <section class="hero container">
+    <h1>See inside a language model</h1>
+    <p class="lede">
+      Follow a sentence through a real transformer, one step at a time. The numbers in the
+      playground come from a real model, and every step is explained from a simple story up to the
+      exact math.
+    </p>
+  </section>
+
+  <section class="doors container" aria-label="Ways to start">
+    <a class="door" href={withBase('learn/')}>
+      <span class="door-title">Learn from scratch</span>
+      <span class="door-text">
+        No math background needed. Start with a story and go as deep as you like.
+      </span>
+    </a>
+    <a class="door" href={quickReviewHref}>
+      <span class="door-title">Quick review</span>
+      <span class="door-text">Formulas, shapes and code, for readers who know the basics.</span>
+    </a>
+  </section>
+</BaseLayout>
+
+<style>
+  .hero {
+    padding-block: var(--space-24) var(--space-12);
+    text-align: center;
+  }
+  .hero h1 {
+    font-size: var(--text-hero);
+    margin-bottom: var(--space-6);
+  }
+  .lede {
+    max-width: 38rem;
+    margin-inline: auto;
+    color: var(--color-text-secondary);
+    font-size: var(--text-title-3);
+    line-height: 1.4;
+  }
+  .doors {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(16rem, 1fr));
+    gap: var(--space-6);
+  }
+  .door {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2);
+    padding: var(--space-8);
+    border-radius: var(--radius-lg);
+    background: var(--color-surface);
+    box-shadow: var(--shadow-card);
+    color: var(--color-text);
+    transition: transform var(--duration-base) var(--ease-emphasized);
+  }
+  .door:hover {
+    text-decoration: none;
+    transform: translateY(-2px);
+  }
+  .door-title {
+    font-size: var(--text-title-2);
+    font-weight: 600;
+  }
+  .door-text {
+    color: var(--color-text-secondary);
+  }
+</style>

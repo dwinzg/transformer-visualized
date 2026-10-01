@@ -1,0 +1,211 @@
+/* Design tokens. Apple's Human Interface Guidelines are the inspiration: system fonts, generous
+   space, quiet surfaces, content first. Concept colors follow Okabe and Ito's colorblind-safe
+   palette so queries, keys and values look the same in every diagram and formula. */
+
+:root {
+  --font-sans:
+    system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial,
+    sans-serif;
+  --font-mono: ui-monospace, SFMono-Regular, Menlo, Consolas, 'Liberation Mono', monospace;
+
+  --text-hero: clamp(2.25rem, 1.5rem + 3vw, 3.5rem);
+  --text-large-title: 2.125rem;
+  --text-title-1: 1.75rem;
+  --text-title-2: 1.375rem;
+  --text-title-3: 1.25rem;
+  --text-headline: 1.0625rem;
+  --text-body: 1.0625rem;
+  --text-callout: 1rem;
+  --text-subheadline: 0.9375rem;
+  --text-footnote: 0.8125rem;
+  --text-caption: 0.75rem;
+  --leading-tight: 1.2;
+  --leading-body: 1.47;
+  --tracking-tight: -0.022em;
+
+  --space-1: 0.25rem;
+  --space-2: 0.5rem;
+  --space-3: 0.75rem;
+  --space-4: 1rem;
+  --space-5: 1.25rem;
+  --space-6: 1.5rem;
+  --space-8: 2rem;
+  --space-10: 2.5rem;
+  --space-12: 3rem;
+  --space-16: 4rem;
+  --space-24: 6rem;
+
+  --radius-sm: 10px;
+  --radius-md: 14px;
+  --radius-lg: 20px;
+  --radius-pill: 999px;
+
+  --duration-fast: 150ms;
+  --duration-base: 250ms;
+  --duration-slow: 350ms;
+  --ease-standard: cubic-bezier(0.25, 0.1, 0.25, 1);
+  --ease-emphasized: cubic-bezier(0.2, 0.8, 0.2, 1);
+
+  --measure: 42rem;
+  --wide: 64rem;
+  --nav-height: 3.25rem;
+  --touch-target: 44px;
+  --focus-width: 3px;
+  --focus-offset: 2px;
+
+  /* SiteHeader's script measures the header's real height into this property. This value is the
+     no-JS fallback for a single-row header. */
+  --header-height: 3.75rem;
+
+  /* Shiki's css-variables theme reads these, so code blocks follow the site theme. */
+  --astro-code-foreground: var(--color-text);
+  --astro-code-background: var(--color-surface-2);
+  --astro-code-token-comment: var(--code-comment);
+  --astro-code-token-keyword: var(--code-keyword);
+  --astro-code-token-string: var(--code-string);
+  --astro-code-token-string-expression: var(--code-string);
+  --astro-code-token-function: var(--code-function);
+  --astro-code-token-constant: var(--code-constant);
+  --astro-code-token-parameter: var(--color-text);
+  --astro-code-token-punctuation: var(--color-text-secondary);
+  --astro-code-token-link: var(--color-accent);
+  --astro-code-token-inserted: var(--color-success-text);
+  --astro-code-token-deleted: var(--color-danger-text);
+  --astro-code-token-changed: var(--code-constant);
+}
+
+@media (max-width: 30rem) {
+  :root {
+    /* Below this width the header's nav can wrap to three rows (see SiteHeader.astro), so the
+       no-JS fallback has to cover that worst case too, or an anchored heading lands underneath
+       the sticky header. */
+    --header-height: 9.5rem;
+  }
+}
+
+:root,
+:root[data-theme='light'] {
+  color-scheme: light;
+  --color-bg: #fbfbfd;
+  --color-surface: #ffffff;
+  --color-surface-2: #f2f2f7;
+  --color-text: #1d1d1f;
+  --color-text-secondary: #6e6e73;
+  --color-separator: #d2d2d7;
+  --color-control-border: #86868b;
+  --color-accent: #0066cc;
+  --color-accent-contrast: #ffffff;
+  --color-focus: #0066cc;
+  --color-success-text: #1a7f37;
+  --color-danger-text: #c0342b;
+  --color-material: rgb(251 251 253 / 0.72);
+  --shadow-card: 0 1px 2px rgb(0 0 0 / 0.04), 0 8px 24px rgb(0 0 0 / 0.06);
+  --color-segment-selected: #ffffff;
+
+  --code-comment: #5f6770;
+  --code-keyword: #9b2393;
+  --code-string: #b3261e;
+  --code-function: #2d6a70;
+  --code-constant: #272ad8;
+
+  --concept-query: #0072b2;
+  --concept-query-text: #0072b2;
+  --concept-key: #e69f00;
+  --concept-key-text: #8a5700;
+  --concept-value: #009e73;
+  --concept-value-text: #00785a;
+  --concept-residual: #cc79a7;
+  --concept-residual-text: #9b4679;
+  --concept-output: #d55e00;
+  --concept-output-text: #ad4c00;
+  --concept-position: #f0e442;
+  --concept-position-text: #6d6800;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme='light']) {
+    color-scheme: dark;
+    --color-bg: #0b0b0d;
+    --color-surface: #1c1c1e;
+    --color-surface-2: #2c2c2e;
+    --color-text: #f5f5f7;
+    --color-text-secondary: #a1a1a6;
+    --color-separator: #3a3a3c;
+    --color-control-border: #8e8e93;
+    --color-accent: #2997ff;
+    --color-accent-contrast: #000000;
+    --color-focus: #2997ff;
+    --color-success-text: #4ac26b;
+    --color-danger-text: #ff6b5e;
+    --color-material: rgb(11 11 13 / 0.72);
+    --shadow-card: 0 1px 2px rgb(0 0 0 / 0.3), 0 8px 24px rgb(0 0 0 / 0.35);
+    /* Lighter than both --color-surface and the dial's track (--color-surface-2), so the
+       selected segment stands out in dark mode instead of blending into the track. */
+    --color-segment-selected: #4a4a4c;
+
+    --code-comment: #9b9ba1;
+    --code-keyword: #ff7ab2;
+    --code-string: #ff8170;
+    --code-function: #6bd3bf;
+    --code-constant: #d9c97c;
+
+    --concept-query: #56b4e9;
+    --concept-query-text: #56b4e9;
+    --concept-key: #e69f00;
+    --concept-key-text: #f0b43c;
+    --concept-value: #009e73;
+    --concept-value-text: #3ccf9f;
+    --concept-residual: #cc79a7;
+    --concept-residual-text: #e39cc5;
+    --concept-output: #d55e00;
+    --concept-output-text: #ff8a4c;
+    --concept-position: #f0e442;
+    --concept-position-text: #f0e442;
+  }
+}
+
+:root[data-theme='dark'] {
+  color-scheme: dark;
+  --color-bg: #0b0b0d;
+  --color-surface: #1c1c1e;
+  --color-surface-2: #2c2c2e;
+  --color-text: #f5f5f7;
+  --color-text-secondary: #a1a1a6;
+  --color-separator: #3a3a3c;
+  --color-control-border: #8e8e93;
+  --color-accent: #2997ff;
+  --color-accent-contrast: #000000;
+  --color-focus: #2997ff;
+  --color-success-text: #4ac26b;
+  --color-danger-text: #ff6b5e;
+  --color-material: rgb(11 11 13 / 0.72);
+  --shadow-card: 0 1px 2px rgb(0 0 0 / 0.3), 0 8px 24px rgb(0 0 0 / 0.35);
+  --color-segment-selected: #4a4a4c;
+
+  --code-comment: #9b9ba1;
+  --code-keyword: #ff7ab2;
+  --code-string: #ff8170;
+  --code-function: #6bd3bf;
+  --code-constant: #d9c97c;
+
+  --concept-query: #56b4e9;
+  --concept-query-text: #56b4e9;
+  --concept-key: #e69f00;
+  --concept-key-text: #f0b43c;
+  --concept-value: #009e73;
+  --concept-value-text: #3ccf9f;
+  --concept-residual: #cc79a7;
+  --concept-residual-text: #e39cc5;
+  --concept-output: #d55e00;
+  --concept-output-text: #ff8a4c;
+  --concept-position: #f0e442;
+  --concept-position-text: #f0e442;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --duration-fast: 0ms;
+    --duration-base: 0ms;
+    --duration-slow: 0ms;
+  }
+}

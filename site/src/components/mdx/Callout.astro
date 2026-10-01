@@ -1,0 +1,41 @@
+---
+interface Props {
+  kind: 'analogy' | 'myth' | 'note' | 'simplification';
+  title?: string;
+}
+
+const DEFAULT_TITLES = {
+  analogy: 'Where the analogy breaks',
+  myth: 'Common myth',
+  note: 'Note',
+  simplification: 'Our simplification',
+} as const;
+
+const { kind, title } = Astro.props;
+const heading = title ?? DEFAULT_TITLES[kind];
+---
+
+{/* A named aside here would be exposed as a nested complementary landmark for every callout on
+    the page. role="note" keeps the visual and semantic grouping without that. */}
+<div class={`callout callout-${kind}`} role="note" aria-label={heading}>
+  <p class="callout-title">{heading}</p>
+  <slot />
+</div>
+
+<style>
+  .callout {
+    margin-block: var(--space-6);
+    padding: var(--space-4) var(--space-5);
+    border-radius: var(--radius-md);
+    background: var(--color-surface-2);
+    /* Neutral for every kind: concept colors stay reserved for concepts, and the title names the kind. */
+    border-left: 4px solid var(--color-text-secondary);
+  }
+  .callout-title {
+    margin: 0 0 var(--space-2);
+    font-weight: 600;
+  }
+  .callout :global(p:last-child) {
+    margin-bottom: 0;
+  }
+</style>

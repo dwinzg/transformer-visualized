@@ -1,0 +1,16 @@
+---
+import { getEntry } from 'astro:content';
+import { citationLabel } from '../../lib/citations';
+import { withBase } from '../../lib/paths';
+
+interface Props {
+  id: string;
+}
+
+const entry = await getEntry('references', Astro.props.id);
+if (!entry) throw new Error(`Unknown reference "${Astro.props.id}"`);
+---
+
+<a class="ref" href={withBase(`references/#${entry.id}`)} title={entry.data.title}>
+  {citationLabel(entry.data)}
+</a>

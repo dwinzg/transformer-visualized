@@ -1,0 +1,37 @@
+---
+import { REPO_URL, withBase } from '../lib/paths';
+---
+
+<footer class="site-footer">
+  <div class="container footer">
+    <p>
+      Code under the <a href={`${REPO_URL}/blob/main/LICENSE`}>MIT License</a>. Lessons and figures
+      under <a href={`${REPO_URL}/blob/main/LICENSE-CONTENT`}>CC BY 4.0</a>.
+    </p>
+    <p class="footer-links">
+      <a href={REPO_URL}>Source on GitHub</a>
+      <span aria-hidden="true"> · </span>
+      <a href={withBase('references/')}>References</a>
+    </p>
+  </div>
+</footer>
+
+<style>
+  .site-footer {
+    margin-top: var(--space-24);
+    border-top: 1px solid var(--color-separator);
+    color: var(--color-text-secondary);
+    font-size: var(--text-footnote);
+  }
+  .footer {
+    padding-block: var(--space-8);
+  }
+  .footer p {
+    margin: 0 0 var(--space-2);
+  }
+  .footer-links a {
+    display: inline-flex;
+    align-items: center;
+    min-height: var(--touch-target);
+  }
+</style>

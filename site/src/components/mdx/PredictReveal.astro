@@ -1,0 +1,20 @@
+---
+import Island from '../islands/PredictReveal.tsx';
+
+interface Props {
+  question: string;
+  options: string[];
+  answer: number;
+}
+
+const { question, options, answer } = Astro.props;
+if (!Number.isInteger(answer) || answer < 0 || answer >= options.length) {
+  throw new Error(`PredictReveal answer ${answer} is not one of the ${options.length} options`);
+}
+---
+
+<div class="island">
+  <Island client:visible question={question} options={options} answer={answer}>
+    <slot />
+  </Island>
+</div>

@@ -1,0 +1,25 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import { withBase } from '../lib/paths';
+---
+
+<BaseLayout title="Page not found" description="This page does not exist.">
+  <section class="prose missing">
+    <h1>Page not found</h1>
+    <p>This page does not exist. It may have moved.</p>
+    <p>
+      <a href={withBase('')}>Go to the home page</a>
+    </p>
+  </section>
+</BaseLayout>
+
+<style>
+  .missing {
+    padding-block: var(--space-24);
+  }
+  .missing a {
+    display: inline-flex;
+    align-items: center;
+    min-height: var(--touch-target);
+  }
+</style>
