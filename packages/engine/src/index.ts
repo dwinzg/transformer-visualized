@@ -42,3 +42,4 @@ export type {
 } from './explain';
 export { bytesToUnicode, Tokenizer } from './tokenizer';
 export type { TokenizerJson } from './tokenizer';
+export { ASCII_EQUIVALENTS, normalizeText, unsupportedCharacters } from './normalize';
