@@ -58,8 +58,8 @@ describe('Tokenizer', () => {
 
   it('matches the longest special token first when one is a prefix of another', () => {
     // Create a tokenizer with two special tokens where one is a prefix of the other.
-    // Intentionally add <|pad|> second (after shorter) to ensure iteration order
-    // puts the shorter token first, forcing a test of longest-match-first logic.
+    // Use '<|a|>' and '<|a|>b' where the first is a true prefix of the second.
+    // Insert shorter token first to ensure regex alternation would match shorter without sort.
     const vocab: Record<string, number> = { '<|endoftext|>': 0 };
     table.forEach((char, i) => {
       vocab[char] = i + 1;
@@ -72,12 +72,12 @@ describe('Tokenizer', () => {
     merges.forEach(([left, right], i) => {
       vocab[left + right] = 257 + i;
     });
-    vocab['<|pad|>'] = 260;
-    vocab['<|pad2|>'] = 261;
+    vocab['<|a|>'] = 260;
+    vocab['<|a|>b'] = 261;
     // Insert shorter token first in specialTokens to trigger the bug if not fixed
     const specialTokens: Record<string, number> = {};
-    specialTokens['<|pad|>'] = 260;
-    specialTokens['<|pad2|>'] = 261;
+    specialTokens['<|a|>'] = 260;
+    specialTokens['<|a|>b'] = 261;
     const json: TokenizerJson = {
       type: 'gpt2-byte-bpe',
       vocab,
@@ -85,10 +85,10 @@ describe('Tokenizer', () => {
       specialTokens,
     };
     const tokenizerWithPrefix = Tokenizer.fromJSON(json);
-    // Should match the longer token, not the shorter one
-    expect(tokenizerWithPrefix.encode('<|pad2|>')).toEqual([261]);
-    expect(tokenizerWithPrefix.encode('<|pad|>')).toEqual([260]);
-    expect(tokenizerWithPrefix.encode('<|pad|><|pad2|>')).toEqual([260, 261]);
+    // Without the sort, regex would be (<|a|>|<|a|>b) and match only '<|a|>' in '<|a|>b'
+    // With the sort, regex is (<|a|>b|<|a|>) and correctly matches the longer token
+    expect(tokenizerWithPrefix.encode('<|a|>b')).toEqual([261]);
+    expect(tokenizerWithPrefix.encode('<|a|>')).toEqual([260]);
   });
 
   it('falls back to single bytes, including for multi-byte characters', () => {
