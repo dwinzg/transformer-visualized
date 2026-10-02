@@ -6,9 +6,6 @@ import DepthDial from './DepthDial.astro';
   <DepthDial />
   <p class="step-count" aria-live="off"></p>
 </div>
-{/* Fixed elements take no space in the flow, so without this the chapter's first step would
-     slide up into the band the floating toolbar covers at the bottom of the screen. */}
-<div class="toolbar-spacer" aria-hidden="true"></div>
 
 <script>
   const toolbar = document.querySelector<HTMLElement>('[data-chapter-toolbar]');
@@ -60,9 +57,6 @@ import DepthDial from './DepthDial.astro';
   }
   .chapter-toolbar[hidden] {
     display: none;
-  }
-  .toolbar-spacer {
-    height: var(--toolbar-reserve, 0px);
   }
   .step-count {
     margin: 0;
