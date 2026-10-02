@@ -111,19 +111,26 @@ pre {
   border-radius: var(--radius-sm);
 }
 
-/* Shared "picked" look for every depth selector: the depth dial's segment and each step's level
-   tab. Both react to native state (:checked, aria-selected) rather than a shared class, so this
-   selects them directly instead of duplicating the same declarations in each component. */
+/* The dial and the tabs now look different on purpose: the dial keeps a filled, bordered
+   segment, the tabs get a flatter fill with an accent underline. Each still marks its selected
+   state with a change in color, weight and shape, so the two rules below stay separate instead
+   of sharing one selector. */
 /* The button type selector matches the specificity of Step.astro's own scoped
    ".level-tabs button" rule (which sets a transparent background for every tab), so this rule's
    background and border reliably win instead of depending on stylesheet load order. */
-[data-depth-dial] input:checked + span,
-[data-step] button[role='tab'][aria-selected='true'] {
+[data-depth-dial] input:checked + span {
   background: var(--color-segment-selected);
   /* The border is a non-color cue: it keeps the selected segment identifiable even where its
      fill is close to the track's, such as older screens that render dark colors flatter. */
   border: 1px solid var(--color-control-border);
   box-shadow: var(--shadow-card);
+  font-weight: 600;
+}
+
+[data-step] button[role='tab'][aria-selected='true'] {
+  background: var(--color-surface-2);
+  border-bottom-color: var(--color-accent);
+  color: var(--color-text);
   font-weight: 600;
 }
 

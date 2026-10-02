@@ -116,15 +116,13 @@ describe('dark theme', () => {
   });
 });
 
-describe('selected depth segment (the depth dial and each step level tabs)', () => {
-  // Both controls share this one rule in global.css instead of each declaring their own selected
-  // look, so checking it once covers the depth dial's segment and every step's level tabs.
-  const sharedRuleSource = readFileSync(new URL('./global.css', import.meta.url), 'utf8');
-  const selectedRule =
-    /\[data-depth-dial\] input:checked \+ span,\s*\n\s*\[data-step\] button\[role='tab'\]\[aria-selected='true'\]\s*{([^}]*)}/.exec(
-      sharedRuleSource,
-    );
-  if (!selectedRule) throw new Error('Expected a shared selected-segment rule in global.css');
+// The depth dial's segment and each step's level tab look different on purpose (see the comment
+// above both rules in global.css), so each gets its own distinguishability check below.
+const globalCss = readFileSync(new URL('./global.css', import.meta.url), 'utf8');
+
+describe('selected depth dial segment', () => {
+  const selectedRule = /\[data-depth-dial\] input:checked \+ span\s*{([^}]*)}/.exec(globalCss);
+  if (!selectedRule) throw new Error('Expected a selected-segment rule in global.css');
   // Passes either way: a strong enough contrast against the track, or a non-color cue such as a
   // border on the selected segment (checked once, since the same rule applies in both themes).
   const hasNonColorCue = /\bborder:/.test(selectedRule[1]);
@@ -133,6 +131,23 @@ describe('selected depth segment (the depth dial and each step level tabs)', () 
     'is distinguishable from the track in the %s theme',
     (_name, tokens) => {
       const ratio = contrastRatio(tokens['--color-segment-selected'], tokens['--color-surface-2']);
+      expect(ratio >= 1.5 || hasNonColorCue).toBe(true);
+    },
+  );
+});
+
+describe('selected level tab', () => {
+  const selectedRule =
+    /\[data-step\] button\[role='tab'\]\[aria-selected='true'\]\s*{([^}]*)}/.exec(globalCss);
+  if (!selectedRule) throw new Error('Expected a selected-tab rule in global.css');
+  // The selected tab's bottom border is a non-color cue (a shape change), so it stays
+  // distinguishable even where the accent color is close to the surface behind it.
+  const hasNonColorCue = /\bborder-bottom/.test(selectedRule[1]);
+
+  it.each(Object.entries(themes))(
+    'is distinguishable from the other tabs in the %s theme',
+    (_name, tokens) => {
+      const ratio = contrastRatio(tokens['--color-accent'], tokens['--color-surface-2']);
       expect(ratio >= 1.5 || hasNonColorCue).toBe(true);
     },
   );
