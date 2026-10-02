@@ -23,10 +23,16 @@ const chapters = (await getCollection('chapters', ({ data }) => !data.draft)).so
     <ol class="chapters">
       {chapters.map((chapter) => (
         <li>
-          <a href={withBase(`learn/${chapter.id}/`)}>
-            <span class="number">Chapter {chapter.data.order}</span>{' '}
-            <span class="title">{chapter.data.title}</span>{' '}
-            <span class="summary">{chapter.data.summary}</span>
+          <a class="press" href={withBase(`learn/${chapter.id}/`)}>
+            <span class="token-chip number">
+              <span class="visually-hidden">Chapter </span>
+              {chapter.data.order}
+            </span>
+            <span class="text">
+              <span class="title">{chapter.data.title}</span>
+              <span class="summary">{chapter.data.summary}</span>
+              <span class="minutes">About {chapter.data.minutes} minutes</span>
+            </span>
           </a>
         </li>
       ))}
@@ -52,31 +58,40 @@ const chapters = (await getCollection('chapters', ({ data }) => !data.draft)).so
     list-style: none;
     padding: 0;
     margin-top: var(--space-8);
-    display: grid;
-    gap: var(--space-4);
   }
   .chapters a {
     display: grid;
-    gap: var(--space-1);
-    padding: var(--space-5) var(--space-6);
-    border-radius: var(--radius-lg);
-    background: var(--color-surface);
-    box-shadow: var(--shadow-card);
+    grid-template-columns: auto 1fr;
+    gap: var(--space-4);
+    align-items: baseline;
+    min-height: var(--touch-target);
+    padding: var(--space-5) var(--space-1);
+    border-top: 1px solid var(--color-separator);
     color: var(--color-text);
-  }
-  .chapters a:hover {
     text-decoration: none;
   }
+  .chapters a:hover .title {
+    color: var(--color-accent);
+  }
   .number {
-    color: var(--color-text-secondary);
-    font-size: var(--text-footnote);
+    min-width: 2.25rem;
+    font-family: var(--font-mono);
+    font-variant-numeric: tabular-nums;
     font-weight: 600;
+  }
+  .text {
+    display: grid;
+    gap: var(--space-1);
   }
   .title {
     font-size: var(--text-title-3);
     font-weight: 600;
   }
-  .summary {
+  .summary,
+  .minutes {
     color: var(--color-text-secondary);
+  }
+  .minutes {
+    font-size: var(--text-footnote);
   }
 </style>

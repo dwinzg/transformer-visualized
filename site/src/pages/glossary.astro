@@ -21,7 +21,9 @@ for (const entry of entries) {
     <dl class="glossary">
       {entries.map((entry) => (
         <div class="entry target-highlight" id={entry.id}>
-          <dt>{entry.data.term}</dt>
+          <dt>
+            <span class="token-chip">{entry.data.term}</span>
+          </dt>
           <dd>
             <p>{entry.data.short}</p>
             {entry.data.related.length > 0 && (
@@ -53,8 +55,11 @@ for (const entry of entries) {
   dt {
     font-weight: 600;
   }
+  dt .token-chip {
+    display: inline-block;
+  }
   dd {
-    margin: var(--space-1) 0 0;
+    margin: var(--space-2) 0 0;
   }
   dd p {
     margin: 0 0 var(--space-1);
