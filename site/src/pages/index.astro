@@ -1,10 +1,17 @@
 ---
+import Figure from '../components/Figure.astro';
+import HomeDemo from '../components/figures/HomeDemo.tsx';
 import BaseLayout from '../layouts/BaseLayout.astro';
+import { guessTree } from '../lib/demo-data';
 import { withBase } from '../lib/paths';
 
-// Interim target for the Quick review door. The /review/ page of formula cards replaces it once
-// that page exists.
+// Interim target for the Quick review door until the /review/ page exists.
 const quickReviewHref = withBase('learn/?depth=formula');
+const trees = [
+  'Once upon a time, there was a',
+  'The cat sat on the',
+  'Lily wanted to play with her',
+].map(guessTree);
 ---
 
 <BaseLayout
@@ -12,69 +19,96 @@ const quickReviewHref = withBase('learn/?depth=formula');
   description="Follow a sentence through a real transformer, step by step, from a simple story to the exact math."
 >
   <section class="hero container">
-    <h1>See inside a language model</h1>
-    <p class="lede">
-      Follow a sentence through a real transformer, one step at a time. The numbers in the
-      playground come from a real model, and every step is explained from a simple story up to the
-      exact math.
-    </p>
+    <div class="hero-text">
+      <h1>See inside a language model</h1>
+      <p class="lede">
+        A real model is guessing the next word below. Tap any guess to choose for it. Every number
+        comes from the model, and every step is explained from a simple story up to the exact math.
+      </p>
+    </div>
+    <Figure
+      caption="A tiny model trained on short stories, guessing live."
+      description="A sentence split into tokens, with bars showing the model's top five guesses for the next token and their probabilities."
+      wide={false}
+    >
+      <HomeDemo client:load trees={trees} />
+    </Figure>
   </section>
 
-  <section class="doors container" aria-label="Ways to start">
-    <a class="door" href={withBase('learn/')}>
-      <span class="door-title">Learn from scratch</span>
-      <span class="door-text">
+  <section class="ways container" aria-label="Ways to start">
+    <a class="way press" href={withBase('learn/')}>
+      <span class="way-title">Learn from scratch</span>
+      <span class="way-text">
         No math background needed. Start with a story and go as deep as you like.
       </span>
     </a>
-    <a class="door" href={quickReviewHref}>
-      <span class="door-title">Quick review</span>
-      <span class="door-text">Formulas, shapes and code, for readers who know the basics.</span>
+    <a class="way press" href={quickReviewHref}>
+      <span class="way-title">Quick review</span>
+      <span class="way-text">Formulas, shapes and code, for a refresher.</span>
     </a>
+    <div class="way way-soon">
+      <span class="way-title">Playground</span>
+      <span class="way-text">Type your own sentence and watch every number. Coming soon.</span>
+    </div>
   </section>
 </BaseLayout>
 
 <style>
   .hero {
-    padding-block: var(--space-24) var(--space-12);
-    text-align: center;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1.2fr);
+    gap: var(--space-12);
+    align-items: center;
+    padding-block: var(--space-16) var(--space-12);
   }
   .hero h1 {
     font-size: var(--text-hero);
-    margin-bottom: var(--space-6);
+    letter-spacing: -0.02em;
+    margin-bottom: var(--space-4);
   }
   .lede {
-    max-width: 38rem;
-    margin-inline: auto;
     color: var(--color-text-secondary);
     font-size: var(--text-title-3);
     line-height: 1.4;
   }
-  .doors {
+  .ways {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(16rem, 1fr));
-    gap: var(--space-6);
-  }
-  .door {
-    display: flex;
-    flex-direction: column;
     gap: var(--space-2);
-    padding: var(--space-8);
-    border-radius: var(--radius-lg);
-    background: var(--color-surface);
-    box-shadow: var(--shadow-card);
+    padding-bottom: var(--space-16);
+  }
+  .way {
+    display: grid;
+    grid-template-columns: 14rem 1fr;
+    gap: var(--space-4);
+    align-items: baseline;
+    min-height: var(--touch-target);
+    padding: var(--space-5) var(--space-4);
+    border-top: 1px solid var(--color-separator);
     color: var(--color-text);
-    transition: transform var(--duration-base) var(--ease-emphasized);
-  }
-  .door:hover {
     text-decoration: none;
-    transform: translateY(-2px);
   }
-  .door-title {
-    font-size: var(--text-title-2);
+  a.way:hover .way-title {
+    color: var(--color-accent);
+  }
+  .way-title {
+    font-size: var(--text-title-3);
     font-weight: 600;
   }
-  .door-text {
+  .way-text {
     color: var(--color-text-secondary);
+  }
+  .way-soon .way-title {
+    color: var(--color-text-secondary);
+  }
+  @media (max-width: 52rem) {
+    .hero {
+      grid-template-columns: 1fr;
+      gap: var(--space-6);
+      padding-block: var(--space-8);
+    }
+    .way {
+      grid-template-columns: 1fr;
+      gap: var(--space-1);
+    }
   }
 </style>

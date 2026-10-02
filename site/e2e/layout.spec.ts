@@ -2,7 +2,7 @@ import { expect, test } from '@playwright/test';
 import { expectNoA11yViolations, expectNoHorizontalScroll } from './a11y';
 
 test.describe('home page', () => {
-  test('offers two ways to start', async ({ page }) => {
+  test('offers ways to start', async ({ page }) => {
     await page.goto('./');
     await expect(page.getByRole('heading', { level: 1 })).toHaveText('See inside a language model');
     await expect(page.getByRole('link', { name: /Learn from scratch/ })).toHaveAttribute(
@@ -13,6 +13,7 @@ test.describe('home page', () => {
       'href',
       '/transformer-visualized/learn/?depth=formula',
     );
+    await expect(page.getByText('Playground')).toBeVisible();
   });
 
   test('has no accessibility violations in either theme', async ({ page }) => {
