@@ -1,7 +1,7 @@
 ---
 import type { CollectionEntry } from 'astro:content';
 import { getEntries } from 'astro:content';
-import DepthDial from '../components/DepthDial.astro';
+import ChapterToolbar from '../components/ChapterToolbar.astro';
 import { citationLabel } from '../lib/citations';
 import { withBase } from '../lib/paths';
 import BaseLayout from './BaseLayout.astro';
@@ -36,8 +36,9 @@ chapter.data.references.forEach((ref, i) => {
           ))}
         </ul>
       </section>
-      <DepthDial />
     </header>
+
+    <ChapterToolbar />
 
     <slot />
 
@@ -85,6 +86,7 @@ chapter.data.references.forEach((ref, i) => {
 <style>
   .chapter {
     padding-block: var(--space-12);
+    padding-bottom: calc(var(--space-12) + var(--toolbar-reserve, 0px));
   }
   .eyebrow {
     color: var(--color-text-secondary);
