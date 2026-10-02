@@ -3,6 +3,13 @@ import { getCollection } from 'astro:content';
 import BaseLayout from '../layouts/BaseLayout.astro';
 import { formatAuthors, TOPIC_LABELS } from '../lib/citations';
 
+/** Topics that belong to one concept get its color. The rest get a neutral dot. */
+const TOPIC_CONCEPT: Record<string, string> = {
+  attention: 'query',
+  prediction: 'output',
+  tokens: 'position',
+};
+
 const all = await getCollection('references');
 const byYearThenName = (a: (typeof all)[number], b: (typeof all)[number]) =>
   a.data.year - b.data.year || a.id.localeCompare(b.id);
@@ -33,7 +40,18 @@ if (unlisted.length > 0) {
     </p>
     {sections.map((section) => (
       <section aria-labelledby={`topic-${section.topic}`}>
-        <h2 id={`topic-${section.topic}`}>{section.label}</h2>
+        <h2 id={`topic-${section.topic}`}>
+          <span
+            class="dot"
+            aria-hidden="true"
+            style={
+              TOPIC_CONCEPT[section.topic]
+                ? `background: var(--concept-${TOPIC_CONCEPT[section.topic]})`
+                : undefined
+            }
+          />
+          {section.label}
+        </h2>
         <ol class="refs">
           {section.items.map((ref) => (
             <li id={ref.id} class="target-highlight">
@@ -58,6 +76,15 @@ if (unlisted.length > 0) {
   }
   .intro {
     color: var(--color-text-secondary);
+  }
+  .dot {
+    display: inline-block;
+    width: 0.6em;
+    height: 0.6em;
+    margin-right: var(--space-2);
+    border-radius: 50%;
+    background: var(--color-text-secondary);
+    vertical-align: 0.1em;
   }
   .refs {
     padding-left: 0;
