@@ -160,11 +160,7 @@ pre {
 }
 
 .island {
-  /* Extra room above: an island is often the thing a reader scrolls straight to (a test, or a
-     reader's own in-page link), and without it the previous step's content can end up sitting
-     right where the sticky header covers it. */
-  margin-top: var(--space-16);
-  margin-bottom: var(--space-6);
+  margin-block: var(--space-6);
   padding: var(--space-5);
   border-radius: var(--radius-md);
   background: var(--color-surface);
