@@ -72,19 +72,20 @@ const mark = displayTokens('Transformer Visualized');
   }
   .wordmark {
     display: inline-flex;
-    flex-wrap: wrap;
     align-items: center;
-    gap: 2px;
+    gap: 1px;
     min-height: var(--touch-target);
     font-weight: 600;
     color: var(--color-text);
     margin-right: auto;
   }
   .mark-chip {
-    padding: 0 var(--space-1);
-    border: 1px solid var(--color-control-border);
+    padding: 0;
     border-radius: var(--radius-sm);
     white-space: pre;
+  }
+  .mark-chip:nth-child(even) {
+    background: color-mix(in srgb, var(--color-text) 6%, transparent);
   }
   .links {
     display: flex;
