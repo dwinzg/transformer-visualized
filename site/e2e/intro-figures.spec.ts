@@ -101,6 +101,9 @@ test('the figures are accessible after interaction in both themes', async ({ pag
   const pipeline = page.locator('#step-inside-a-transformer-does-the-guessing figure');
   await hydrated(pipeline);
   await pipeline.getByRole('radio', { name: 'Output' }).click();
+  // Axe flags a target that the sticky header half covers, and where the clicks above leave the
+  // page decides whether a step's tabs sit there. Scan from the top, so the result is stable.
+  await page.evaluate(() => window.scrollTo(0, 0));
   for (const colorScheme of ['light', 'dark'] as const) {
     await page.emulateMedia({ colorScheme });
     await expectNoA11yViolations(page);
