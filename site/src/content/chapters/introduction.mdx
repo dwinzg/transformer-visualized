@@ -21,6 +21,8 @@ references:
 
 <Step title="It guesses the next piece of text">
 
+<NextWord prompt="Once upon a time, there was a" />
+
 <Level of="story">
 
 When you type a message, your phone suggests the next word. A <Term id="language-model">language model</Term> does the same thing, only much better. You give it some text, and it answers with every piece of text that could come next, each with a chance.
@@ -78,6 +80,8 @@ All chances add up to 1, so what is left is 1 minus 0.9 minus 0.05, which is 0.0
 
 <Step title="Then it does it again">
 
+<GenerationLoop prompt="The cat sat on the" />
+
 <Level of="story">
 
 To write more than one word, the model picks one of the likely pieces, adds it to the text, and guesses again. Repeat this a few hundred times and you have a paragraph. Chatbots like ChatGPT write their answers this way, one piece at a time.
@@ -121,6 +125,8 @@ In 1951 Claude Shannon (<Ref id="shannon1951" />) asked people to guess the next
 </Callout>
 
 <Step title="Inside, a transformer does the guessing">
+
+<Pipeline />
 
 <Level of="story">
 

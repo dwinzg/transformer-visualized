@@ -139,3 +139,117 @@
   background: var(--color-surface);
   color: var(--color-text);
 }
+
+.next-word-figure,
+.generation-loop-figure {
+  display: grid;
+  gap: var(--space-4);
+}
+.figure-reset {
+  justify-self: start;
+  min-height: var(--touch-target);
+  padding: 0 var(--space-3);
+  border: 1px solid var(--color-control-border);
+  border-radius: var(--radius-sm);
+  background: var(--color-surface);
+  color: var(--color-text);
+}
+.loop-controls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+.loop-controls button {
+  min-height: var(--touch-target);
+  padding: 0 var(--space-3);
+  border: 1px solid var(--color-control-border);
+  border-radius: var(--radius-sm);
+  background: var(--color-surface);
+  color: var(--color-text);
+}
+.loop-controls button:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+.prob-note {
+  margin: 0;
+  color: var(--color-text-secondary);
+  font-family: var(--font-mono);
+  font-size: var(--text-footnote);
+}
+.guess-count {
+  margin: 0;
+  color: var(--color-text-secondary);
+  font-size: var(--text-footnote);
+  font-variant-numeric: tabular-nums;
+}
+
+.pipeline-figure {
+  display: grid;
+  gap: var(--space-4);
+}
+.pipeline-stages {
+  position: relative;
+  display: grid;
+  gap: var(--space-2);
+}
+.pipeline-stage {
+  min-height: var(--touch-target);
+  padding: var(--space-2) var(--space-3);
+  border: 1px solid var(--color-control-border);
+  border-left: 4px solid var(--stage-color);
+  border-radius: var(--radius-sm);
+  background: var(--color-surface);
+  color: var(--color-text);
+  text-align: left;
+}
+.pipeline-stage[aria-checked='true'] {
+  outline: var(--focus-width) solid var(--color-focus);
+  outline-offset: calc(-1 * var(--focus-width));
+}
+.pipeline-stage.concept-position {
+  --stage-color: var(--concept-position);
+}
+.pipeline-stage.concept-query {
+  --stage-color: var(--concept-query);
+}
+.pipeline-stage.concept-residual {
+  --stage-color: var(--concept-residual);
+}
+.pipeline-stage.concept-output {
+  --stage-color: var(--concept-output);
+}
+.pipeline-explain {
+  margin: 0;
+  color: var(--color-text-secondary);
+}
+/* The dot travels down the stage list once, the first time it scrolls into view. */
+.pipeline-stages::before {
+  content: '';
+  position: absolute;
+  left: calc(-1 * var(--space-2));
+  top: 0;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--color-accent);
+  opacity: 0;
+}
+.pipeline-stages.is-playing::before {
+  animation: pipeline-travel 1.6s ease forwards;
+}
+@keyframes pipeline-travel {
+  0% {
+    opacity: 1;
+    top: 0;
+  }
+  100% {
+    opacity: 1;
+    top: calc(100% - 8px);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .pipeline-stages.is-playing::before {
+    animation: none;
+  }
+}
