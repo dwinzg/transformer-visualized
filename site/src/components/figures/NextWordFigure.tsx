@@ -18,15 +18,19 @@ import { ProbabilityBars } from './ProbabilityBars';
 import { TokenRow } from './TokenRow';
 import { useTravel } from './useTravel';
 
-/** A reader-driven version of the home demo: pick a guess, see it added, reset at any point. */
+/** A reader-driven version of the home demo: pick a guess, see it added, start over at any point. */
 export default function NextWordFigure({ tree }: { tree: GuessTree }) {
   const [path, setPath] = useState<number[]>([]);
   const [announcement, setAnnouncement] = useState('');
-  const [depth, setDepth] = useState<Depth>(() => readStoredDepth(browserStorage()));
+  // Starts at the server's value so hydration matches. The stored depth is read after mount.
+  const [depth, setDepth] = useState<Depth>('story');
   const root = useRef<HTMLDivElement>(null);
+  const startOver = useRef<HTMLButtonElement>(null);
+  const focusStartOver = useRef(false);
   const remember = useTravel(root, path);
 
   useEffect(() => {
+    setDepth(readStoredDepth(browserStorage()));
     const onChange = (event: Event) => {
       const detail = (event as CustomEvent<unknown>).detail;
       if (isDepth(detail)) setDepth(detail);
@@ -34,6 +38,13 @@ export default function NextWordFigure({ tree }: { tree: GuessTree }) {
     document.addEventListener(DEPTH_EVENT, onChange);
     return () => document.removeEventListener(DEPTH_EVENT, onChange);
   }, []);
+
+  // The guess list goes away after the last pick, so keep keyboard focus in the figure.
+  useEffect(() => {
+    if (!focusStartOver.current) return;
+    focusStartOver.current = false;
+    startOver.current?.focus();
+  });
 
   const guesses = guessesAt(tree, path);
   const tokens = chosenTokens(tree, path);
@@ -46,6 +57,7 @@ export default function NextWordFigure({ tree }: { tree: GuessTree }) {
     setPath(nextPath);
     const word = guesses[index] ? spoken(guesses[index].token) : '';
     const after = guessesAt(tree, nextPath);
+    if (after.length === 0) focusStartOver.current = true;
     setAnnouncement(
       after.length > 0
         ? `Added '${word}'. Next guesses: ${describeGuesses(after)}.`
@@ -55,20 +67,26 @@ export default function NextWordFigure({ tree }: { tree: GuessTree }) {
 
   return (
     <div ref={root} className="next-word-figure">
-      {path.length > 0 && (
-        <button type="button" className="figure-reset press" onClick={() => setPath([])}>
-          {guesses.length > 0 ? 'Reset' : 'Start over'}
-        </button>
-      )}
+      <button
+        ref={startOver}
+        type="button"
+        className="figure-button press"
+        aria-disabled={path.length === 0}
+        onClick={() => {
+          if (path.length === 0) return;
+          setPath([]);
+          setAnnouncement('Back to the start.');
+        }}
+      >
+        Start over
+      </button>
       <TokenRow tokens={tokens} caret={guesses.length > 0} newFrom={tree.tokens.length} />
-      {guesses.length > 0 && (
-        <ProbabilityBars
-          guesses={guesses}
-          label="The model's next word guesses"
-          onPick={pick}
-          exact={exact}
-        />
-      )}
+      <ProbabilityBars
+        guesses={guesses}
+        label="The model's guesses for what comes next"
+        onPick={pick}
+        exact={exact}
+      />
       {showFormula && <p className="prob-note">P(next token | tokens so far)</p>}
       <p className="visually-hidden" aria-live="polite">
         {announcement}
