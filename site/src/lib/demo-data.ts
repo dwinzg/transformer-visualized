@@ -67,11 +67,6 @@ function toDisplay(ids: readonly number[]): DisplayToken[] {
   return ids.map((id) => ({ id, text: tok.decode([id]) }));
 }
 
-export function displayTokens(text: string): DisplayToken[] {
-  assertSupported(text);
-  return toDisplay(getTokenizer().encode(normalizeText(text)));
-}
-
 const END_OF_STORY = '<|endoftext|>';
 
 /**

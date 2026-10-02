@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { displayTokens, GUESS_DEPTH, GUESS_WIDTH, guessDisplayToken, guessTree } from './demo-data';
+import { GUESS_DEPTH, GUESS_WIDTH, guessDisplayToken, guessTree } from './demo-data';
 import type { Guess } from './guess-tree';
 
 const PROMPTS = [
@@ -12,23 +12,17 @@ function allTokens(guesses: readonly Guess[]): Guess[] {
   return guesses.flatMap((g) => [g, ...allTokens(g.next)]);
 }
 
-describe('displayTokens', () => {
-  it('splits text into tokens whose texts join back to the cleaned text', () => {
-    const tokens = displayTokens('Transformer Visualized');
-    expect(tokens.length).toBeGreaterThan(1);
-    expect(tokens.map((t) => t.text).join('')).toBe('Transformer Visualized');
-  });
-
+describe('guessTree prompt cleaning', () => {
   it('cleans phone punctuation first', () => {
     expect(
-      displayTokens('it\u2019s')
-        .map((t) => t.text)
+      guessTree('it\u2019s')
+        .tokens.map((t) => t.text)
         .join(''),
     ).toBe("it's");
   });
 
   it('refuses a prompt with characters the model was never trained on', () => {
-    expect(() => displayTokens('caf\u00e9')).toThrow(/\u00e9/);
+    expect(() => guessTree('caf\u00e9')).toThrow(/\u00e9/);
   });
 });
 
