@@ -61,6 +61,15 @@ test('Start over resets the sentence at any point', async ({ page }) => {
   await expect(demo.locator('.token-chip')).toHaveCount(before);
 });
 
+test('Play resumes right after the reader picks a guess', async ({ page }) => {
+  await page.goto('./');
+  const demo = page.locator('[data-home-demo]');
+  await demo.getByRole('option').first().click();
+  const count = await demo.locator('.token-chip').count();
+  await demo.getByRole('button', { name: 'Play demo' }).click();
+  await expect(demo.locator('.token-chip')).toHaveCount(count + 1, { timeout: 5000 });
+});
+
 test('the end of the guesses offers to start over', async ({ page }) => {
   await page.goto('./');
   const demo = page.locator('[data-home-demo]');

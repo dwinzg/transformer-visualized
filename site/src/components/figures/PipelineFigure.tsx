@@ -6,7 +6,7 @@ interface Stage {
   id: string;
   label: string;
   /** One of the site's concept colors, see figures.css. */
-  color: 'position' | 'query' | 'residual' | 'output';
+  color: 'neutral' | 'position' | 'residual' | 'output';
   text: string;
   /** Key into `links`, for the stages whose own chapter may exist. */
   linkKey?: 'tokens' | 'embeddings' | 'output';
@@ -16,14 +16,14 @@ const STAGES: Stage[] = [
   {
     id: 'tokens',
     label: 'Tokens',
-    color: 'position',
+    color: 'neutral',
     text: 'The text is split into tokens. Each token has an id number.',
     linkKey: 'tokens',
   },
   {
     id: 'embeddings',
     label: 'Embeddings and position',
-    color: 'query',
+    color: 'position',
     text: 'Each id becomes a list of 128 numbers. Its position is mixed in.',
     linkKey: 'embeddings',
   },
@@ -135,17 +135,31 @@ export default function PipelineFigure({ links = {} }: Props) {
           </button>
         ))}
       </div>
-      {selected !== null && (
-        <p className="pipeline-explain">
-          {active.text}
-          {href && (
-            <>
-              {' '}
-              <a href={href}>Learn more.</a>
-            </>
-          )}
-        </p>
-      )}
+      <p className="pipeline-explain" aria-live="polite">
+        {selected !== null && (
+          <>
+            {active.text}
+            {href && (
+              <>
+                {' '}
+                <a href={href}>Read the {active.label} chapter.</a>
+              </>
+            )}
+          </>
+        )}
+      </p>
+      <button
+        type="button"
+        className="figure-button press"
+        aria-disabled={selected === null}
+        onClick={() => {
+          if (selected === null) return;
+          setSelected(null);
+          buttonRefs.current[0]?.focus();
+        }}
+      >
+        Start over
+      </button>
     </div>
   );
 }

@@ -16,52 +16,59 @@ export default function GenerationLoopFigure({ tree }: { tree: GuessTree }) {
 
   const guesses = guessesAt(tree, path);
   const tokens = chosenTokens(tree, path);
+  const done = guesses.length === 0;
 
   const addOne = useCallback(() => {
+    if (guesses.length === 0) return;
     remember(0);
-    const word = guesses[0] ? spoken(guesses[0].token) : '';
     setPath((p) => [...p, 0]);
-    setAnnouncement(`Added '${word}'.`);
+    setAnnouncement(`Added '${spoken(guesses[0].token)}'.`);
   }, [guesses, remember]);
 
   // Play keeps stepping every STEP_MS until the tree runs out of guesses.
   useEffect(() => {
     if (!playing) return;
-    if (guesses.length === 0) {
+    if (done) {
       setPlaying(false);
       return;
     }
     const timer = setTimeout(addOne, STEP_MS);
     return () => clearTimeout(timer);
-  }, [playing, guesses, addOne]);
+  }, [playing, done, addOne]);
 
+  // aria-disabled rather than disabled, so a focused button keeps focus when it runs out.
   return (
     <div ref={root} className="generation-loop-figure">
       <div className="loop-controls">
-        <button type="button" className="press" disabled={guesses.length === 0} onClick={addOne}>
-          Next word
+        <button type="button" className="figure-button press" aria-disabled={done} onClick={addOne}>
+          Add a guess
         </button>
         <button
           type="button"
-          className="press"
-          disabled={guesses.length === 0 || playing}
-          onClick={() => setPlaying(true)}
-        >
-          Play
-        </button>
-        <button
-          type="button"
-          className="press"
+          className="figure-button press"
+          aria-disabled={done && !playing}
           onClick={() => {
-            setPlaying(false);
-            setPath([]);
+            if (!done || playing) setPlaying((p) => !p);
           }}
         >
-          Reset
+          {playing ? 'Pause' : 'Play'}
+        </button>
+        <button
+          type="button"
+          className="figure-button press"
+          aria-disabled={path.length === 0}
+          onClick={() => {
+            if (path.length === 0) return;
+            setPlaying(false);
+            setPath([]);
+            setAnnouncement('Back to the start.');
+          }}
+        >
+          Start over
         </button>
       </div>
-      <TokenRow tokens={tokens} caret={guesses.length > 0} newFrom={tree.tokens.length} />
-      <ProbabilityBars guesses={guesses} label="The model's next word guesses" />
+      <TokenRow tokens={tokens} caret={!done} newFrom={tree.tokens.length} />
+      <ProbabilityBars guesses={guesses} label="The model's guesses for what comes next" />
       <p className="guess-count">Guesses made: {path.length}</p>
       <p className="visually-hidden" aria-live="polite">
         {announcement}
