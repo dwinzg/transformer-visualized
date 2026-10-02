@@ -93,6 +93,14 @@ pre {
   font-variant-numeric: tabular-nums;
 }
 
+/* Form controls use the page font instead of the browser's own. */
+button,
+input,
+select,
+textarea {
+  font: inherit;
+}
+
 .visually-hidden {
   position: absolute;
   width: 1px;
