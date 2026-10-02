@@ -1,0 +1,17 @@
+---
+import Figure from '../Figure.astro';
+import Island from '../figures/GenerationLoopFigure.tsx';
+import { guessTree } from '../../lib/demo-data';
+
+interface Props {
+  prompt: string;
+}
+const tree = guessTree(Astro.props.prompt);
+---
+
+<Figure
+  caption="Each new word is one more guess."
+  description="The sentence as token chips, with buttons to add one guess at a time or to play them automatically, and a count of guesses made so far."
+>
+  <Island client:visible tree={tree} />
+</Figure>

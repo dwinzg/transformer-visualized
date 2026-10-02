@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import {
   chosenTokens,
   describeGuesses,
@@ -6,9 +6,10 @@ import {
   spoken,
   type GuessTree,
 } from '../../lib/guess-tree';
-import { prefersReducedMotion, travel, type Box } from '../../lib/motion';
+import { prefersReducedMotion } from '../../lib/motion';
 import { ProbabilityBars } from './ProbabilityBars';
 import { TokenRow } from './TokenRow';
+import { useTravel } from './useTravel';
 
 const STEP_MS = 1800;
 const END_MS = 2400;
@@ -22,7 +23,7 @@ export default function HomeDemo({ trees }: { trees: GuessTree[] }) {
   const [focused, setFocused] = useState(false);
   const [announcement, setAnnouncement] = useState('');
   const root = useRef<HTMLDivElement>(null);
-  const fromBox = useRef<Box | null>(null);
+  const remember = useTravel(root, path);
 
   const tree = trees[sentence];
   const guesses = guessesAt(tree, path);
@@ -35,8 +36,7 @@ export default function HomeDemo({ trees }: { trees: GuessTree[] }) {
   // Remember where the picked bar was, so its word can travel into the sentence.
   const pick = useCallback(
     (index: number, byReader: boolean) => {
-      const bar = root.current?.querySelectorAll<HTMLElement>('.prob-bar .prob-word')[index];
-      fromBox.current = bar ? bar.getBoundingClientRect() : null;
+      remember(index);
       const nextPath = [...path, index];
       setPath(nextPath);
       if (byReader) {
@@ -50,16 +50,8 @@ export default function HomeDemo({ trees }: { trees: GuessTree[] }) {
         );
       }
     },
-    [guesses, path, tree],
+    [guesses, path, remember, tree],
   );
-
-  useLayoutEffect(() => {
-    if (!fromBox.current || !root.current) return;
-    const chips = root.current.querySelectorAll<HTMLElement>('.token-chip');
-    const last = chips[chips.length - 1];
-    if (last) travel(last, fromBox.current);
-    fromBox.current = null;
-  }, [path]);
 
   // Autoplay. Hover, focus, off-screen and a hidden tab all hold the timer.
   useEffect(() => {
