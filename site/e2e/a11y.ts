@@ -9,11 +9,14 @@ import { expect, type Page } from '@playwright/test';
 async function settleEnterMotion(page: Page): Promise<void> {
   const targets = page.locator('[data-enter]');
   const count = await targets.count();
+  // Put the page back where the test left it, so the scan sees the scroll position it set up.
+  const scrollY = await page.evaluate(() => window.scrollY);
   for (let i = 0; i < count; i++) {
     const target = targets.nth(i);
     await target.scrollIntoViewIfNeeded();
     await expect(target).toHaveCSS('opacity', '1');
   }
+  await page.evaluate((y) => window.scrollTo(0, y), scrollY);
 }
 
 /** Fails the test if axe finds WCAG 2.2 A or AA violations on the current page. */
