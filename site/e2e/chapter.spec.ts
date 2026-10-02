@@ -127,9 +127,7 @@ test('the toolbar counts steps as the reader scrolls', async ({ page }) => {
 test.describe('on a phone', () => {
   test.use({ viewport: { width: 390, height: 700 } });
 
-  test('the toolbar sits at the bottom and never covers the end of the chapter', async ({
-    page,
-  }) => {
+  test('the toolbar sits at the bottom and never covers the end of the page', async ({ page }) => {
     await page.goto(CHAPTER);
     const toolbar = page.locator('[data-chapter-toolbar]');
     const box = await toolbar.boundingBox();
@@ -138,6 +136,8 @@ test.describe('on a phone', () => {
     const recap = await page.getByRole('region', { name: 'Go deeper' }).boundingBox();
     const bar = await toolbar.boundingBox();
     expect(recap && bar && recap.y + recap.height).toBeLessThanOrEqual(bar!.y);
+    const lastLink = await page.locator('footer a').last().boundingBox();
+    expect(lastLink && lastLink.y + lastLink.height).toBeLessThanOrEqual(bar!.y);
   });
 });
 

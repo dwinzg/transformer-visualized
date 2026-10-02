@@ -27,13 +27,15 @@ import DepthDial from './DepthDial.astro';
     );
     steps.forEach((step) => observer.observe(step));
 
-    // On phones the toolbar is fixed to the bottom; reserve its height so nothing hides under it.
+    // On phones the toolbar is fixed to the bottom, so the page reserves its height there. On
+    // wide screens it sticks under the header, so scrolling to an anchor or a focused control
+    // leaves room for it at the top instead.
     const reserve = () => {
       const fixed = getComputedStyle(toolbar).position === 'fixed';
-      document.documentElement.style.setProperty(
-        '--toolbar-reserve',
-        fixed ? `${toolbar.offsetHeight}px` : '0px',
-      );
+      const height = `${toolbar.offsetHeight}px`;
+      const root = document.documentElement.style;
+      root.setProperty('--toolbar-reserve', fixed ? height : '0px');
+      root.setProperty('--toolbar-top', fixed ? '0px' : height);
     };
     reserve();
     new ResizeObserver(reserve).observe(toolbar);
