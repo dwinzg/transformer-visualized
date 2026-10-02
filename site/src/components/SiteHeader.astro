@@ -13,7 +13,10 @@ const current = Astro.url.pathname;
 <header class="site-header">
   <nav class="container nav" aria-label="Main">
     <a class="wordmark" href={withBase('')}>
-      Transformer Visualized
+      <span class="mark" aria-hidden="true">
+        T
+      </span>
+      <span class="name">Transformer Visualized</span>
     </a>
     <ul class="links">
       {links.map((link) => (
@@ -69,10 +72,25 @@ const current = Astro.url.pathname;
   .wordmark {
     display: inline-flex;
     align-items: center;
+    gap: var(--space-2);
     min-height: var(--touch-target);
+    min-width: var(--touch-target);
     font-weight: 600;
     color: var(--color-text);
     margin-right: auto;
+  }
+  /* A small token chip, the site's signature shape. On phones it stands in for the name. */
+  .mark {
+    display: inline-grid;
+    place-items: center;
+    width: 1.75rem;
+    height: 1.75rem;
+    border: 1px solid var(--color-control-border);
+    border-radius: var(--radius-sm);
+    background: var(--color-surface);
+    box-shadow: inset 0 -3px 0 var(--concept-output);
+    font-family: var(--font-mono);
+    font-size: var(--text-footnote);
   }
   .links {
     display: flex;
@@ -102,8 +120,15 @@ const current = Astro.url.pathname;
     background: var(--color-surface-2);
   }
   @media (max-width: 30rem) {
-    .wordmark {
-      font-size: var(--text-subheadline);
+    /* The name would push the links onto a second row. The mark keeps the home link, and the
+       name stays as its accessible name. */
+    .name {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      overflow: hidden;
+      clip-path: inset(50%);
+      white-space: nowrap;
     }
     .links a {
       padding: 0 var(--space-2);
