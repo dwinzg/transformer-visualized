@@ -4,7 +4,7 @@ A friendly, visual guide to how language models like GPT work.
 
 You type a sentence and follow it through a real transformer, one step at a time, until it guesses the next word. Every number on screen comes from a real model, and you can always see the math behind it.
 
-![The home page, with two ways to start: Learn from scratch or Quick review](docs/images/home-desktop-light.png)
+![The home page, where a real model guesses the next word of a sentence](docs/images/home-desktop-light.png)
 
 ## Who it's for
 
@@ -13,6 +13,30 @@ This is a learning resource. It is the guide we wish we had when we were first l
 - **Learning it for the first time.** No math background needed. Each idea starts as a short story, and you can go deeper whenever you're ready.
 - **Refreshing what you know.** Jump straight to the formulas, tensor shapes and code. The glossary is there when you need a quick reminder.
 - **Teaching it.** Use the pages in a class, a study group or a talk. The lessons are free to share and adapt under CC BY 4.0, as long as you give credit.
+
+## How to use it
+
+**1. Watch it guess.** The home page shows a real model guessing the next word. Tap any guess to pick it yourself, and the model guesses again from there.
+
+<img src="docs/images/use-1-pick.png" alt="The home demo after picking 'big'. New guesses appear below the sentence." width="480">
+
+**2. Pick how deep to go.** Each chapter starts as a story. Switch to Numbers, Formula or Code at any time.
+
+<img src="docs/images/use-2-depth.png" alt="A chapter with the Story, Numbers, Formula and Code switch" width="600">
+
+**3. Play with the figures.** Every step has something to touch. Pick a guess and see the exact chances.
+
+<img src="docs/images/use-3-next-word.png" alt="A figure showing the top five next guesses with exact percentages" width="600">
+
+**4. See a sentence grow.** Add one guess at a time. A long answer is just many single guesses.
+
+<img src="docs/images/use-4-loop.png" alt="A sentence that grew by three guesses, with a count of guesses made" width="600">
+
+**5. Look inside.** Tap each part of the model to see what it does.
+
+<img src="docs/images/use-5-pipeline.png" alt="The model's stages from tokens to output, with Block 1 explained" width="600">
+
+Every figure has a Start over button, and everything works with a keyboard and a screen reader.
 
 ## What you can do
 
@@ -31,7 +55,8 @@ The project is in early development.
 **Ready now**
 
 - The site, with light and dark mode, and layouts for phone and desktop.
-- The first chapter, "What a language model does".
+- A live demo on the home page, with real guesses from the model.
+- The first chapter, "What a language model does", with three figures to play with.
 - The glossary and the references page.
 - The tiny trained model and the engine that runs it.
 
