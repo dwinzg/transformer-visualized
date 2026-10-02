@@ -22,11 +22,14 @@ export function ProbabilityBars({ guesses, label, onPick, exact = false }: Props
   const fill = (p: number) => ({ '--p': `${Math.max(p * 100, 1)}%` }) as React.CSSProperties;
   const wordClass = (g: Guess) => `prob-word${g.token.special ? ' is-special' : ''}`;
 
+  if (guesses.length === 0) return null;
+
   if (!onPick) {
     return (
       <ul className="prob-bars" aria-label={label}>
-        {guesses.map((g) => (
-          <li key={g.token.id} className="prob-bar" style={fill(g.p)}>
+        {guesses.map((g, i) => (
+          // Keyed by rank, so each bar's width grows or shrinks from the last list's value.
+          <li key={i} className="prob-bar" style={fill(g.p)}>
             <span className="prob-fill" aria-hidden="true" />
             <span className={wordClass(g)}>{g.token.text}</span>
             <span className="prob-value">{value(g.p)}</span>
@@ -69,7 +72,7 @@ export function ProbabilityBars({ guesses, label, onPick, exact = false }: Props
     >
       {guesses.map((g, i) => (
         <li
-          key={g.token.id}
+          key={i}
           id={`${id}-${i}`}
           role="option"
           aria-selected={i === current}

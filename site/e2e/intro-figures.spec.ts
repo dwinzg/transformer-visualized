@@ -27,7 +27,7 @@ test('next word: picking and resetting', async ({ page }) => {
   await fig.getByRole('option').nth(2).click();
   await expect(chips).toHaveCount(before + 1);
   await expect(fig.locator('[aria-live="polite"]')).toContainText('Added');
-  await fig.getByRole('button', { name: 'Reset' }).click();
+  await fig.getByRole('button', { name: 'Start over' }).click();
   await expect(chips).toHaveCount(before);
 });
 
@@ -52,15 +52,24 @@ test('next word: rapid taps never skip or double up, and the end offers to start
   await expect(fig.getByRole('button', { name: 'Start over' })).toBeVisible();
 });
 
-test('generation loop: next word and play', async ({ page }) => {
+test('next word: keyboard focus stays in the figure after the last pick', async ({ page }) => {
+  await page.goto(CHAPTER);
+  const fig = page.locator('#step-it-guesses-the-next-piece-of-text figure');
+  await hydrated(fig);
+  await fig.getByRole('listbox').focus();
+  for (let i = 0; i < 3; i++) await page.keyboard.press('Enter');
+  await expect(fig.getByRole('button', { name: 'Start over' })).toBeFocused();
+});
+
+test('generation loop: add a guess and play', async ({ page }) => {
   await page.goto(CHAPTER);
   const fig = page.locator('#step-then-it-does-it-again figure');
   await hydrated(fig);
-  await fig.getByRole('button', { name: 'Next word' }).click();
+  await fig.getByRole('button', { name: 'Add a guess' }).click();
   await expect(fig.getByText('Guesses made: 1')).toBeVisible();
   await fig.getByRole('button', { name: 'Play' }).click();
   await expect(fig.getByText('Guesses made: 3')).toBeVisible({ timeout: 5000 });
-  await fig.getByRole('button', { name: 'Reset' }).click();
+  await fig.getByRole('button', { name: 'Start over' }).click();
   await expect(fig.getByText('Guesses made: 0')).toBeVisible();
 });
 
@@ -92,9 +101,6 @@ test('the figures are accessible after interaction in both themes', async ({ pag
   const pipeline = page.locator('#step-inside-a-transformer-does-the-guessing figure');
   await hydrated(pipeline);
   await pipeline.getByRole('radio', { name: 'Output' }).click();
-  // Axe judges targets by where they sit on screen. Wherever the clicks above leave the page, a
-  // step's tabs can end up half under the sticky header, so scan from the top like a reader would.
-  await page.evaluate(() => window.scrollTo(0, 0));
   for (const colorScheme of ['light', 'dark'] as const) {
     await page.emulateMedia({ colorScheme });
     await expectNoA11yViolations(page);

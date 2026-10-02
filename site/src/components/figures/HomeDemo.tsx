@@ -23,6 +23,8 @@ export default function HomeDemo({ trees }: { trees: GuessTree[] }) {
   const [focused, setFocused] = useState(false);
   const [announcement, setAnnouncement] = useState('');
   const root = useRef<HTMLDivElement>(null);
+  const startOver = useRef<HTMLButtonElement>(null);
+  const focusStartOver = useRef(false);
   const remember = useTravel(root, path);
 
   const tree = trees[sentence];
@@ -43,6 +45,7 @@ export default function HomeDemo({ trees }: { trees: GuessTree[] }) {
         setPlaying(false);
         const word = guesses[index] ? spoken(guesses[index].token) : '';
         const after = guessesAt(tree, nextPath);
+        if (after.length === 0) focusStartOver.current = true;
         setAnnouncement(
           after.length > 0
             ? `Added '${word}'. Next guesses: ${describeGuesses(after)}.`
@@ -91,7 +94,18 @@ export default function HomeDemo({ trees }: { trees: GuessTree[] }) {
     };
   }, []);
 
-  const paused = !playing || held || hovered || focused;
+  // The guess list goes away after the reader's last pick, so keep keyboard focus in the demo.
+  useEffect(() => {
+    if (!focusStartOver.current) return;
+    focusStartOver.current = false;
+    startOver.current?.focus();
+  });
+
+  const restart = () => {
+    if (path.length === 0) return;
+    setPath([]);
+    setAnnouncement('Back to the start.');
+  };
 
   return (
     <div
@@ -113,16 +127,27 @@ export default function HomeDemo({ trees }: { trees: GuessTree[] }) {
       }}
     >
       <div className="demo-controls">
-        {path.length > 0 && guesses.length > 0 && (
-          <button type="button" className="demo-reset press" onClick={() => setPath([])}>
-            Start over
-          </button>
-        )}
+        <button
+          ref={startOver}
+          type="button"
+          className="figure-button press"
+          aria-disabled={path.length === 0}
+          onClick={restart}
+        >
+          Start over
+        </button>
         <button
           type="button"
-          className="demo-toggle press"
+          className="figure-button demo-toggle press"
           aria-label={playing ? 'Pause demo' : 'Play demo'}
-          onClick={() => setPlaying((p) => !p)}
+          onClick={() => {
+            // Pressing Play means go now, even though the pointer and focus are inside the demo.
+            if (!playing) {
+              setHovered(false);
+              setFocused(false);
+            }
+            setPlaying((p) => !p);
+          }}
         >
           <span aria-hidden="true">{playing ? 'Pause' : 'Play'}</span>
         </button>
@@ -131,30 +156,25 @@ export default function HomeDemo({ trees }: { trees: GuessTree[] }) {
       {guesses.length > 0 ? (
         <ProbabilityBars
           guesses={guesses}
-          label="The model's next word guesses"
+          label="The model's guesses for what comes next"
           onPick={(i) => pick(i, true)}
         />
       ) : (
-        <div className="demo-end">
-          <button type="button" className="press" onClick={() => setPath([])}>
-            Start over
-          </button>
-          <button
-            type="button"
-            className="press"
-            onClick={() => {
-              setPath([]);
-              setSentence((s) => (s + 1) % trees.length);
-            }}
-          >
-            Next sentence
-          </button>
-        </div>
+        <button
+          type="button"
+          className="figure-button press"
+          onClick={() => {
+            setPath([]);
+            setSentence((s) => (s + 1) % trees.length);
+            setAnnouncement('');
+          }}
+        >
+          Next sentence
+        </button>
       )}
       <p className="visually-hidden" aria-live="polite">
         {announcement}
       </p>
-      <span className="visually-hidden">{paused ? 'Demo paused.' : ''}</span>
     </div>
   );
 }
