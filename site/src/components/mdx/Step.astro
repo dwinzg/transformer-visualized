@@ -16,7 +16,9 @@ taken.add(id);
 ---
 
 <section class="step" id={id} data-step aria-labelledby={`${id}-title`}>
-  <h2 id={`${id}-title`}>{title}</h2>
+  <div class="step-head">
+    <h2 id={`${id}-title`}>{title}</h2>
+  </div>
   <div class="step-levels">
     <slot />
   </div>
@@ -97,7 +99,7 @@ taken.add(id);
       if (isDepth(depth)) show(depth);
     });
 
-    step.querySelector('.step-levels')?.before(tablist);
+    step.querySelector('.step-head')?.append(tablist);
     step.classList.add('is-enhanced');
     show(readStoredDepth(browserStorage()));
   }
@@ -109,26 +111,34 @@ taken.add(id);
   .step {
     margin-block: var(--space-12);
   }
+  .step-head {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: var(--space-2) var(--space-4);
+    margin-bottom: var(--space-6);
+  }
+  .step-head h2 {
+    margin: 0;
+  }
   .step :global(.level-tabs) {
     display: inline-flex;
     flex-wrap: wrap;
     gap: var(--space-1);
-    padding: var(--space-1);
-    margin-bottom: var(--space-4);
-    border-radius: var(--radius-lg);
-    background: var(--color-surface-2);
   }
   .step :global(.level-tabs button) {
     min-height: var(--touch-target);
-    padding: 0 var(--space-4);
+    padding: 0 var(--space-2);
     border: 0;
-    border-radius: var(--radius-pill);
+    border-bottom: 2px solid transparent;
+    border-radius: var(--radius-sm) var(--radius-sm) 0 0;
     background: transparent;
-    color: var(--color-text);
+    color: var(--color-text-secondary);
     font: inherit;
-    font-size: var(--text-subheadline);
+    font-size: var(--text-footnote);
     cursor: pointer;
   }
-  /* The selected tab's fill, border and shadow are shared with the depth dial's segment in
-     global.css's "picked" rule, so a selected depth control looks the same everywhere. */
+  /* The selected tab looks different from the depth dial's segment on purpose, see global.css
+     for why. */
 </style>

@@ -107,7 +107,38 @@ test('without JavaScript every level is shown in order and the depth dial is hid
   const step = page.locator('#step-it-guesses-the-next-piece-of-text');
   await expect(step.locator('.level-label')).toHaveText(LEVELS);
   await expect(page.locator('[data-depth-dial]').first()).toBeHidden();
+  await expect(page.locator('[data-chapter-toolbar]')).toBeHidden();
   await context.close();
+});
+
+test('the toolbar counts steps as the reader scrolls', async ({ page }) => {
+  await page.goto(CHAPTER);
+  const count = page.locator('[data-chapter-toolbar] .step-count');
+  await expect(count).toHaveText('Step 1 of 3');
+  await page.locator('#step-inside-a-transformer-does-the-guessing').scrollIntoViewIfNeeded();
+  await page.evaluate(() =>
+    document
+      .querySelector('#step-inside-a-transformer-does-the-guessing')
+      ?.scrollIntoView({ block: 'center' }),
+  );
+  await expect(count).toHaveText('Step 3 of 3');
+});
+
+test.describe('on a phone', () => {
+  test.use({ viewport: { width: 390, height: 700 } });
+
+  test('the toolbar sits at the bottom and never covers the end of the chapter', async ({
+    page,
+  }) => {
+    await page.goto(CHAPTER);
+    const toolbar = page.locator('[data-chapter-toolbar]');
+    const box = await toolbar.boundingBox();
+    expect(box && Math.round(box.y + box.height)).toBe(700);
+    await page.evaluate(() => window.scrollTo(0, document.documentElement.scrollHeight));
+    const recap = await page.getByRole('region', { name: 'Go deeper' }).boundingBox();
+    const bar = await toolbar.boundingBox();
+    expect(recap && bar && recap.y + recap.height).toBeLessThanOrEqual(bar!.y);
+  });
 });
 
 test('the chapter has no pager when there is no other chapter', async ({ page }) => {
