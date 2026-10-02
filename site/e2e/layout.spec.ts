@@ -78,6 +78,20 @@ test.describe('navigation', () => {
   });
 });
 
+test.describe('on a phone', () => {
+  test.use({ viewport: { width: 390, height: 844 } });
+
+  test('the header fits on one row and still links home by name', async ({ page }) => {
+    await page.goto('learn/');
+    const home = page.getByRole('link', { name: 'Transformer Visualized' });
+    await expect(home).toBeVisible();
+    const header = await page.locator('.site-header').boundingBox();
+    expect(header!.height).toBeLessThan(70);
+    await home.click();
+    await expect(page.getByRole('heading', { level: 1 })).toHaveText('See inside a language model');
+  });
+});
+
 test.describe('at 320px wide', () => {
   test.use({ viewport: { width: 320, height: 640 } });
 
