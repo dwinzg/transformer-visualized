@@ -46,7 +46,8 @@ export function percent(p: number): string {
   return p < 0.005 ? '<1%' : `${Math.round(p * 100)}%`;
 }
 
-function spoken(token: DisplayToken): string {
+/** A token's text for speaking aloud: special tokens lose their brackets, others just trim. */
+export function spoken(token: DisplayToken): string {
   return token.special ? token.text.replace(/^\[|\]$/g, '') : token.text.trim();
 }
 

@@ -21,13 +21,10 @@ const trees = [
   <section class="hero container">
     <div class="hero-text">
       <h1>See inside a language model</h1>
-      <p class="lede">
-        A real model is guessing the next word below. Tap any guess to choose for it. Every number
-        comes from the model, and every step is explained from a simple story up to the exact math.
-      </p>
+      <p class="lede">A real model is guessing the next word. Tap a guess to pick it yourself.</p>
     </div>
     <Figure
-      caption="A tiny model trained on short stories, guessing live."
+      caption="A tiny model trained on short stories."
       description="A sentence split into tokens, with bars showing the model's top five guesses for the next token and their probabilities."
       wide={false}
     >
@@ -38,17 +35,15 @@ const trees = [
   <section class="ways container" aria-label="Ways to start">
     <a class="way press" href={withBase('learn/')}>
       <span class="way-title">Learn from scratch</span>
-      <span class="way-text">
-        No math background needed. Start with a story and go as deep as you like.
-      </span>
+      <span class="way-text">No math needed. Start with a story and go deeper when you like.</span>
     </a>
     <a class="way press" href={quickReviewHref}>
       <span class="way-title">Quick review</span>
-      <span class="way-text">Formulas, shapes and code, for a refresher.</span>
+      <span class="way-text">Formulas, shapes and code for a refresher.</span>
     </a>
     <div class="way way-soon">
       <span class="way-title">Playground</span>
-      <span class="way-text">Type your own sentence and watch every number. Coming soon.</span>
+      <span class="way-text">Type your own sentence and see every number. Coming soon.</span>
     </div>
   </section>
 </BaseLayout>

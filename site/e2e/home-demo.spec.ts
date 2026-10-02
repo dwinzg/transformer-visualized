@@ -50,6 +50,17 @@ test('reduced motion starts paused, and Play still works', async ({ page }) => {
   await expect(demo.locator('.token-chip')).toHaveCount(count + 1, { timeout: 5000 });
 });
 
+test('Start over resets the sentence at any point', async ({ page }) => {
+  await page.goto('./');
+  const demo = page.locator('[data-home-demo]');
+  await demo.getByRole('button', { name: 'Pause demo' }).click();
+  const before = await demo.locator('.token-chip').count();
+  await demo.getByRole('option').first().click();
+  await expect(demo.locator('.token-chip')).toHaveCount(before + 1);
+  await demo.getByRole('button', { name: 'Start over' }).click();
+  await expect(demo.locator('.token-chip')).toHaveCount(before);
+});
+
 test('the end of the guesses offers to start over', async ({ page }) => {
   await page.goto('./');
   const demo = page.locator('[data-home-demo]');

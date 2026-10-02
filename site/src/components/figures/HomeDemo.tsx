@@ -1,5 +1,11 @@
 import { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react';
-import { chosenTokens, describeGuesses, guessesAt, type GuessTree } from '../../lib/guess-tree';
+import {
+  chosenTokens,
+  describeGuesses,
+  guessesAt,
+  spoken,
+  type GuessTree,
+} from '../../lib/guess-tree';
 import { prefersReducedMotion, travel, type Box } from '../../lib/motion';
 import { ProbabilityBars } from './ProbabilityBars';
 import { TokenRow } from './TokenRow';
@@ -35,7 +41,7 @@ export default function HomeDemo({ trees }: { trees: GuessTree[] }) {
       setPath(nextPath);
       if (byReader) {
         setPlaying(false);
-        const word = guesses[index]?.token.text.trim() ?? '';
+        const word = guesses[index] ? spoken(guesses[index].token) : '';
         const after = guessesAt(tree, nextPath);
         setAnnouncement(
           after.length > 0
@@ -114,14 +120,21 @@ export default function HomeDemo({ trees }: { trees: GuessTree[] }) {
         if (!e.currentTarget.contains(e.relatedTarget as Node | null)) setFocused(false);
       }}
     >
-      <button
-        type="button"
-        className="demo-toggle press"
-        aria-label={playing ? 'Pause demo' : 'Play demo'}
-        onClick={() => setPlaying((p) => !p)}
-      >
-        <span aria-hidden="true">{playing ? 'Pause' : 'Play'}</span>
-      </button>
+      <div className="demo-controls">
+        {path.length > 0 && guesses.length > 0 && (
+          <button type="button" className="demo-reset press" onClick={() => setPath([])}>
+            Start over
+          </button>
+        )}
+        <button
+          type="button"
+          className="demo-toggle press"
+          aria-label={playing ? 'Pause demo' : 'Play demo'}
+          onClick={() => setPlaying((p) => !p)}
+        >
+          <span aria-hidden="true">{playing ? 'Pause' : 'Play'}</span>
+        </button>
+      </div>
       <TokenRow tokens={tokens} caret={guesses.length > 0} newFrom={tree.tokens.length} />
       {guesses.length > 0 ? (
         <ProbabilityBars
