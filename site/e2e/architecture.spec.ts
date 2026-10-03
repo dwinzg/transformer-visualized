@@ -22,7 +22,7 @@ test('picking a block explains it, with the formula at the Formula level', async
   await expect(panel(map).getByRole('heading', { name: 'Masked attention' })).toBeVisible();
   await expect(panel(map)).toContainText('cannot look ahead');
   await expect(panel(map).locator('.katex')).toHaveCount(0);
-  await page.getByRole('radio', { name: 'Formula' }).check();
+  await page.getByRole('radio', { name: 'Formula', exact: true }).check();
   await expect(panel(map).locator('.katex')).toHaveCount(1);
 });
 
@@ -42,7 +42,7 @@ test('the GPT-2 view drops the encoder and cross-attention and adds a final norm
 }) => {
   const map = await openMap(page);
   await expect(map.getByRole('radio', { name: 'Outputs (shifted right)' })).toBeVisible();
-  await map.getByRole('radio', { name: 'Multi-head attention', exact: true }).nth(1).click();
+  await map.getByRole('radio', { name: 'Multi-head attention', exact: true }).click();
   await expect(panel(map).getByRole('heading')).toHaveText('Cross-attention');
   const original = map.getByRole('radio', { name: 'Original paper' });
   const gpt2 = map.getByRole('radio', { name: 'GPT-2 style (our model)' });
@@ -61,6 +61,18 @@ test('the GPT-2 view drops the encoder and cross-attention and adds a final norm
   await page.keyboard.press('ArrowLeft');
   await expect(original).toBeChecked();
   await expect(original).toBeFocused();
+});
+
+test("a lesson link opens our model's block, not the encoder's", async ({ page }) => {
+  const map = await openMap(page, '?part=input&view=gpt2');
+  await expect(map.getByRole('radio', { name: 'Inputs' })).toHaveAttribute('aria-checked', 'true');
+  const gpt2 = map.getByRole('radio', { name: 'GPT-2 style (our model)' });
+  await expect(gpt2).toBeChecked();
+  await gpt2.focus();
+  await page.keyboard.press('ArrowLeft');
+  await map.getByRole('radio', { name: 'Inputs' }).click();
+  await expect(panel(map)).toContainText('the sentence to translate');
+  await expect(panel(map)).not.toContainText('shifted');
 });
 
 test('a link can open the map at one part', async ({ page }) => {
@@ -129,8 +141,8 @@ test('the panel links to the glossary, and says when a chapter is still coming',
 
 test('the map is accessible after interaction in both themes', async ({ page }) => {
   const map = await openMap(page);
-  await map.getByRole('radio', { name: 'Feed forward' }).nth(1).click();
-  await page.getByRole('radio', { name: 'Code' }).check();
+  await map.getByRole('radio', { name: 'Feed forward', exact: true }).click();
+  await page.getByRole('radio', { name: 'Code', exact: true }).check();
   for (const colorScheme of ['light', 'dark'] as const) {
     await page.emulateMedia({ colorScheme });
     await expectNoA11yViolations(page);

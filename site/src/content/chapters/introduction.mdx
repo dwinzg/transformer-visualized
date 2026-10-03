@@ -33,12 +33,12 @@ When you type a message, your phone suggests the next word. A <Term id="language
 
 Here is what that answer could look like after "Once upon a". These numbers are made up to show the idea.
 
-| Next piece | Chance |
-| --- | --- |
-| time | 0.92 |
-| day | 0.03 |
-| hill | 0.01 |
-| everything else | 0.04 |
+| Next piece      | Chance |
+| --------------- | ------ |
+| time            | 0.92   |
+| day             | 0.03   |
+| hill            | 0.01   |
+| everything else | 0.04   |
 
 The chances, called <Term id="probability">probabilities</Term>, always add up to 1, because something has to come next.
 
@@ -144,7 +144,10 @@ The small model on this site has a vocabulary of 4,096 pieces. It turns each pie
 
 A transformer computes scores for every token in the vocabulary, called logits, from the tokens so far. Softmax turns the logits into probabilities.
 
-<Tex display tex="\text{logits} = f_\theta(t_1, \dots, t_{i-1}), \qquad P(t_i \mid t_{<i}) = \operatorname{softmax}(\text{logits})" />
+<Tex
+  display
+  tex="\text{logits} = f_\theta(t_1, \dots, t_{i-1}), \qquad P(t_i \mid t_{<i}) = \operatorname{softmax}(\text{logits})"
+/>
 
 Here <Tex tex="\theta" /> stands for all of the model's learned parameters.
 
@@ -153,7 +156,9 @@ Here <Tex tex="\theta" /> stands for all of the model's learned parameters.
 <Level of="code">
 
 ```ts
-const model = loadModel(await (await fetch('/transformer-visualized/models/tiny/model.safetensors')).arrayBuffer());
+const model = loadModel(
+  await (await fetch('/transformer-visualized/models/tiny/model.safetensors')).arrayBuffer(),
+);
 console.log(model.config); // { vocabSize: 4096, dModel: 128, nLayers: 4, ... }
 ```
 

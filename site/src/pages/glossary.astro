@@ -15,7 +15,8 @@ function placesFor(id: string) {
   const parts = Object.values(PARTS).filter((part) => part.glossary === id);
   const taught = parts.find((part) => part.chapter && chapters.has(part.chapter));
   return {
-    map: parts[0] ? withBase(mapPath(parts[0].id)) : undefined,
+    // The whole map explains "transformer", so that entry links to the map itself.
+    map: parts[0] || id === 'transformer' ? withBase(mapPath(parts[0]?.id)) : undefined,
     chapter: taught?.chapter
       ? {
           href: withBase(`learn/${taught.chapter}/${taught.step ? `#${taught.step}` : ''}`),

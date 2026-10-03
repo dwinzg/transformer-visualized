@@ -3,6 +3,7 @@ import {
   BLOCKS,
   BOX,
   blockLabel,
+  blockName,
   blockY,
   firstBlockFor,
   FRAMES,
@@ -136,6 +137,7 @@ export default function ArchitectureMap({ formulas, links }: Props) {
   // Faded outlines mark the paper's parts that GPT-2 drops, so the shape of Figure 1 stays.
   const hidden = view === 'gpt2' ? BLOCKS.filter((b) => !b.views.includes('gpt2')) : [];
   const formula = part ? formulas[part.id]?.[view] : undefined;
+  const note = (block?.notes ?? part?.notes)?.[view];
   const link = part ? links[part.id] : undefined;
 
   return (
@@ -197,7 +199,7 @@ export default function ArchitectureMap({ formulas, links }: Props) {
             <>
               <h2 className="arch-title">{part.title}</h2>
               <p>{part.story}</p>
-              {part.notes?.[view] && <p>{part.notes[view]}</p>}
+              {note && <p>{note}</p>}
               {level >= 1 && <p className="arch-numbers">{part.numbers}</p>}
               {level >= 2 && formula && (
                 <div className="arch-formula" dangerouslySetInnerHTML={{ __html: formula }} />
@@ -314,6 +316,9 @@ export default function ArchitectureMap({ formulas, links }: Props) {
                 role="radio"
                 aria-checked={b.id === selected}
                 tabIndex={b.id === rovingId ? 0 : -1}
+                aria-label={
+                  blockName(b, view) === blockLabel(b, view) ? undefined : blockName(b, view)
+                }
                 className={`arch-block press arch-${PARTS[b.part].color}`}
                 style={{
                   left: pct(b.x, BOX.width),

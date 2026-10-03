@@ -4,6 +4,10 @@ export interface Block {
   id: string;
   part: PartId;
   label: string | Record<View, string>;
+  /** The name a screen reader hears, where the label alone repeats another block's. */
+  name?: string | Record<View, string>;
+  /** Replaces the part's note for this block, where the block differs from the part. */
+  notes?: Partial<Record<View, string>>;
   views: readonly View[];
   x: number;
   /** One y for both views, or one per view where GPT-2 moves the block. */
@@ -20,7 +24,16 @@ const D = { x: 340, w: 220 };
 const E = { x: 40, w: 220 };
 
 export const BLOCKS: readonly Block[] = [
-  { id: 'enc-input', part: 'input', label: 'Inputs', views: ORIGINAL, ...E, y: 746, h: 40 },
+  {
+    id: 'enc-input',
+    part: 'input',
+    label: 'Inputs',
+    notes: { original: 'In the paper this side read the sentence to translate.' },
+    views: ORIGINAL,
+    ...E,
+    y: 746,
+    h: 40,
+  },
   {
     id: 'enc-embedding',
     part: 'embedding',
@@ -34,6 +47,7 @@ export const BLOCKS: readonly Block[] = [
     id: 'enc-position',
     part: 'position',
     label: 'Positional encoding',
+    name: 'Encoder positional encoding',
     views: ORIGINAL,
     ...E,
     y: 630,
@@ -43,6 +57,7 @@ export const BLOCKS: readonly Block[] = [
     id: 'enc-attn',
     part: 'enc-attn',
     label: 'Multi-head attention',
+    name: 'Encoder multi-head attention',
     views: ORIGINAL,
     ...E,
     y: 546,
@@ -52,16 +67,27 @@ export const BLOCKS: readonly Block[] = [
     id: 'enc-add-norm-1',
     part: 'add-norm',
     label: 'Add and norm',
+    name: 'Encoder add and norm, after attention',
     views: ORIGINAL,
     ...E,
     y: 500,
     h: 32,
   },
-  { id: 'enc-ffn', part: 'ffn', label: 'Feed forward', views: ORIGINAL, ...E, y: 436, h: 44 },
+  {
+    id: 'enc-ffn',
+    part: 'ffn',
+    label: 'Feed forward',
+    name: 'Encoder feed forward',
+    views: ORIGINAL,
+    ...E,
+    y: 436,
+    h: 44,
+  },
   {
     id: 'enc-add-norm-2',
     part: 'add-norm',
     label: 'Add and norm',
+    name: 'Encoder add and norm, after feed forward',
     views: ORIGINAL,
     ...E,
     y: 396,
@@ -107,6 +133,7 @@ export const BLOCKS: readonly Block[] = [
     id: 'add-norm-1',
     part: 'add-norm',
     label: { original: 'Add and norm', gpt2: 'Norm' },
+    name: { original: 'Add and norm, after masked attention', gpt2: 'Norm, before attention' },
     views: BOTH,
     ...D,
     y: { original: 500, gpt2: 558 },
@@ -125,6 +152,7 @@ export const BLOCKS: readonly Block[] = [
     id: 'add-norm-2',
     part: 'add-norm',
     label: 'Add and norm',
+    name: 'Add and norm, after cross-attention',
     views: ORIGINAL,
     ...D,
     y: 396,
@@ -143,6 +171,7 @@ export const BLOCKS: readonly Block[] = [
     id: 'add-norm-3',
     part: 'add-norm',
     label: { original: 'Add and norm', gpt2: 'Norm' },
+    name: { original: 'Add and norm, after feed forward', gpt2: 'Norm, before feed forward' },
     views: BOTH,
     ...D,
     y: { original: 270, gpt2: 328 },
@@ -200,6 +229,12 @@ export const TOUR: Record<View, readonly string[]> = {
 
 export function blockLabel(block: Block, view: View): string {
   return typeof block.label === 'string' ? block.label : block.label[view];
+}
+
+/** The accessible name, which always contains the visible label. */
+export function blockName(block: Block, view: View): string {
+  const name = block.name ?? block.label;
+  return typeof name === 'string' ? name : name[view];
 }
 
 export function blockY(block: Block, view: View): number {

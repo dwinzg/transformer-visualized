@@ -3,6 +3,8 @@ import katex from 'katex';
 import { describe, expect, it } from 'vitest';
 import {
   BLOCKS,
+  blockLabel,
+  blockName,
   blockY,
   BOX,
   firstBlockFor,
@@ -56,7 +58,7 @@ describe('concepts', () => {
   it('recognizes part ids and builds map paths', () => {
     expect(isPartId('ffn')).toBe(true);
     expect(isPartId('toString')).toBe(false);
-    expect(mapPath('ffn')).toBe('learn/architecture/?part=ffn');
+    expect(mapPath('ffn')).toBe('learn/architecture/?part=ffn&view=gpt2');
     expect(mapPath()).toBe('learn/architecture/');
   });
 });
@@ -104,6 +106,15 @@ describe('architecture layout', () => {
     expect(at('add-norm-3')).toBeGreaterThan(at('ffn'));
     expect(TOUR.gpt2.indexOf('add-norm-1')).toBeLessThan(TOUR.gpt2.indexOf('masked-attn'));
   });
+  it.each(VIEWS)(
+    'gives every block a unique name that contains its label in the %s view',
+    (view: View) => {
+      const names = visibleBlocks(view).map((b) => blockName(b, view));
+      expect(new Set(names).size).toBe(names.length);
+      for (const b of visibleBlocks(view))
+        expect(blockName(b, view).toLowerCase()).toContain(blockLabel(b, view).toLowerCase());
+    },
+  );
   it('lands links on the first block of a part', () => {
     expect(firstBlockFor('add-norm', 'gpt2')?.id).toBe('add-norm-1');
     expect(firstBlockFor('input', 'original')?.id).toBe('enc-input');
