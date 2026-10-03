@@ -1,0 +1,105 @@
+---
+import 'katex/dist/katex.min.css';
+import { getCollection } from 'astro:content';
+import katex from 'katex';
+import DepthDial from '../../components/DepthDial.astro';
+import Figure from '../../components/Figure.astro';
+import ArchitectureMap from '../../components/figures/ArchitectureMap.tsx';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { TOUR, BLOCKS } from '../../lib/architecture-layout';
+import { formulaFor, PARTS, VIEWS, type PartId, type View } from '../../lib/concepts';
+import { withBase } from '../../lib/paths';
+
+const chapters = new Set((await getCollection('chapters')).map((chapter) => chapter.id));
+const glossary = new Set((await getCollection('glossary')).map((entry) => entry.id));
+
+// Formulas are rendered here at build time, so the page ships no KaTeX JavaScript.
+const formulas: Partial<Record<PartId, Partial<Record<View, string>>>> = {};
+const links: Partial<Record<PartId, { chapter?: string; glossary?: string }>> = {};
+for (const part of Object.values(PARTS)) {
+  for (const view of VIEWS) {
+    const tex = formulaFor(part, view);
+    if (tex) {
+      (formulas[part.id] ??= {})[view] = katex.renderToString(tex, {
+        displayMode: true,
+        throwOnError: true,
+        output: 'htmlAndMathml',
+      });
+    }
+  }
+  links[part.id] = {
+    chapter:
+      part.chapter && chapters.has(part.chapter)
+        ? withBase(`learn/${part.chapter}/${part.step ? `#${part.step}` : ''}`)
+        : undefined,
+    glossary:
+      part.glossary && glossary.has(part.glossary)
+        ? withBase(`glossary/#${part.glossary}`)
+        : undefined,
+  };
+}
+
+// The text version follows the GPT-2 tour, one entry per part.
+const outline = [...new Set(TOUR.gpt2.map((id) => BLOCKS.find((b) => b.id === id)!.part))].map(
+  (id) => PARTS[id],
+);
+---
+
+<BaseLayout
+  title="The transformer at a glance"
+  description="A clickable map of the transformer, from the input text to the next-token guess."
+>
+  <section class="prose page">
+    <h1>The transformer at a glance</h1>
+    <p class="lede">Tap any part to see what it does. Or press Next for a guided tour.</p>
+    <DepthDial />
+    <Figure
+      caption="Redrawn from Figure 1 of Vaswani et al. 2017."
+      description="The transformer drawn as stacked blocks, from the inputs at the bottom to the output probabilities at the top. Each block is a button that explains that part."
+    >
+      <ArchitectureMap client:visible formulas={formulas} links={links} />
+    </Figure>
+    <p class="credit">
+      The paper is listed on the <a href={withBase('references/#vaswani2017')}>references page</a>.
+      GPT-2 keeps only the right-hand side, because it continues text instead of translating it.
+    </p>
+    <details class="outline">
+      <summary>Text version</summary>
+      <ol>
+        {outline.map((part) => (
+          <li>
+            <strong>{part.title}.</strong> {part.story}
+          </li>
+        ))}
+      </ol>
+    </details>
+  </section>
+</BaseLayout>
+
+<script>
+  import { applyDepthFromQuery } from '../../lib/depth';
+
+  applyDepthFromQuery();
+</script>
+
+<style>
+  .page {
+    padding-block: var(--space-12);
+  }
+  .lede,
+  .credit {
+    color: var(--color-text-secondary);
+  }
+  .outline {
+    margin-top: var(--space-6);
+  }
+  .outline summary {
+    min-height: var(--touch-target);
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+  }
+  .outline li {
+    margin-bottom: var(--space-2);
+  }
+</style>
