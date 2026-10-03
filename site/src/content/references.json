@@ -131,7 +131,8 @@
     "venue": "Proceedings of the 54th Annual Meeting of the Association for Computational Linguistics (ACL 2016)",
     "url": "https://arxiv.org/abs/1508.07909v5",
     "arxiv": "1508.07909v5",
-    "note": "Brought byte pair encoding to language, building rare words from smaller pieces.",
+    "doi": "10.18653/v1/P16-1162",
+    "note": "Adapted byte pair encoding from data compression to split rare words into smaller pieces.",
     "topics": ["tokens"]
   }
 ]
