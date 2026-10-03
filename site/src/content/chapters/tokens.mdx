@@ -48,10 +48,10 @@ Tokenizing turns a text into a sequence of ids, each one from the vocabulary.
 
 <Tex
   display
-  tex="\text{text} \;\mapsto\; (t_1, t_2, \dots, t_T), \qquad t_i \in \{0, 1, \dots, 4095\}"
+  tex="\text{text} \;\mapsto\; (t_1, t_2, \dots, t_n), \qquad t_i \in \{0, 1, \dots, 4095\}"
 />
 
-For our sentence <Tex tex="T = 6" />.
+For our sentence <Tex tex="n = 6" />.
 
 </Level>
 
@@ -78,7 +78,7 @@ Four. It becomes "To", "ken", "iz" and "ation". Our model learned from simple ch
 
 <Level of="story">
 
-Words the model saw often in training, like "play" or "happy", are one token each. A rare word is built from smaller pieces that are in the list. "Tokenization" becomes four pieces.
+Words the model saw often in training, like "·play" or "·happy" after a space, are one token each. A rare word is built from smaller pieces that are in the list. "Tokenization" becomes four pieces.
 
 Nothing is ever left out. The smallest pieces go all the way down to single letters, so every word can still be written.
 
@@ -94,7 +94,7 @@ A bigger vocabulary keeps more words whole, so the same text takes fewer tokens.
 
 <Level of="formula">
 
-Turning ids back into text undoes tokenizing exactly, for any text the model can read.
+Turning the ids back into text gives exactly the text you started with.
 
 <Tex display tex="\operatorname{decode}(\operatorname{encode}(x)) = x" />
 
@@ -113,7 +113,7 @@ tokenizer.decode(tokenizer.encode('Tokenization is fun!'));
 
 <Callout kind="analogy" title="Like building blocks">
 
-Think of tokens as building blocks, with a big block for each common word and small blocks for everything else. **Where this breaks.** Real blocks look the same wherever they go. A token can change with the space before it or with a capital letter, as the next step shows.
+Think of tokens as building blocks, with a big block for each common word and small blocks for everything else. **Where this breaks.** Real blocks look the same wherever they go. The same word can become a different block after a space or with a capital letter, as the next step shows.
 
 </Callout>
 
@@ -141,7 +141,7 @@ So "Lily was happy. Happy Lily!" is 27 characters and 8 tokens.
 
 <Level of="formula">
 
-Tokenizing is case and space sensitive. The same word can map to different ids.
+Capitals and spaces change the ids. The same word can get different ids.
 
 <Tex
   display
@@ -167,7 +167,7 @@ tokenizer.encode(' Lily'); // [405]
 
 <Level of="story">
 
-The vocabulary is built before training, with a method called <Term id="byte-pair-encoding">byte pair encoding</Term> (<Ref id="sennrich2016" />). It starts with the 256 possible bytes, so any text at all can be written. Then it finds the pair of pieces that sits side by side most often in the training text and joins them into a new token. It repeats this until the list is full. Common words end up whole.
+The vocabulary is built before training, with a method called <Term id="byte-pair-encoding">byte pair encoding</Term> (<Ref id="sennrich2016" />). Like GPT-2 (<Ref id="radford2019" />), ours starts with the 256 possible bytes, the small codes a computer stores text in, so any text at all can be written. Then it finds the pair of pieces that sits side by side most often inside words and joins them into a new token. It repeats this until the list is full.
 
 </Level>
 
@@ -175,7 +175,7 @@ The vocabulary is built before training, with a method called <Term id="byte-pai
 
 Our list has 1 special token that marks the end of a story, 256 single bytes and 3,839 joined pieces, 4,096 in all. The very first join was a space followed by "t", as in "·the" and "·to".
 
-Numbers are split into single digits, so "123" is three tokens. An emoji the model never saw is written as 4 raw bytes.
+Our stories had few numbers, so in "·123" the space and each digit are tokens of their own. An emoji the model never saw is written as its raw bytes, four for 😀.
 
 </Level>
 
@@ -183,7 +183,7 @@ Numbers are split into single digits, so "123" is three tokens. An emoji the mod
 
 Each round joins the pair of neighboring pieces <Tex tex="(a, b)" /> that appears most often in the training text, then counts again.
 
-<Tex display tex="(a, b)^{*} = \arg\max_{(a,\, b)} \operatorname{count}(a\,b)" />
+<Tex display tex="(a^{*}, b^{*}) = \arg\max_{(a,\, b)} \operatorname{count}(a, b)" />
 
 </Level>
 
