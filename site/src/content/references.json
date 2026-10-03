@@ -117,5 +117,21 @@
     "doi": "10.1609/aaai.v39i28.35347",
     "note": "An interactive visualization that runs GPT-2 in the browser.",
     "topics": ["tools"]
+  },
+  {
+    "id": "sennrich2016",
+    "type": "paper",
+    "authors": [
+      { "family": "Sennrich", "given": "Rico" },
+      { "family": "Haddow", "given": "Barry" },
+      { "family": "Birch", "given": "Alexandra" }
+    ],
+    "title": "Neural Machine Translation of Rare Words with Subword Units",
+    "year": 2016,
+    "venue": "Proceedings of the 54th Annual Meeting of the Association for Computational Linguistics (ACL 2016)",
+    "url": "https://arxiv.org/abs/1508.07909v5",
+    "arxiv": "1508.07909v5",
+    "note": "Brought byte pair encoding to language, building rare words from smaller pieces.",
+    "topics": ["tokens"]
   }
 ]

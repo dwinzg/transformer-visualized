@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { GUESS_DEPTH, GUESS_WIDTH, guessDisplayToken, guessTree } from './demo-data';
+import { GUESS_DEPTH, GUESS_WIDTH, guessDisplayToken, guessTree, tokenize } from './demo-data';
 import type { Guess } from './guess-tree';
 
 const PROMPTS = [
@@ -73,5 +73,48 @@ describe('guessTree', () => {
         if (g.token.special) expect(g.next).toEqual([]);
       }
     }
+  });
+});
+
+// The Tokens chapter quotes these numbers, so a retrained tokenizer has to update the text too.
+describe('tokenize, as the Tokens chapter quotes it', () => {
+  const pieces = (text: string) => tokenize(text).map((t) => `${t.text}:${t.id}`);
+  it('keeps every word of the shared sentence whole', () => {
+    expect(pieces('Lily wanted to play with her')).toEqual([
+      'Lily:665',
+      ' wanted:408',
+      ' to:266',
+      ' play:324',
+      ' with:329',
+      ' her:336',
+    ]);
+  });
+  it('splits rare words and tells spaces and capitals apart', () => {
+    expect(tokenize('Tokenization is fun!').map((t) => t.text)).toEqual([
+      'To',
+      'ken',
+      'iz',
+      'ation',
+      ' is',
+      ' fun',
+      '!',
+    ]);
+    expect(pieces('Lily was happy. Happy Lily!')).toEqual([
+      'Lily:665',
+      ' was:283',
+      ' happy:376',
+      '.:14',
+      ' H:308',
+      'appy:3189',
+      ' Lily:405',
+      '!:1',
+    ]);
+    expect(tokenize('The little dog ran to the park.')).toHaveLength(8);
+    expect(tokenize(' played')).toHaveLength(1);
+    expect(tokenize(' plays').map((t) => t.text)).toEqual([' play', 's']);
+    expect(tokenize('123')).toHaveLength(3);
+  });
+  it('refuses text the model was never trained on', () => {
+    expect(() => tokenize('café')).toThrow(/never trained on/);
   });
 });

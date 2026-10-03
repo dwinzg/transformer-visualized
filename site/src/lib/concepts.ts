@@ -58,6 +58,7 @@ export const PARTS: Record<PartId, Part> = {
     code: "const ids = tokenizer.encode('Lily wanted to play with her');",
     glossary: 'token',
     chapter: 'tokens',
+    step: 'step-text-becomes-tokens',
   },
   embedding: {
     id: 'embedding',
