@@ -44,16 +44,23 @@ test('the GPT-2 view drops the encoder and cross-attention and adds a final norm
   await expect(map.getByRole('radio', { name: 'Outputs (shifted right)' })).toBeVisible();
   await map.getByRole('radio', { name: 'Multi-head attention', exact: true }).nth(1).click();
   await expect(panel(map).getByRole('heading')).toHaveText('Cross-attention');
-  await map.getByRole('radio', { name: 'GPT-2 style (our model)' }).check();
+  const original = map.getByRole('radio', { name: 'Original paper' });
+  const gpt2 = map.getByRole('radio', { name: 'GPT-2 style (our model)' });
+  await original.focus();
+  await page.keyboard.press('ArrowRight');
+  await expect(gpt2).toBeChecked();
   await expect(map.getByRole('radio', { name: 'Outputs (shifted right)' })).toHaveCount(0);
   await expect(map.getByRole('radio', { name: 'Multi-head attention', exact: true })).toHaveCount(
     0,
   );
   await expect(map.getByRole('radio', { name: 'Final norm' })).toBeVisible();
-  // The picked block was hidden, so the panel resets and focus stays in the map.
+  // The picked block was hidden, so the panel resets. Focus stays on the toggle.
   await expect(panel(map)).toContainText('Tap a part');
-  await expect(map.getByRole('radio', { name: 'Inputs' })).toBeFocused();
   await expect(map.locator('.arch-count')).toHaveText('12 parts');
+  await expect(gpt2).toBeFocused();
+  await page.keyboard.press('ArrowLeft');
+  await expect(original).toBeChecked();
+  await expect(original).toBeFocused();
 });
 
 test('a link can open the map at one part', async ({ page }) => {
@@ -80,6 +87,26 @@ test('arrow keys move through the parts', async ({ page }) => {
   );
   await page.keyboard.press('End');
   await expect(map.getByRole('radio', { name: 'Output probabilities' })).toBeFocused();
+});
+
+test('the tour keeps its buttons and the text on screen', async ({ page }) => {
+  const map = await openMap(page);
+  const next = map.getByRole('button', { name: 'Next' });
+  for (let i = 0; i < 3; i++) await next.click();
+  await expect(next).toBeInViewport();
+  await expect(panel(map).getByRole('heading')).toBeInViewport();
+});
+
+test('start over at rest does nothing, so the tour still advances after it', async ({ page }) => {
+  const map = await openMap(page);
+  const next = map.getByRole('button', { name: 'Next' });
+  // Playwright treats aria-disabled as disabled, so force the click a reader can still make.
+  await map.getByRole('button', { name: 'Start over' }).click({ force: true });
+  await next.focus();
+  await page.keyboard.press('Enter');
+  await page.keyboard.press('Enter');
+  await expect(map.locator('.arch-count')).toHaveText('2 of 20');
+  await expect(next).toBeFocused();
 });
 
 test('start over clears the pick and returns to the original view', async ({ page }) => {
@@ -116,5 +143,11 @@ test.describe('on a phone', () => {
   test('the page never scrolls sideways', async ({ page }) => {
     await openMap(page);
     await expectNoHorizontalScroll(page);
+  });
+
+  test('tapping a block shows its text', async ({ page }) => {
+    const map = await openMap(page);
+    await map.getByRole('radio', { name: 'Softmax' }).click();
+    await expect(panel(map).getByRole('heading')).toBeInViewport();
   });
 });
