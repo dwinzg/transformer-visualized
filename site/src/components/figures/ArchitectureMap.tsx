@@ -51,6 +51,8 @@ export default function ArchitectureMap({ formulas, links }: Props) {
   const [selected, setSelected] = useState<string | null>(null);
   const [depth, setDepth] = useState<Depth>('story');
   const buttons = useRef(new Map<string, HTMLButtonElement>());
+  const scroller = useRef<HTMLDivElement>(null);
+  const panel = useRef<HTMLDivElement>(null);
   const focusNext = useRef<string | null>(null);
 
   useEffect(() => {
@@ -78,10 +80,13 @@ export default function ArchitectureMap({ formulas, links }: Props) {
     return () => document.removeEventListener(DEPTH_EVENT, onChange);
   }, []);
 
-  // On narrow screens the drawing scrolls sideways, so bring the picked block into view.
+  // On narrow screens the drawing scrolls sideways inside its frame. Center the picked block there,
+  // without scrolling the page, so the tour buttons and the text stay where they are.
   useEffect(() => {
-    if (selected)
-      buttons.current.get(selected)?.scrollIntoView({ block: 'nearest', inline: 'nearest' });
+    const frame = scroller.current;
+    const button = selected ? buttons.current.get(selected) : undefined;
+    if (!frame || !button || frame.scrollWidth <= frame.clientWidth) return;
+    frame.scrollLeft = button.offsetLeft + button.offsetWidth / 2 - frame.clientWidth / 2;
   }, [selected, view]);
 
   // Move focus after the render that creates the target button.
@@ -102,12 +107,10 @@ export default function ArchitectureMap({ formulas, links }: Props) {
     if (focus) focusNext.current = id;
   };
 
+  // Focus stays on the view toggle, so arrow keys can flip back and forth.
   const changeView = (next: View) => {
     setView(next);
-    if (selected && !byId.get(selected)!.views.includes(next)) {
-      setSelected(null);
-      focusNext.current = TOUR[next][0];
-    }
+    if (selected && !byId.get(selected)!.views.includes(next)) setSelected(null);
   };
 
   const onKeyDown = (event: KeyboardEvent<HTMLDivElement>) => {
@@ -137,57 +140,92 @@ export default function ArchitectureMap({ formulas, links }: Props) {
 
   return (
     <div className="arch-map">
-      <div className="arch-controls">
-        <fieldset className="arch-views">
-          <legend className="visually-hidden">Show</legend>
-          {(['original', 'gpt2'] as const).map((v) => (
-            <label key={v}>
-              <input
-                type="radio"
-                name="arch-view"
-                checked={view === v}
-                onChange={() => changeView(v)}
-              />
-              <span>{VIEW_LABELS[v]}</span>
-            </label>
-          ))}
-        </fieldset>
-        <div className="arch-tour">
-          <button
-            type="button"
-            className="figure-button press"
-            aria-disabled={index <= 0}
-            onClick={() => index > 0 && pick(tour[index - 1])}
-          >
-            Previous
-          </button>
-          <span className="arch-count" aria-live="off">
-            {index >= 0 ? `${index + 1} of ${tour.length}` : `${tour.length} parts`}
-          </span>
-          <button
-            type="button"
-            className="figure-button press"
-            aria-disabled={index === tour.length - 1}
-            onClick={() => index < tour.length - 1 && pick(tour[index + 1])}
-          >
-            Next
-          </button>
-          <button
-            type="button"
-            className="figure-button press"
-            aria-disabled={selected === null && view === 'original'}
-            onClick={() => {
-              setSelected(null);
-              setView('original');
-              focusNext.current = TOUR.original[0];
-            }}
-          >
-            Start over
-          </button>
+      <div className="arch-side">
+        <div className="arch-controls">
+          <fieldset className="arch-views">
+            <legend className="visually-hidden">Show</legend>
+            {(['original', 'gpt2'] as const).map((v) => (
+              <label key={v}>
+                <input
+                  type="radio"
+                  name="arch-view"
+                  checked={view === v}
+                  onChange={() => changeView(v)}
+                />
+                <span>{VIEW_LABELS[v]}</span>
+              </label>
+            ))}
+          </fieldset>
+          <div className="arch-tour">
+            <button
+              type="button"
+              className="figure-button press"
+              aria-disabled={index <= 0}
+              onClick={() => index > 0 && pick(tour[index - 1])}
+            >
+              Previous
+            </button>
+            <span className="arch-count" aria-live="off">
+              {index >= 0 ? `${index + 1} of ${tour.length}` : `${tour.length} parts`}
+            </span>
+            <button
+              type="button"
+              className="figure-button press"
+              aria-disabled={index === tour.length - 1}
+              onClick={() => index < tour.length - 1 && pick(tour[index + 1])}
+            >
+              Next
+            </button>
+            <button
+              type="button"
+              className="figure-button press"
+              aria-disabled={selected === null && view === 'original'}
+              onClick={() => {
+                if (selected === null && view === 'original') return;
+                setSelected(null);
+                setView('original');
+                focusNext.current = TOUR.original[0];
+              }}
+            >
+              Start over
+            </button>
+          </div>
         </div>
+
+        <div className="arch-panel" ref={panel}>
+          {part ? (
+            <>
+              <h2 className="arch-title">{part.title}</h2>
+              <p>{part.story}</p>
+              {part.notes?.[view] && <p>{part.notes[view]}</p>}
+              {level >= 1 && <p className="arch-numbers">{part.numbers}</p>}
+              {level >= 2 && formula && (
+                <div className="arch-formula" dangerouslySetInnerHTML={{ __html: formula }} />
+              )}
+              {level >= 3 && part.code && (
+                <pre className="arch-code">
+                  <code>{part.code}</code>
+                </pre>
+              )}
+              <p className="arch-links">
+                {link?.chapter ? (
+                  <a href={link.chapter}>Read the chapter</a>
+                ) : (
+                  <span>Chapter coming soon</span>
+                )}
+                {link?.glossary && <a href={link.glossary}>What the word means</a>}
+              </p>
+            </>
+          ) : (
+            <p>Tap a part, or press Next for a tour.</p>
+          )}
+        </div>
+        <p className="visually-hidden" aria-live="polite">
+          {part ? `${index + 1} of ${tour.length}, ${part.title}` : ''}
+        </p>
       </div>
 
-      <div className="arch-scroll">
+      <div className="arch-scroll" ref={scroller}>
         <div className="arch-canvas">
           <svg viewBox={`0 0 ${BOX.width} ${BOX.height}`} aria-hidden="true" focusable="false">
             <defs>
@@ -283,42 +321,17 @@ export default function ArchitectureMap({ formulas, links }: Props) {
                   width: pct(b.w, BOX.width),
                   height: pct(b.h, BOX.height),
                 }}
-                onClick={() => pick(b.id)}
+                onClick={() => {
+                  pick(b.id);
+                  // On phones the text sits above the drawing, so show it after a tap.
+                  panel.current?.scrollIntoView({ block: 'nearest' });
+                }}
               >
                 {blockLabel(b, view)}
               </button>
             ))}
           </div>
         </div>
-      </div>
-
-      <div className="arch-panel" aria-live="polite">
-        {part ? (
-          <>
-            <h2 className="arch-title">{part.title}</h2>
-            <p>{part.story}</p>
-            {part.notes?.[view] && <p>{part.notes[view]}</p>}
-            {level >= 1 && <p className="arch-numbers">{part.numbers}</p>}
-            {level >= 2 && formula && (
-              <div className="arch-formula" dangerouslySetInnerHTML={{ __html: formula }} />
-            )}
-            {level >= 3 && part.code && (
-              <pre className="arch-code">
-                <code>{part.code}</code>
-              </pre>
-            )}
-            <p className="arch-links">
-              {link?.chapter ? (
-                <a href={link.chapter}>Read the chapter</a>
-              ) : (
-                <span>Chapter coming soon</span>
-              )}
-              {link?.glossary && <a href={link.glossary}>What the word means</a>}
-            </p>
-          </>
-        ) : (
-          <p>Tap a part, or press Next for a tour.</p>
-        )}
       </div>
     </div>
   );
