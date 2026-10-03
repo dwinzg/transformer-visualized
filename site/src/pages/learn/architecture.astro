@@ -10,7 +10,10 @@ import { TOUR, BLOCKS } from '../../lib/architecture-layout';
 import { formulaFor, PARTS, VIEWS, type PartId, type View } from '../../lib/concepts';
 import { withBase } from '../../lib/paths';
 
-const chapters = new Set((await getCollection('chapters')).map((chapter) => chapter.id));
+// Draft chapters get no page, so they count as missing.
+const chapters = new Set(
+  (await getCollection('chapters', ({ data }) => !data.draft)).map((chapter) => chapter.id),
+);
 const glossary = new Set((await getCollection('glossary')).map((entry) => entry.id));
 
 // Formulas are rendered here at build time, so the page ships no KaTeX JavaScript.

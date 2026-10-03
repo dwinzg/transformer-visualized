@@ -4,7 +4,8 @@ import Figure from '../Figure.astro';
 import Island from '../figures/PipelineFigure.tsx';
 import { withBase } from '../../lib/paths';
 
-const chapters = await getCollection('chapters');
+// Draft chapters get no page, so they count as missing.
+const chapters = await getCollection('chapters', ({ data }) => !data.draft);
 const ids = new Set(chapters.map((chapter) => chapter.id));
 const links: Partial<Record<'tokens' | 'embeddings' | 'output', string>> = {};
 if (ids.has('tokens')) links.tokens = withBase('learn/tokens/');
