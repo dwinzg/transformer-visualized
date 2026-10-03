@@ -1,5 +1,7 @@
 import { useEffect, useRef, useState, type KeyboardEvent } from 'react';
+import { mapPath, type PartId } from '../../lib/concepts';
 import { prefersReducedMotion } from '../../lib/motion';
+import { withBase } from '../../lib/paths';
 import './figures.css';
 
 interface Stage {
@@ -9,7 +11,7 @@ interface Stage {
   color: 'neutral' | 'position' | 'residual' | 'output';
   text: string;
   /** The part of the architecture map this stage opens. */
-  part: 'input' | 'embedding' | 'stack' | 'output';
+  part: PartId;
   /** Key into `links`, for the stages whose own chapter may exist. */
   linkKey?: 'tokens' | 'embeddings' | 'output';
 }
@@ -71,12 +73,10 @@ const STAGES: Stage[] = [
 
 interface Props {
   links?: Partial<Record<'tokens' | 'embeddings' | 'output', string>>;
-  /** The map page's URL with the site base, opened at each stage's part. */
-  mapHref: string;
 }
 
 /** The transformer's stages as a single-select list, from tokens in to a prediction out. */
-export default function PipelineFigure({ links = {}, mapHref }: Props) {
+export default function PipelineFigure({ links = {} }: Props) {
   const [selected, setSelected] = useState<number | null>(null);
   const [animate, setAnimate] = useState(false);
   const listRef = useRef<HTMLDivElement>(null);
@@ -156,7 +156,7 @@ export default function PipelineFigure({ links = {}, mapHref }: Props) {
                 <a href={href}>Read the {active.label} chapter.</a>
               </>
             )}{' '}
-            <a href={`${mapHref}?part=${active.part}`}>See it on the map.</a>
+            <a href={withBase(mapPath(active.part))}>See it on the map.</a>
           </>
         )}
       </p>

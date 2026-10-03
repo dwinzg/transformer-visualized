@@ -52,7 +52,7 @@ export const PARTS: Record<PartId, Part> = {
     story: 'Your text, split into tokens. Each token is an id number from the vocabulary.',
     notes: {
       original:
-        'In the paper this side read the translation so far, shifted one place right so each position predicts the next word.',
+        'In the paper the right side read the translation so far, shifted one place right so each position predicts the next word.',
     },
     numbers: 'The sentence "Lily wanted to play with her" is 6 token ids, each from 0 to 4,095.',
     code: "const ids = tokenizer.encode('Lily wanted to play with her');",
@@ -215,7 +215,10 @@ export function formulaFor(part: Part, view: View): string | undefined {
   return typeof part.formula === 'string' ? part.formula : part.formula?.[view];
 }
 
-/** The map page with one part picked, as a path without the site base. */
+/**
+ * The map page with one part picked, as a path without the site base. Links come from lessons
+ * about our GPT-2 style model, so they open that view. Parts it lacks fall back to the paper's.
+ */
 export function mapPath(part?: PartId): string {
-  return part ? `learn/architecture/?part=${part}` : 'learn/architecture/';
+  return part ? `learn/architecture/?part=${part}&view=gpt2` : 'learn/architecture/';
 }
