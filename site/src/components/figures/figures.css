@@ -212,3 +212,188 @@
     animation: none;
   }
 }
+
+/* Architecture map. The canvas keeps the 640 by 800 shape of the drawing; on narrow screens it
+   keeps a readable size and scrolls sideways inside its own frame instead of shrinking. */
+.arch-map {
+  display: grid;
+  gap: var(--space-4);
+}
+.arch-controls {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: var(--space-3);
+}
+.arch-views {
+  display: inline-flex;
+  flex-wrap: wrap;
+  gap: var(--space-1);
+  margin: 0;
+  padding: var(--space-1);
+  border: 0;
+  border-radius: var(--radius-lg);
+  background: var(--color-surface-2);
+}
+.arch-views label {
+  position: relative;
+}
+.arch-views input {
+  position: absolute;
+  opacity: 0;
+  inset: 0;
+}
+.arch-views span {
+  display: inline-flex;
+  align-items: center;
+  min-height: var(--touch-target);
+  padding: 0 var(--space-3);
+  border-radius: var(--radius-pill);
+  font-size: var(--text-subheadline);
+  cursor: pointer;
+}
+.arch-views input:checked + span {
+  background: var(--color-segment-selected);
+  border: 1px solid var(--color-control-border);
+  font-weight: 600;
+}
+.arch-views input:focus-visible + span {
+  outline: var(--focus-width) solid var(--color-focus);
+  outline-offset: var(--focus-offset);
+}
+.arch-tour {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2);
+}
+.arch-count {
+  min-width: 4.5rem;
+  text-align: center;
+  color: var(--color-text-secondary);
+  font-size: var(--text-footnote);
+  font-variant-numeric: tabular-nums;
+}
+.arch-scroll {
+  overflow-x: auto;
+}
+.arch-canvas {
+  position: relative;
+  width: max(36rem, min(100%, 40rem));
+  margin-inline: auto;
+  aspect-ratio: 640 / 800;
+}
+.arch-canvas svg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+.arch-frame {
+  fill: none;
+  stroke: var(--color-control-border);
+  stroke-dasharray: 6 4;
+}
+.arch-line {
+  fill: none;
+  stroke: var(--color-text-secondary);
+  stroke-width: 1.5;
+}
+.arch-arrowhead {
+  fill: var(--color-text-secondary);
+}
+.arch-n {
+  fill: var(--color-text-secondary);
+  font-size: 14px;
+}
+.arch-ghost {
+  opacity: 0.25;
+}
+.arch-ghost rect {
+  fill: none;
+  stroke: var(--color-text-secondary);
+  stroke-dasharray: 4 3;
+}
+.arch-ghost text {
+  fill: var(--color-text);
+  font-size: 13px;
+  text-anchor: middle;
+  dominant-baseline: central;
+}
+.arch-block {
+  position: absolute;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 var(--space-2) 0 var(--space-3);
+  border: 1px solid var(--color-control-border);
+  border-radius: var(--radius-sm);
+  background: var(--color-surface);
+  color: var(--color-text);
+  font-size: var(--text-footnote);
+  line-height: 1.15;
+  text-align: center;
+  cursor: pointer;
+  overflow: hidden;
+}
+/* A strip on the left carries the concept color. The label is always the main cue. */
+.arch-block::before {
+  content: '';
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: 6px;
+  background: var(--arch-color);
+}
+.arch-neutral {
+  --arch-color: var(--color-text-secondary);
+}
+.arch-position {
+  --arch-color: var(--concept-position);
+}
+.arch-residual {
+  --arch-color: var(--concept-residual);
+}
+.arch-output {
+  --arch-color: var(--concept-output);
+}
+.arch-attention {
+  --arch-color: linear-gradient(
+    var(--concept-query) 0 33%,
+    var(--concept-key) 33% 66%,
+    var(--concept-value) 66%
+  );
+}
+.arch-block[aria-checked='true'] {
+  border: 2px solid var(--color-accent);
+  font-weight: 600;
+  background: var(--color-surface-2);
+}
+.arch-panel {
+  min-height: 6rem;
+}
+.arch-panel p {
+  margin: 0 0 var(--space-2);
+}
+.arch-title {
+  margin: 0 0 var(--space-2);
+  font-size: var(--text-title-3);
+}
+.arch-numbers {
+  color: var(--color-text-secondary);
+}
+.arch-formula {
+  overflow-x: auto;
+  padding-block: var(--space-2);
+}
+.arch-code {
+  margin: 0 0 var(--space-2);
+  overflow-x: auto;
+}
+.arch-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-4);
+}
+.arch-links span {
+  color: var(--color-text-secondary);
+}
