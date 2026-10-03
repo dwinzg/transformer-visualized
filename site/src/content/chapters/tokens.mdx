@@ -1,0 +1,205 @@
+---
+title: Tokens
+order: 1
+summary: Before a model can read text, it cuts the text into pieces called tokens and swaps each piece for a number.
+goals:
+  - Say what a token and a token id are
+  - Predict when a word stays whole and when it splits
+  - Explain how byte pair encoding builds the list of tokens
+minutes: 10
+recap:
+  - A model reads tokens, pieces of text from a fixed list called the vocabulary.
+  - Each token has an id number, and the model only ever sees those numbers.
+  - Common words are one token. Rare words are built from smaller pieces.
+  - Byte pair encoding builds the list by merging the most common pairs of pieces.
+references:
+  - sennrich2016
+  - radford2019
+  - eldan2023
+---
+
+<Step title="Text becomes tokens" map="input">
+
+<Tokenizer text="Lily wanted to play with her" />
+
+<Level of="story">
+
+A model cannot read letters. It reads <Term id="token">tokens</Term>, pieces of text from a fixed list called the <Term id="vocabulary">vocabulary</Term>. Each token has a number, its <Term id="token-id">token id</Term>.
+
+Our sentence, "Lily wanted to play with her", is six tokens, one for each word. The model never sees the letters, only the six ids. Try typing your own sentence in the box.
+
+</Level>
+
+<Level of="numbers">
+
+Our vocabulary has 4,096 tokens, with ids from 0 to 4,095. The 28 characters of our sentence become 6 ids.
+
+| Token | Lily | ·wanted | ·to | ·play | ·with | ·her |
+| ----- | ---- | ------- | --- | ----- | ----- | ---- |
+| Id    | 665  | 408     | 266 | 324   | 329   | 336  |
+
+GPT-2 uses the same method with a much bigger list of 50,257 tokens (<Ref id="radford2019" />).
+
+</Level>
+
+<Level of="formula">
+
+Tokenizing turns a text into a sequence of ids, each one from the vocabulary.
+
+<Tex
+  display
+  tex="\text{text} \;\mapsto\; (t_1, t_2, \dots, t_T), \qquad t_i \in \{0, 1, \dots, 4095\}"
+/>
+
+For our sentence <Tex tex="T = 6" />.
+
+</Level>
+
+<Level of="code">
+
+```ts
+const ids = tokenizer.encode('Lily wanted to play with her');
+// [665, 408, 266, 324, 329, 336]
+```
+
+</Level>
+
+</Step>
+
+<PredictReveal question="How many tokens is the word &quot;Tokenization&quot; for our model?" options={['1', '2', '4']} answer={2}>
+
+Four. It becomes "To", "ken", "iz" and "ation". Our model learned from simple children's stories (<Ref id="eldan2023" />), where that word almost never shows up, so the vocabulary has no single token for it.
+
+</PredictReveal>
+
+<Step title="Common words stay whole, rare words split">
+
+<Tokenizer text="Tokenization is fun!" caption="Rare words are built from smaller pieces." />
+
+<Level of="story">
+
+Words the model saw often in training, like "play" or "happy", are one token each. A rare word is built from smaller pieces that are in the list. "Tokenization" becomes four pieces.
+
+Nothing is ever left out. The smallest pieces go all the way down to single letters, so every word can still be written.
+
+</Level>
+
+<Level of="numbers">
+
+"Tokenization is fun!" is 20 characters and 7 tokens. Small changes can matter too. "·played" is one token, but "·plays" is "·play" plus "s".
+
+A bigger vocabulary keeps more words whole, so the same text takes fewer tokens. A smaller one splits more often.
+
+</Level>
+
+<Level of="formula">
+
+Turning ids back into text undoes tokenizing exactly, for any text the model can read.
+
+<Tex display tex="\operatorname{decode}(\operatorname{encode}(x)) = x" />
+
+</Level>
+
+<Level of="code">
+
+```ts
+tokenizer.decode(tokenizer.encode('Tokenization is fun!'));
+// 'Tokenization is fun!'
+```
+
+</Level>
+
+</Step>
+
+<Callout kind="analogy" title="Like building blocks">
+
+Think of tokens as building blocks, with a big block for each common word and small blocks for everything else. **Where this breaks.** Real blocks look the same wherever they go. A token can change with the space before it or with a capital letter, as the next step shows.
+
+</Callout>
+
+<Step title="Spaces and capitals count">
+
+<Tokenizer text="Lily was happy. Happy Lily!" caption="Look at the ids for Lily and for happy." />
+
+<Level of="story">
+
+The space before a word is part of its token. "Lily" at the very start and "·Lily" after a space are two different tokens with two different ids.
+
+Capitals matter too. "·happy" is one token, but "·Happy" splits into two, because it was much rarer in training. To the model these are different pieces, and it has to learn that they mean nearly the same thing.
+
+</Level>
+
+<Level of="numbers">
+
+| Token | Lily | ·Lily | ·happy | ·H + appy  |
+| ----- | ---- | ----- | ------ | ---------- |
+| Id    | 665  | 405   | 376    | 308 + 3189 |
+
+So "Lily was happy. Happy Lily!" is 27 characters and 8 tokens.
+
+</Level>
+
+<Level of="formula">
+
+Tokenizing is case and space sensitive. The same word can map to different ids.
+
+<Tex
+  display
+  tex="\operatorname{encode}(\text{Lily}) = (665), \qquad \operatorname{encode}(\text{·Lily}) = (405)"
+/>
+
+</Level>
+
+<Level of="code">
+
+```ts
+tokenizer.encode('Lily'); // [665]
+tokenizer.encode(' Lily'); // [405]
+```
+
+</Level>
+
+</Step>
+
+<Step title="How the list was made">
+
+<Tokenizer text="Zebras zigzag 123" caption="Try an emoji or a long, rare word." />
+
+<Level of="story">
+
+The vocabulary is built before training, with a method called <Term id="byte-pair-encoding">byte pair encoding</Term> (<Ref id="sennrich2016" />). It starts with the 256 possible bytes, so any text at all can be written. Then it finds the pair of pieces that sits side by side most often in the training text and joins them into a new token. It repeats this until the list is full. Common words end up whole.
+
+</Level>
+
+<Level of="numbers">
+
+Our list has 1 special token that marks the end of a story, 256 single bytes and 3,839 joined pieces, 4,096 in all. The very first join was a space followed by "t", as in "·the" and "·to".
+
+Numbers are split into single digits, so "123" is three tokens. An emoji the model never saw is written as 4 raw bytes.
+
+</Level>
+
+<Level of="formula">
+
+Each round joins the pair of neighboring pieces <Tex tex="(a, b)" /> that appears most often in the training text, then counts again.
+
+<Tex display tex="(a, b)^{*} = \arg\max_{(a,\, b)} \operatorname{count}(a\,b)" />
+
+</Level>
+
+<Level of="code">
+
+```ts
+tokenizer.encode('😀').map((id) => tokenizer.tokenText(id));
+// ['<0xF0>', '<0x9F>', '<0x98>', '<0x80>']
+```
+
+</Level>
+
+</Step>
+
+<Exercise prompt="How many tokens is &quot;The little dog ran to the park.&quot;? Make a guess, then check it in any of the boxes above." answer={8} tolerance={0}>
+
+Eight. Each of the seven words is common, so each one is a single token, and the full stop is a token of its own.
+
+</Exercise>

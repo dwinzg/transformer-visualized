@@ -141,9 +141,17 @@ test.describe('on a phone', () => {
   });
 });
 
-test('the chapter has no pager when there is no other chapter', async ({ page }) => {
+test('the pager links each chapter to its neighbors', async ({ page }) => {
   await page.goto(CHAPTER);
-  await expect(page.getByRole('navigation', { name: 'Chapters' })).toHaveCount(0);
+  const pager = page.getByRole('navigation', { name: 'Chapters' });
+  await expect(pager.getByRole('link')).toHaveCount(1);
+  await pager.getByRole('link', { name: /Tokens/ }).click();
+  await expect(page).toHaveURL(/learn\/tokens\/$/);
+  await expect(
+    page
+      .getByRole('navigation', { name: 'Chapters' })
+      .getByRole('link', { name: /What a language model does/ }),
+  ).toBeVisible();
 });
 
 test('the chapter ends with a recap and links to go deeper', async ({ page }) => {

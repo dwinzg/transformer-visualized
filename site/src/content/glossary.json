@@ -9,7 +9,7 @@
     "id": "token",
     "term": "Token",
     "short": "One piece of text from a fixed list the model knows, often a whole word or part of one.",
-    "related": ["language-model"]
+    "related": ["language-model", "token-id", "vocabulary"]
   },
   {
     "id": "probability",
@@ -40,5 +40,23 @@
     "term": "Training",
     "short": "Adjusting a model's parameters, a little at a time, so its predictions on example text get better.",
     "related": ["parameter"]
+  },
+  {
+    "id": "vocabulary",
+    "term": "Vocabulary",
+    "short": "The fixed list of every token a model knows. Ours has 4,096 tokens, and GPT-2 has 50,257.",
+    "related": ["token", "byte-pair-encoding"]
+  },
+  {
+    "id": "token-id",
+    "term": "Token id",
+    "short": "The number that stands for a token in the vocabulary. The model only ever sees these numbers.",
+    "related": ["token", "vocabulary"]
+  },
+  {
+    "id": "byte-pair-encoding",
+    "term": "Byte pair encoding",
+    "short": "A way to build a vocabulary. Start with single bytes, then keep joining the pair of pieces that appears together most often.",
+    "related": ["vocabulary", "token"]
   }
 ]
