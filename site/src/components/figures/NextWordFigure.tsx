@@ -1,12 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import {
-  browserStorage,
-  DEPTH_EVENT,
-  DEPTHS,
-  isDepth,
-  readStoredDepth,
-  type Depth,
-} from '../../lib/depth';
+import { DEPTH_EVENT, DEPTHS, isDepth, pageDepth, type Depth } from '../../lib/depth';
 import {
   chosenTokens,
   describeGuesses,
@@ -30,7 +23,7 @@ export default function NextWordFigure({ tree }: { tree: GuessTree }) {
   const remember = useTravel(root, path);
 
   useEffect(() => {
-    setDepth(readStoredDepth(browserStorage()));
+    setDepth(pageDepth());
     const onChange = (event: Event) => {
       const detail = (event as CustomEvent<unknown>).detail;
       if (isDepth(detail)) setDepth(detail);
