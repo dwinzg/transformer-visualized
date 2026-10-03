@@ -302,6 +302,11 @@
 .arch-arrowhead {
   fill: var(--color-text-secondary);
 }
+.arch-plus {
+  fill: var(--color-surface);
+  stroke: var(--color-text-secondary);
+  stroke-width: 1.5;
+}
 .arch-n {
   fill: var(--color-text-secondary);
   font-size: 14px;

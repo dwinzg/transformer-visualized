@@ -1,7 +1,15 @@
 import { readFileSync, readdirSync } from 'node:fs';
 import katex from 'katex';
 import { describe, expect, it } from 'vitest';
-import { BLOCKS, BOX, firstBlockFor, TOUR, visibleBlocks } from './architecture-layout';
+import {
+  BLOCKS,
+  blockY,
+  BOX,
+  firstBlockFor,
+  TOUR,
+  visibleBlocks,
+  type Block,
+} from './architecture-layout';
 import { formulaFor, isPartId, mapPath, PARTS, VIEWS, type View } from './concepts';
 import { stepId } from './stepId';
 
@@ -71,17 +79,30 @@ describe('architecture layout', () => {
   });
   it.each(VIEWS)('keeps blocks inside the box and apart in the %s view', (view: View) => {
     const blocks = visibleBlocks(view);
+    const y = (b: Block) => blockY(b, view);
     for (const b of blocks) {
-      expect(b.x >= 0 && b.y >= 0 && b.x + b.w <= BOX.width && b.y + b.h <= BOX.height, b.id).toBe(
-        true,
-      );
+      expect(
+        b.x >= 0 && y(b) >= 0 && b.x + b.w <= BOX.width && y(b) + b.h <= BOX.height,
+        b.id,
+      ).toBe(true);
     }
     for (const a of blocks)
       for (const b of blocks) {
         if (a === b) continue;
-        const apart = a.x + a.w <= b.x || b.x + b.w <= a.x || a.y + a.h <= b.y || b.y + b.h <= a.y;
+        const apart =
+          a.x + a.w <= b.x || b.x + b.w <= a.x || y(a) + a.h <= y(b) || y(b) + b.h <= y(a);
         expect(apart, `${a.id} and ${b.id}`).toBe(true);
       }
+  });
+  it('draws each GPT-2 norm below its sublayer, since the diagram reads upward', () => {
+    const at = (id: string) =>
+      blockY(
+        BLOCKS.find((b) => b.id === id)!,
+        'gpt2',
+      );
+    expect(at('add-norm-1')).toBeGreaterThan(at('masked-attn'));
+    expect(at('add-norm-3')).toBeGreaterThan(at('ffn'));
+    expect(TOUR.gpt2.indexOf('add-norm-1')).toBeLessThan(TOUR.gpt2.indexOf('masked-attn'));
   });
   it('lands links on the first block of a part', () => {
     expect(firstBlockFor('add-norm', 'gpt2')?.id).toBe('add-norm-1');
