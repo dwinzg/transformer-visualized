@@ -8,7 +8,10 @@ const entries = (await getCollection('glossary')).sort((a, b) =>
   a.data.term.localeCompare(b.data.term),
 );
 const termById = new Map(entries.map((entry) => [entry.id, entry.data.term]));
-const chapters = new Map((await getCollection('chapters')).map((c) => [c.id, c.data.title]));
+// Draft chapters get no page, so they count as missing.
+const chapters = new Map(
+  (await getCollection('chapters', ({ data }) => !data.draft)).map((c) => [c.id, c.data.title]),
+);
 
 /** The map part and the chapter that teach a term, from the shared concept list. */
 function placesFor(id: string) {
