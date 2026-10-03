@@ -63,6 +63,7 @@ export function chooseDepth(depth: Depth): void {
   } catch {
     // Storage can be full or blocked. The choice then lasts for this page only.
   }
+  markPageDepth(depth);
   document.dispatchEvent(new CustomEvent<Depth>(DEPTH_EVENT, { detail: depth }));
   clearDepthQueryParam();
 }
@@ -76,6 +77,21 @@ export function chooseDepth(depth: Depth): void {
 export function applyDepthFromQuery(): void {
   const requested = new URL(location.href).searchParams.get('depth');
   if (!isDepth(requested)) return;
+  markPageDepth(requested);
   document.dispatchEvent(new CustomEvent<Depth>(DEPTH_EVENT, { detail: requested }));
   clearDepthQueryParam();
+}
+
+/**
+ * Records the level shown on this page, so islands that hydrate later (client:visible) start at
+ * it instead of missing the event that a `?depth=` link fired at load.
+ */
+function markPageDepth(depth: Depth): void {
+  document.documentElement.dataset.depth = depth;
+}
+
+/** The level this page shows right now: a `?depth=` link or a pick on this page, else the saved one. */
+export function pageDepth(): Depth {
+  const marked = document.documentElement.dataset.depth;
+  return isDepth(marked) ? marked : readStoredDepth(browserStorage());
 }

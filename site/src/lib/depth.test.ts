@@ -7,6 +7,7 @@ import {
   DEPTH_STORAGE_KEY,
   DEPTHS,
   isDepth,
+  pageDepth,
   readStoredDepth,
 } from './depth';
 
@@ -57,7 +58,7 @@ describe('chooseDepth', () => {
     const setItem = vi.fn();
     const dispatchEvent = vi.fn();
     vi.stubGlobal('localStorage', { setItem });
-    vi.stubGlobal('document', { dispatchEvent });
+    vi.stubGlobal('document', { dispatchEvent, documentElement: { dataset: {} } });
     vi.stubGlobal('location', { href: 'https://example.com/learn/' });
     vi.stubGlobal('history', { replaceState: vi.fn(), state: null });
     chooseDepth('code');
@@ -74,7 +75,7 @@ describe('chooseDepth', () => {
         throw new Error('full');
       },
     });
-    vi.stubGlobal('document', { dispatchEvent });
+    vi.stubGlobal('document', { dispatchEvent, documentElement: { dataset: {} } });
     vi.stubGlobal('location', { href: 'https://example.com/learn/' });
     vi.stubGlobal('history', { replaceState: vi.fn(), state: null });
     chooseDepth('numbers');
@@ -84,7 +85,7 @@ describe('chooseDepth', () => {
   it('drops a depth query parameter from the address bar', () => {
     const replaceState = vi.fn();
     vi.stubGlobal('localStorage', { setItem: vi.fn() });
-    vi.stubGlobal('document', { dispatchEvent: vi.fn() });
+    vi.stubGlobal('document', { dispatchEvent: vi.fn(), documentElement: { dataset: {} } });
     vi.stubGlobal('location', { href: 'https://example.com/learn/?depth=formula&foo=bar' });
     vi.stubGlobal('history', { replaceState, state: null });
     chooseDepth('code');
@@ -96,7 +97,7 @@ describe('chooseDepth', () => {
   it('leaves the address bar alone when there is no depth parameter', () => {
     const replaceState = vi.fn();
     vi.stubGlobal('localStorage', { setItem: vi.fn() });
-    vi.stubGlobal('document', { dispatchEvent: vi.fn() });
+    vi.stubGlobal('document', { dispatchEvent: vi.fn(), documentElement: { dataset: {} } });
     vi.stubGlobal('location', { href: 'https://example.com/learn/' });
     vi.stubGlobal('history', { replaceState, state: null });
     chooseDepth('code');
@@ -109,7 +110,7 @@ describe('applyDepthFromQuery', () => {
     const dispatchEvent = vi.fn();
     const setItem = vi.fn();
     const replaceState = vi.fn();
-    vi.stubGlobal('document', { dispatchEvent });
+    vi.stubGlobal('document', { dispatchEvent, documentElement: { dataset: {} } });
     vi.stubGlobal('localStorage', { setItem });
     vi.stubGlobal('location', { href: 'https://example.com/learn/?depth=formula' });
     vi.stubGlobal('history', { replaceState, state: null });
@@ -128,7 +129,7 @@ describe('applyDepthFromQuery', () => {
   it('does nothing without a valid depth parameter', () => {
     const dispatchEvent = vi.fn();
     const replaceState = vi.fn();
-    vi.stubGlobal('document', { dispatchEvent });
+    vi.stubGlobal('document', { dispatchEvent, documentElement: { dataset: {} } });
     vi.stubGlobal('location', { href: 'https://example.com/learn/?depth=nonsense' });
     vi.stubGlobal('history', { replaceState, state: null });
 
@@ -136,5 +137,19 @@ describe('applyDepthFromQuery', () => {
 
     expect(dispatchEvent).not.toHaveBeenCalled();
     expect(replaceState).not.toHaveBeenCalled();
+  });
+});
+
+describe('pageDepth', () => {
+  it('prefers the level marked on this page over the saved one', () => {
+    const dataset: Record<string, string> = {};
+    vi.stubGlobal('document', { dispatchEvent: vi.fn(), documentElement: { dataset } });
+    vi.stubGlobal('localStorage', { getItem: () => 'numbers', setItem: vi.fn() });
+    vi.stubGlobal('location', { href: 'https://example.com/learn/?depth=code' });
+    vi.stubGlobal('history', { replaceState: vi.fn(), state: null });
+
+    expect(pageDepth()).toBe('numbers');
+    applyDepthFromQuery();
+    expect(pageDepth()).toBe('code');
   });
 });
