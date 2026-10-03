@@ -20,6 +20,10 @@ const chapters = (await getCollection('chapters', ({ data }) => !data.draft)).so
       explained. You can change it at any step.
     </p>
     <DepthDial />
+    <a class="map-row press" href={withBase('learn/architecture/')}>
+      <span class="title">The transformer at a glance</span>
+      <span class="summary">A clickable map of the whole model.</span>
+    </a>
     <ol class="chapters">
       {chapters.map((chapter) => (
         <li>
@@ -54,10 +58,23 @@ const chapters = (await getCollection('chapters', ({ data }) => !data.draft)).so
   .intro {
     color: var(--color-text-secondary);
   }
+  .map-row {
+    display: grid;
+    gap: var(--space-1);
+    min-height: var(--touch-target);
+    margin-top: var(--space-8);
+    padding: var(--space-5) var(--space-1);
+    border-top: 1px solid var(--color-separator);
+    color: var(--color-text);
+    text-decoration: none;
+  }
+  .map-row:hover .title {
+    color: var(--color-accent);
+  }
   .chapters {
     list-style: none;
     padding: 0;
-    margin-top: var(--space-8);
+    margin-top: 0;
   }
   .chapters a {
     display: grid;
