@@ -109,3 +109,10 @@ export function guessTree(prompt: string): GuessTree {
   cache.set(prompt, tree);
   return tree;
 }
+
+/** The tokens of a text as the live tokenizer shows them, for its first paint before it loads. */
+export function tokenize(text: string): DisplayToken[] {
+  assertSupported(text);
+  const tok = getTokenizer();
+  return tok.encode(normalizeText(text)).map((id) => ({ id, text: tok.tokenText(id) }));
+}

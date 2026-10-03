@@ -1,0 +1,18 @@
+---
+import Figure from '../Figure.astro';
+import Island from '../figures/TokenizerFigure.tsx';
+import { tokenize } from '../../lib/demo-data';
+
+interface Props {
+  text: string;
+  caption?: string;
+}
+const { text, caption = 'Type anything to see its tokens.' } = Astro.props;
+---
+
+<Figure
+  caption={caption}
+  description="A text box with the tokens of its text below it, each shown as a chip with its id number."
+>
+  <Island client:visible text={text} tokens={tokenize(text)} />
+</Figure>
