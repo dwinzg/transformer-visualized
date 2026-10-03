@@ -12,12 +12,48 @@ async function firstTokenizer(page: Page): Promise<Locator> {
   return figure;
 }
 
-test('the starting sentence shows its tokens before anything loads', async ({ page }) => {
+const TOKENIZER = /tokenizer[^/]*\.json$/;
+
+test('the starting sentence shows its tokens before the tokenizer loads', async ({ page }) => {
+  // Hold the download back for the whole test.
+  await page.route(TOKENIZER, () => {});
   await page.goto(CHAPTER);
-  const chips = page.locator('.tokenizer-tokens').first().locator('.token-chip');
+  const figure = page.locator('.tokenizer-figure').first();
+  await figure.scrollIntoViewIfNeeded();
+  const chips = figure.locator('.token-chip');
   await expect(chips).toHaveCount(6);
-  await expect(chips.first()).toHaveAccessibleName('Lily, id 665');
-  await expect(chips.nth(1)).toHaveAccessibleName('space wanted, id 408');
+  await expect(chips.first()).toHaveText(/Lily/);
+  await expect(chips.nth(1).locator('.visually-hidden')).toHaveText('space wanted, id 408');
+  await expect(figure.locator('.tokenizer-count')).toHaveText('28 characters, 6 tokens');
+});
+
+test('a failed download says so, and typing again retries it', async ({ page }) => {
+  await page.route(TOKENIZER, (route) => route.abort());
+  await page.goto(CHAPTER);
+  const figure = page.locator('.tokenizer-figure').first();
+  await figure.scrollIntoViewIfNeeded();
+  const box = figure.getByRole('textbox', { name: 'Your text' });
+  await expect(box).not.toHaveAttribute('readonly');
+  await box.fill('Hello');
+  await expect(figure.locator('.tokenizer-count')).toHaveText(/did not load/);
+  await page.unroute(TOKENIZER);
+  await box.fill('Hello there');
+  await expect(figure.locator('.tokenizer-count')).toHaveText('11 characters, 2 tokens');
+});
+
+test('it works from the keyboard alone', async ({ page }) => {
+  await page.goto(CHAPTER);
+  const figure = await firstTokenizer(page);
+  const startOver = figure.getByRole('button', { name: 'Start over' });
+  const box = figure.getByRole('textbox', { name: 'Your text' });
+  // WebKit leaves buttons out of the Tab order by default, so focus each control directly.
+  await box.focus();
+  await page.keyboard.press('ControlOrMeta+A');
+  await page.keyboard.type('Lily ran');
+  await expect(figure.locator('.tokenizer-count')).toHaveText('8 characters, 2 tokens');
+  await startOver.focus();
+  await page.keyboard.press('Enter');
+  await expect(box).toHaveValue('Lily wanted to play with her');
 });
 
 test('typing shows the new tokens and count, and Start over brings the sentence back', async ({
@@ -28,7 +64,10 @@ test('typing shows the new tokens and count, and Start over brings the sentence 
   const box = figure.getByRole('textbox', { name: 'Your text' });
   await box.fill('Tokenization is fun!');
   await expect(figure.locator('.tokenizer-count')).toHaveText('20 characters, 7 tokens');
-  await expect(figure.locator('.token-chip').first()).toHaveAccessibleName('To, id 2275');
+  await expect(figure.locator('.token-chip').first()).toHaveText(/To/);
+  await expect(figure.locator('.token-chip').first().locator('.visually-hidden')).toHaveText(
+    'To, id 2275',
+  );
   await figure.getByRole('button', { name: 'Start over' }).click();
   await expect(box).toHaveValue('Lily wanted to play with her');
   await expect(figure.locator('.tokenizer-count')).toHaveText('28 characters, 6 tokens');
@@ -39,15 +78,17 @@ test('it explains cleaned punctuation and characters the model never saw', async
   const figure = await firstTokenizer(page);
   const box = figure.getByRole('textbox', { name: 'Your text' });
   await box.fill('It’s a café');
-  await expect(figure).toContainText('Curly quotes and long dashes become plain ones');
+  await expect(figure).toContainText('Curly quotes, long dashes and other fancy punctuation');
   await expect(figure).toContainText('The model never saw é in training');
-  await expect(figure.locator('.token-chip', { hasText: '<0xC3>' })).toHaveCount(1);
+  await expect(figure.locator('.token-chip', { hasText: 'byte C3' })).toHaveCount(1);
+  await box.fill('Hi 😀');
+  await expect(figure.locator('.tokenizer-count')).toHaveText(/^4 characters/);
 });
 
 test('only the Tokens chapter downloads the tokenizer, once for every figure', async ({ page }) => {
   const fetched: string[] = [];
   page.on('request', (request) => {
-    if (/tokenizer[^/]*\.json$/.test(request.url())) fetched.push(request.url());
+    if (TOKENIZER.test(request.url())) fetched.push(request.url());
   });
   await page.goto('learn/introduction/');
   await page.evaluate(() => window.scrollTo(0, document.body.scrollHeight));
@@ -55,10 +96,12 @@ test('only the Tokens chapter downloads the tokenizer, once for every figure', a
   expect(fetched).toHaveLength(0);
 
   await page.goto(CHAPTER);
-  for (const figure of await page.locator('.tokenizer-figure').all()) {
+  const figures = page.locator('.tokenizer-figure');
+  for (const figure of await figures.all()) {
     await figure.scrollIntoViewIfNeeded();
+    await expect(figure).toHaveAttribute('data-ready');
   }
-  await page.waitForLoadState('networkidle');
+  expect(await figures.count()).toBeGreaterThan(1);
   expect(fetched).toHaveLength(1);
 });
 
