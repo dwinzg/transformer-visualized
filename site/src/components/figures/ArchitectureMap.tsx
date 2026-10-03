@@ -3,8 +3,10 @@ import {
   BLOCKS,
   BOX,
   blockLabel,
+  blockY,
   firstBlockFor,
   FRAMES,
+  RESIDUALS,
   TOUR,
   visibleBlocks,
   type Block,
@@ -230,16 +232,28 @@ export default function ArchitectureMap({ formulas, links }: Props) {
                 key={`${from.id}-${to.id}`}
                 className="arch-line"
                 x1={from.x + from.w / 2}
-                y1={from.y}
+                y1={blockY(from, view)}
                 x2={to.x + to.w / 2}
-                y2={to.y + to.h + 2}
+                y2={blockY(to, view) + to.h + 2}
                 markerEnd="url(#arch-arrow)"
               />
             ))}
+            {view === 'gpt2' &&
+              RESIDUALS.map(({ from, to }) => (
+                <g key={from}>
+                  <path
+                    className="arch-line"
+                    d={`M450 ${from} H332 V${to} H442`}
+                    markerEnd="url(#arch-arrow)"
+                  />
+                  <circle className="arch-plus" cx="450" cy={to} r="6" />
+                  <path className="arch-line" d={`M446 ${to} H454 M450 ${to - 4} V${to + 4}`} />
+                </g>
+              ))}
             {hidden.map((b) => (
               <g key={b.id} className="arch-ghost">
-                <rect x={b.x} y={b.y} width={b.w} height={b.h} rx="8" />
-                <text x={b.x + b.w / 2} y={b.y + b.h / 2}>
+                <rect x={b.x} y={blockY(b, 'original')} width={b.w} height={b.h} rx="8" />
+                <text x={b.x + b.w / 2} y={blockY(b, 'original') + b.h / 2}>
                   {blockLabel(b, 'original')}
                 </text>
               </g>
@@ -265,7 +279,7 @@ export default function ArchitectureMap({ formulas, links }: Props) {
                 className={`arch-block press arch-${PARTS[b.part].color}`}
                 style={{
                   left: pct(b.x, BOX.width),
-                  top: pct(b.y, BOX.height),
+                  top: pct(blockY(b, view), BOX.height),
                   width: pct(b.w, BOX.width),
                   height: pct(b.h, BOX.height),
                 }}
