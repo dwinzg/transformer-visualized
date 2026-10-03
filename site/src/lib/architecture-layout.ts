@@ -6,7 +6,8 @@ export interface Block {
   label: string | Record<View, string>;
   views: readonly View[];
   x: number;
-  y: number;
+  /** One y for both views, or one per view where GPT-2 moves the block. */
+  y: number | Record<View, number>;
   w: number;
   h: number;
 }
@@ -99,16 +100,16 @@ export const BLOCKS: readonly Block[] = [
     label: 'Masked multi-head attention',
     views: BOTH,
     ...D,
-    y: 546,
+    y: { original: 546, gpt2: 500 },
     h: 44,
   },
   {
     id: 'add-norm-1',
     part: 'add-norm',
-    label: { original: 'Add and norm', gpt2: 'Norm, then add' },
+    label: { original: 'Add and norm', gpt2: 'Norm' },
     views: BOTH,
     ...D,
-    y: 500,
+    y: { original: 500, gpt2: 558 },
     h: 32,
   },
   {
@@ -129,14 +130,22 @@ export const BLOCKS: readonly Block[] = [
     y: 396,
     h: 32,
   },
-  { id: 'ffn', part: 'ffn', label: 'Feed forward', views: BOTH, ...D, y: 316, h: 44 },
+  {
+    id: 'ffn',
+    part: 'ffn',
+    label: 'Feed forward',
+    views: BOTH,
+    ...D,
+    y: { original: 316, gpt2: 270 },
+    h: 44,
+  },
   {
     id: 'add-norm-3',
     part: 'add-norm',
-    label: { original: 'Add and norm', gpt2: 'Norm, then add' },
+    label: { original: 'Add and norm', gpt2: 'Norm' },
     views: BOTH,
     ...D,
-    y: 270,
+    y: { original: 270, gpt2: 328 },
     h: 32,
   },
   { id: 'stack', part: 'stack', label: 'N×', views: BOTH, x: 576, y: 400, w: 48, h: 44 },
@@ -152,7 +161,7 @@ export const FRAMES = [
   { views: ORIGINAL, x: 24, y: 384, w: 252, h: 218 },
 ] as const;
 
-const DECODER_TOUR = ['input', 'embedding', 'position', 'masked-attn', 'add-norm-1'];
+const DECODER_INPUT = ['input', 'embedding', 'position'];
 export const TOUR: Record<View, readonly string[]> = {
   original: [
     'enc-input',
@@ -162,7 +171,9 @@ export const TOUR: Record<View, readonly string[]> = {
     'enc-add-norm-1',
     'enc-ffn',
     'enc-add-norm-2',
-    ...DECODER_TOUR,
+    ...DECODER_INPUT,
+    'masked-attn',
+    'add-norm-1',
     'cross-attn',
     'add-norm-2',
     'ffn',
@@ -172,10 +183,13 @@ export const TOUR: Record<View, readonly string[]> = {
     'softmax',
     'output',
   ],
+  // GPT-2 norms before each sublayer, so each norm comes first.
   gpt2: [
-    ...DECODER_TOUR,
-    'ffn',
+    ...DECODER_INPUT,
+    'add-norm-1',
+    'masked-attn',
     'add-norm-3',
+    'ffn',
     'stack',
     'final-norm',
     'linear',
@@ -187,6 +201,19 @@ export const TOUR: Record<View, readonly string[]> = {
 export function blockLabel(block: Block, view: View): string {
   return typeof block.label === 'string' ? block.label : block.label[view];
 }
+
+export function blockY(block: Block, view: View): number {
+  return typeof block.y === 'number' ? block.y : block.y[view];
+}
+
+/**
+ * GPT-2's residual adds: the line leaves below each norm, skips around it and its sublayer, and
+ * joins at a plus just above the sublayer.
+ */
+export const RESIDUALS = [
+  { from: 610, to: 490 },
+  { from: 375, to: 263 },
+] as const;
 
 export function visibleBlocks(view: View): Block[] {
   return BLOCKS.filter((b) => b.views.includes(view));
