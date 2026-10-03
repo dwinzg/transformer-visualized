@@ -1,15 +1,20 @@
 ---
+import { isPartId, mapPath, type PartId } from '../../lib/concepts';
+import { withBase } from '../../lib/paths';
 import { stepId } from '../../lib/stepId';
 
 interface Props {
   title: string;
+  /** Adds a "See it on the map" link: true for the whole map, or a part to open it at. */
+  map?: PartId | true;
 }
 
 // Steps on the same page can share a title (or one with no ASCII letters to slugify), so ids are
 // deduplicated against the others on the page. Astro.locals is fresh for every request (one
 // request per static page), so this needs no keying by pathname, the same way Term.astro counts
 // its popovers.
-const { title } = Astro.props;
+const { title, map } = Astro.props;
+const mapHref = map ? withBase(mapPath(isPartId(map) ? map : undefined)) : undefined;
 const taken = ((Astro.locals as { stepIds?: Set<string> }).stepIds ??= new Set());
 const id = stepId(title, taken);
 taken.add(id);
@@ -19,6 +24,11 @@ taken.add(id);
   <div class="step-head">
     <h2 id={`${id}-title`}>{title}</h2>
   </div>
+  {mapHref && (
+    <p class="map-link">
+      <a href={mapHref}>See it on the map</a>
+    </p>
+  )}
   <div class="step-levels">
     <slot />
   </div>
@@ -121,6 +131,15 @@ taken.add(id);
   }
   .step-head h2 {
     margin: 0;
+  }
+  .map-link {
+    margin: calc(-1 * var(--space-4)) 0 var(--space-4);
+    font-size: var(--text-footnote);
+  }
+  .map-link a {
+    display: inline-flex;
+    align-items: center;
+    min-height: var(--touch-target);
   }
   .step :global(.level-tabs) {
     display: inline-flex;
