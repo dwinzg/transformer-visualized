@@ -8,6 +8,8 @@ interface Stage {
   /** One of the site's concept colors, see figures.css. */
   color: 'neutral' | 'position' | 'residual' | 'output';
   text: string;
+  /** The part of the architecture map this stage opens. */
+  part: 'input' | 'embedding' | 'stack' | 'output';
   /** Key into `links`, for the stages whose own chapter may exist. */
   linkKey?: 'tokens' | 'embeddings' | 'output';
 }
@@ -15,6 +17,7 @@ interface Stage {
 const STAGES: Stage[] = [
   {
     id: 'tokens',
+    part: 'input',
     label: 'Tokens',
     color: 'neutral',
     text: 'The text is split into tokens. Each token has an id number.',
@@ -22,6 +25,7 @@ const STAGES: Stage[] = [
   },
   {
     id: 'embeddings',
+    part: 'embedding',
     label: 'Embeddings and position',
     color: 'position',
     text: 'Each id becomes a list of 128 numbers. Its position is mixed in.',
@@ -29,30 +33,35 @@ const STAGES: Stage[] = [
   },
   {
     id: 'block-1',
+    part: 'stack',
     label: 'Block 1',
     color: 'residual',
     text: 'Each token looks at the tokens before it and updates its numbers.',
   },
   {
     id: 'block-2',
+    part: 'stack',
     label: 'Block 2',
     color: 'residual',
     text: 'Each token looks at the tokens before it and updates its numbers.',
   },
   {
     id: 'block-3',
+    part: 'stack',
     label: 'Block 3',
     color: 'residual',
     text: 'Each token looks at the tokens before it and updates its numbers.',
   },
   {
     id: 'block-4',
+    part: 'stack',
     label: 'Block 4',
     color: 'residual',
     text: 'Each token looks at the tokens before it and updates its numbers.',
   },
   {
     id: 'output',
+    part: 'output',
     label: 'Output',
     color: 'output',
     text: "The last token's numbers become a chance for every possible next token.",
@@ -62,10 +71,12 @@ const STAGES: Stage[] = [
 
 interface Props {
   links?: Partial<Record<'tokens' | 'embeddings' | 'output', string>>;
+  /** The map page's URL with the site base, opened at each stage's part. */
+  mapHref: string;
 }
 
 /** The transformer's stages as a single-select list, from tokens in to a prediction out. */
-export default function PipelineFigure({ links = {} }: Props) {
+export default function PipelineFigure({ links = {}, mapHref }: Props) {
   const [selected, setSelected] = useState<number | null>(null);
   const [animate, setAnimate] = useState(false);
   const listRef = useRef<HTMLDivElement>(null);
@@ -144,7 +155,8 @@ export default function PipelineFigure({ links = {} }: Props) {
                 {' '}
                 <a href={href}>Read the {active.label} chapter.</a>
               </>
-            )}
+            )}{' '}
+            <a href={`${mapHref}?part=${active.part}`}>See it on the map.</a>
           </>
         )}
       </p>
