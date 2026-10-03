@@ -10,6 +10,7 @@ import Ref from './Ref.astro';
 import Step from './Step.astro';
 import Term from './Term.astro';
 import Tex from './Tex.astro';
+import Tokenizer from './Tokenizer.astro';
 
 /** Components every chapter can use without importing them. */
 export const mdxComponents = {
@@ -25,4 +26,5 @@ export const mdxComponents = {
   Step,
   Tex,
   Term,
+  Tokenizer,
 };

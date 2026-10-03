@@ -422,3 +422,51 @@
 .arch-links span {
   color: var(--color-text-secondary);
 }
+
+/* Live tokenizer. */
+.tokenizer-figure {
+  display: grid;
+  gap: var(--space-3);
+}
+.tokenizer-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2);
+  font-weight: 600;
+}
+.tokenizer-input {
+  width: 100%;
+  padding: var(--space-3);
+  border: 1px solid var(--color-control-border);
+  border-radius: var(--radius-md);
+  background: var(--color-surface);
+  color: var(--color-text);
+  font-size: var(--text-title-3);
+  resize: vertical;
+}
+.tokenizer-input:focus-visible {
+  outline: var(--focus-width) solid var(--color-focus);
+  outline-offset: var(--focus-offset);
+}
+.tokenizer-count {
+  margin: 0;
+  color: var(--color-text-secondary);
+  font-size: var(--text-footnote);
+  font-variant-numeric: tabular-nums;
+}
+.tokenizer-tokens {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.tokenizer-notes p {
+  margin: 0 0 var(--space-1);
+  color: var(--color-text-secondary);
+  font-size: var(--text-footnote);
+}
+.tokenizer-notes .tokenizer-unseen {
+  color: var(--color-text);
+  font-weight: 600;
+}
