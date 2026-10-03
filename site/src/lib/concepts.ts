@@ -94,10 +94,10 @@ export const PARTS: Record<PartId, Part> = {
     title: 'Masked attention',
     color: 'attention',
     story:
-      'Each token looks back at the tokens before it and pulls in what it needs. Masked means it cannot look ahead.',
+      'Each token looks at itself and the tokens before it, and pulls in what it needs. Masked means it cannot look ahead.',
     numbers:
       'Our model has 4 heads with 32 numbers each. Each head makes a 6 by 6 grid of weights.',
-    formula: String.raw`\mathrm{softmax}\!\left(\frac{QK^\top}{\sqrt{d_k}} + M\right)V`,
+    formula: String.raw`\mathrm{softmax}\!\left(\frac{QK^\top}{\sqrt{d_k}} + M\right)V, \quad M_{ij} = -\infty \text{ when } j > i`,
     code: 'trace.layers[0].heads[0].weights // 6 × 6, each row sums to 1',
     glossary: 'attention',
     chapter: 'attention',
@@ -190,7 +190,7 @@ export const PARTS: Record<PartId, Part> = {
     story: 'Turns the scores into chances between 0 and 1 that add up to 1.',
     numbers: '4,096 chances, one for each possible next token.',
     formula: String.raw`p_i = \frac{e^{z_i}}{\sum_j e^{z_j}}`,
-    code: 'probabilities(rowView(trace.logits, ids.length - 1))',
+    code: 'probabilities(rowView(trace.logits, ids.length - 1), 1)',
     glossary: 'probability',
     chapter: 'prediction',
   },
