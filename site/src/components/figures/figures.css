@@ -215,9 +215,29 @@
 
 /* Architecture map. The canvas keeps the 640 by 800 shape of the drawing; on narrow screens it
    keeps a readable size and scrolls sideways inside its own frame instead of shrinking. */
-.arch-map {
+.arch-map,
+.arch-side {
   display: grid;
   gap: var(--space-4);
+  align-content: start;
+}
+/* On wide screens the text and tour buttons sit beside the tall drawing and follow the reader
+   down it. On narrow screens they sit above it. */
+@media (min-width: 60rem) {
+  .arch-map {
+    grid-template-columns: minmax(36rem, 40rem) minmax(14rem, 1fr);
+    align-items: start;
+  }
+  .arch-side {
+    grid-column: 2;
+    grid-row: 1;
+    position: sticky;
+    top: calc(var(--header-height, 0px) + var(--space-4));
+  }
+  .arch-scroll {
+    grid-column: 1;
+    grid-row: 1;
+  }
 }
 .arch-controls {
   display: flex;
