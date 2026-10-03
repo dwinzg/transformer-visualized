@@ -42,10 +42,10 @@ for (const part of Object.values(PARTS)) {
   };
 }
 
-// The text version follows the GPT-2 tour, one entry per part.
-const outline = [...new Set(TOUR.gpt2.map((id) => BLOCKS.find((b) => b.id === id)!.part))].map(
-  (id) => PARTS[id],
-);
+// The text version follows the paper's tour, then adds the part only GPT-2 has.
+const outline = [
+  ...new Set([...TOUR.original, ...TOUR.gpt2].map((id) => BLOCKS.find((b) => b.id === id)!.part)),
+].map((id) => PARTS[id]);
 ---
 
 <BaseLayout
@@ -71,7 +71,7 @@ const outline = [...new Set(TOUR.gpt2.map((id) => BLOCKS.find((b) => b.id === id
       <ol>
         {outline.map((part) => (
           <li>
-            <strong>{part.title}.</strong> {part.story}
+            <strong>{part.title}.</strong> {part.story} {part.notes?.original} {part.notes?.gpt2}
           </li>
         ))}
       </ol>
