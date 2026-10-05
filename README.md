@@ -36,36 +36,39 @@ This is a learning resource. It is the guide we wish we had when we were first l
 
 <img src="docs/images/use-5-pipeline.png" alt="The model's stages from tokens to output, with Block 1 explained" width="600">
 
+**6. Try your own text.** The playground runs the model on anything you type. Sample the next token and add it to your text.
+
+<img src="docs/images/use-6-playground.png" alt="The playground with a typed sentence, its tokens, and the next token chances with top-k on" width="480">
+
+**7. See what each token looks at.** Pick a layer and a head to see the attention weights.
+
+<img src="docs/images/use-7-attention.png" alt="An attention grid where 'her' looks most at 'Lily'" width="600">
+
+**8. Review it all on one page.** The quick review has the shapes, formula and code for every part.
+
+<img src="docs/images/use-8-review.png" alt="The quick review page with the model's sizes and the first card" width="600">
+
 Every figure has a Start over button, and everything works with a keyboard and a screen reader.
 
 ## What you can do
-
-Some of this is still being built. The next section shows what is ready today.
 
 - **Pick your depth.** Every step can be read four ways, as a story, as worked numbers, as the formula or as code. Switch at any time.
 - **Look inside a real model.** A tiny GPT-2 style model, trained on short children's stories, runs right in your browser. You can inspect every number it produces.
 - **Start small.** A toy example is small enough to work out by hand before you meet the real thing.
 - **Check the sources.** The references page lists every paper with a pinned link, and simplifications are labeled as ours.
-- **Use it anywhere.** It runs in the browser with no account, no server and no tracking.
+- **Use it anywhere.** It runs in the browser with no account, no server and no tracking. Install it and it works offline too.
 
 ## What's ready and what's next
 
-The project is in early development.
-
 **Ready now**
 
-- The site, with light and dark mode, and layouts for phone and desktop.
-- A live demo on the home page, with real guesses from the model.
-- The first chapter, "What a language model does", with three figures to play with.
+- Five chapters, from what a language model does to how it picks the next word. They cover tokens, embeddings and position, attention, and prediction.
+- A map of the whole model that links each part to its chapter.
+- The playground, where you type your own text and look inside the model.
+- A quick review page with every formula in one place.
 - The glossary and the references page.
+- Light and dark mode, phone and desktop layouts, and offline use.
 - The tiny trained model and the engine that runs it.
-
-**Coming next**
-
-- Four chapters that take you from text to a prediction. They cover tokens, embeddings and position, attention, and how the model picks the next word.
-- The playground, where you type your own sentence and watch it move through the model.
-- Quick review cards with every formula in one place.
-- Offline use, so you can install the site and study without internet.
 
 **Later**
 
@@ -109,7 +112,14 @@ You need [Node.js](https://nodejs.org/) 22.13 or newer (24 is recommended) and G
 
    This runs the format check, lint, type checks and unit tests. To run the browser tests too, install the test browsers once with `npx playwright install` and then run `npm run e2e`.
 
-To build the site the way it is published, run `npm run build`. The finished pages land in `site/dist/`.
+To build the site the way it is published and look at it, run these two commands. The finished pages land in `site/dist/`.
+
+```sh
+npm run build
+npm run preview --workspace @transformer-visualized/site
+```
+
+Then open http://localhost:4321/transformer-visualized/. Offline use only works in this build, not in `npm run dev`.
 
 The model is trained with Python, which you only need if you want to retrain it. The steps are in [model/README.md](model/README.md).
 
