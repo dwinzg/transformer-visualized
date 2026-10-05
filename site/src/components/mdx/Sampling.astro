@@ -1,0 +1,22 @@
+---
+import Figure from '../Figure.astro';
+import Island from '../figures/SamplingFigure.tsx';
+import { nextScores } from '../../lib/demo-data';
+import type { Keep } from '../../lib/prediction';
+
+interface Props {
+  text: string;
+  temperature?: number;
+  keep?: Keep;
+  caption?: string;
+}
+const { text, temperature, keep, caption = 'Drag the temperature, then press Sample a few times.' } =
+  Astro.props;
+---
+
+<Figure
+  caption={caption}
+  description="Bars for the model's likeliest next tokens with their chances. A temperature slider and a choice of which tokens stay in reshape the bars. A Sample button picks one token at random and lists the picks so far."
+>
+  <Island client:visible data={nextScores(text)} temperature={temperature} keep={keep} />
+</Figure>
