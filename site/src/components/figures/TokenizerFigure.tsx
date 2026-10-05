@@ -1,42 +1,17 @@
 import { useEffect, useId, useState } from 'react';
-import { normalizeText, Tokenizer, unsupportedCharacters } from '@transformer-visualized/engine';
-import tokenizerUrl from '../../../../models/tiny/tokenizer.json?url';
+import {
+  normalizeText,
+  unsupportedCharacters,
+  type Tokenizer,
+} from '@transformer-visualized/engine';
+import { loadTokenizer, toTokens } from '../../lib/model-loader';
 import type { DisplayToken } from '../../lib/guess-tree';
 import { shownToken, spokenToken } from '../../lib/token-text';
 import './figures.css';
 
 const MAX_LENGTH = 200;
-const END_OF_STORY = '<|endoftext|>';
 /** How long typing has to pause before a screen reader hears the new count. */
 const ANNOUNCE_DELAY_MS = 800;
-
-// One download for every tokenizer figure on the page. It starts when the first one mounts, which
-// client:visible delays until the figure is near the screen. A failed download can be tried again.
-let loading: Promise<Tokenizer> | undefined;
-function loadTokenizer(): Promise<Tokenizer> {
-  loading ??= fetch(tokenizerUrl)
-    .then((response) => {
-      if (!response.ok) throw new Error(`HTTP ${response.status}`);
-      return response.json();
-    })
-    .then((json: unknown) => Tokenizer.fromJSON(json))
-    .catch((error: unknown) => {
-      loading = undefined;
-      throw error;
-    });
-  return loading;
-}
-
-function toTokens(tokenizer: Tokenizer, text: string): DisplayToken[] {
-  const end = tokenizer.specialTokenId(END_OF_STORY);
-  return tokenizer
-    .encode(normalizeText(text))
-    .map((id) =>
-      id === end
-        ? { id, text: '[end of story]', special: true }
-        : { id, text: tokenizer.tokenText(id) },
-    );
-}
 
 /** Counts what a reader sees as one character, so an emoji counts once. */
 const segmenter = new Intl.Segmenter();
