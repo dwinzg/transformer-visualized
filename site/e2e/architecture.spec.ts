@@ -133,7 +133,7 @@ test('the panel links to the glossary, and says when a chapter is still coming',
   page,
 }) => {
   const map = await openMap(page);
-  await map.getByRole('radio', { name: 'Linear' }).click();
+  await map.getByRole('radio', { name: 'Feed forward' }).first().click();
   await expect(panel(map)).toContainText('Chapter coming soon');
   await map.getByRole('radio', { name: 'Inputs' }).first().click();
   await expect(panel(map).getByRole('link', { name: 'Read the chapter' })).toHaveAttribute(

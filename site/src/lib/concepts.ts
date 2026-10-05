@@ -187,7 +187,9 @@ export const PARTS: Record<PartId, Part> = {
     numbers: '4,096 scores per position. Only the last position is used to guess the next token.',
     formula: String.raw`z = h\,W_E^\top`,
     code: 'trace.logits // 6 × 4,096',
+    glossary: 'logit',
     chapter: 'prediction',
+    step: 'step-one-score-for-every-token',
   },
   softmax: {
     id: 'softmax',
@@ -197,8 +199,9 @@ export const PARTS: Record<PartId, Part> = {
     numbers: '4,096 chances, one for each possible next token.',
     formula: String.raw`p_i = \frac{e^{z_i}}{\sum_j e^{z_j}}`,
     code: 'probabilities(rowView(trace.logits, ids.length - 1), 1)',
-    glossary: 'probability',
+    glossary: 'softmax',
     chapter: 'prediction',
+    step: 'step-scores-become-chances',
   },
   output: {
     id: 'output',
@@ -208,8 +211,9 @@ export const PARTS: Record<PartId, Part> = {
       "The model's guess, a chance for every possible next token. Pick one, add it to the text, and run again.",
     numbers: 'One chance for each of the 4,096 tokens.',
     formula: String.raw`P(t_{T+1} \mid t_1, \dots, t_T)`,
-    glossary: 'language-model',
+    glossary: 'sampling',
     chapter: 'prediction',
+    step: 'step-turning-the-temperature-up-or-down',
   },
 };
 
