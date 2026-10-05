@@ -223,6 +223,7 @@ export default function Playground() {
                   tokens={run.views.attention.tokens}
                   weights={run.views.attention.weights}
                   from={run.views.attention.from}
+                  scores={run.views.attention.scores}
                 />
               </>
             )}
