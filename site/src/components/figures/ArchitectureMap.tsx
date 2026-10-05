@@ -23,6 +23,8 @@ interface Props {
   links: Partial<Record<PartId, { chapter?: string; glossary?: string }>>;
   /** PyTorch for each part, with what it prints for our sentence. */
   articles: Partial<Record<PartId, Article>>;
+  /** GPT-2's second norm box, which runs ln_2 instead of ln_1. */
+  secondNorm: Article;
   /** The PyTorch setup every snippet needs. */
   setup: string;
 }
@@ -31,30 +33,34 @@ export interface Article {
   shape: string;
   code: string;
   prints?: string;
-  paper?: { code: string; prints?: string };
+  paper?: { code: string; prints?: string; sketch?: boolean };
 }
 
 /** The page's spot for the long article, below the figure. */
 const ARTICLE_ID = 'part-article';
 
 /** A code block with a Copy button. */
-function Code({ code, label }: { code: string; label: string }) {
+function Code({ code, label, copy = true }: { code: string; label: string; copy?: boolean }) {
   const [copied, setCopied] = useState(false);
+  // Some browsers block the clipboard, and then there is nothing to press.
+  const canCopy = copy && typeof navigator !== 'undefined' && !!navigator.clipboard;
   return (
     <div className="arch-snippet">
-      <button
-        type="button"
-        className="figure-button press"
-        onClick={() =>
-          navigator.clipboard?.writeText(code).then(
-            () => setCopied(true),
-            () => setCopied(false),
-          )
-        }
-      >
-        {copied ? 'Copied' : 'Copy'}
-        <span className="visually-hidden"> {label}</span>
-      </button>
+      {canCopy && (
+        <button
+          type="button"
+          className="figure-button press"
+          onClick={() =>
+            navigator.clipboard.writeText(code).then(
+              () => setCopied(true),
+              () => setCopied(false),
+            )
+          }
+        >
+          {copied ? 'Copied' : 'Copy'}
+          <span className="visually-hidden"> {label}</span>
+        </button>
+      )}
       <pre tabIndex={0} aria-label={label}>
         <code>{code}</code>
       </pre>
@@ -86,7 +92,7 @@ function arrows(view: View): [Block, Block][] {
 }
 
 /** A clickable redrawing of Figure 1 of Vaswani et al. 2017, with a guided tour. */
-export default function ArchitectureMap({ formulas, links, articles, setup }: Props) {
+export default function ArchitectureMap({ formulas, links, articles, secondNorm, setup }: Props) {
   const [view, setView] = useState<View>('original');
   const [selected, setSelected] = useState<string | null>(null);
   const [target, setTarget] = useState<HTMLElement | null>(null);
@@ -181,7 +187,8 @@ export default function ArchitectureMap({ formulas, links, articles, setup }: Pr
   const formula = part ? formulas[part.id]?.[view] : undefined;
   const note = (block?.notes ?? part?.notes)?.[view];
   const link = part ? links[part.id] : undefined;
-  const article = part ? articles[part.id] : undefined;
+  const article =
+    view === 'gpt2' && block?.id === 'add-norm-3' ? secondNorm : part && articles[part.id];
   // Box names, since GPT-2's two norms share one part.
   const titleAt = (i: number) => blockName(byId.get(tour[i])!, view);
   // The article's own buttons move the reader to the top of the next article.
@@ -202,7 +209,12 @@ export default function ArchitectureMap({ formulas, links, articles, setup }: Pr
         <Code code={setup} label="PyTorch setup" />
       </details>
       {part ? (
-        <article className="arch-article" aria-labelledby={`${ARTICLE_ID}-title`}>
+        // A new key for each box, so Copy buttons start fresh.
+        <article
+          key={`${view}-${selected}`}
+          className="arch-article"
+          aria-labelledby={`${ARTICLE_ID}-title`}
+        >
           <h2 id={`${ARTICLE_ID}-title`} ref={title} tabIndex={-1}>
             {part.title}
           </h2>
@@ -236,7 +248,7 @@ export default function ArchitectureMap({ formulas, links, articles, setup }: Pr
               {article.prints && (
                 <>
                   <p className="arch-prints-label">It prints</p>
-                  <pre className="arch-prints" tabIndex={0}>
+                  <pre className="arch-prints" tabIndex={0} aria-label="What it prints">
                     <code>{article.prints}</code>
                   </pre>
                 </>
@@ -244,9 +256,13 @@ export default function ArchitectureMap({ formulas, links, articles, setup }: Pr
               {view === 'original' && article.paper && (
                 <>
                   <h3>The paper&apos;s version</h3>
-                  <Code code={article.paper.code} label={`The paper's ${part.title}`} />
+                  <Code
+                    code={article.paper.code}
+                    label={`The paper's ${part.title}`}
+                    copy={!article.paper.sketch}
+                  />
                   {article.paper.prints && (
-                    <pre className="arch-prints" tabIndex={0}>
+                    <pre className="arch-prints" tabIndex={0} aria-label="What it prints">
                       <code>{article.paper.prints}</code>
                     </pre>
                   )}
@@ -257,16 +273,18 @@ export default function ArchitectureMap({ formulas, links, articles, setup }: Pr
           {part.code && (
             <>
               <h3>In our engine</h3>
-              <pre className="arch-code" tabIndex={0}>
+              <pre className="arch-code" tabIndex={0} aria-label="Engine code">
                 <code>{part.code}</code>
               </pre>
             </>
           )}
-          <p className="arch-links">
-            {link?.chapter && <a href={link.chapter}>Read the chapter</a>}
-            {link?.glossary && <a href={link.glossary}>What the word means</a>}
-          </p>
-          <nav className="arch-pager" aria-label="Parts">
+          {(link?.chapter || link?.glossary) && (
+            <p className="arch-links">
+              {link.chapter && <a href={link.chapter}>Read the chapter</a>}
+              {link.glossary && <a href={link.glossary}>What the word means</a>}
+            </p>
+          )}
+          <nav className="arch-pager" aria-label="Previous and next part">
             {index > 0 && (
               <button type="button" className="press" onClick={() => read(index - 1)}>
                 <span className="arch-pager-label">Previous</span> {titleAt(index - 1)}
