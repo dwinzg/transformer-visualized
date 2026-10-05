@@ -10,6 +10,7 @@ import {
   unsupportedCharacters,
   type Model,
 } from '@transformer-visualized/engine';
+import { cosine, round, type EmbeddedToken, type NearestTokens } from './embeddings';
 import type { DisplayToken, Guess, GuessTree } from './guess-tree';
 
 /**
@@ -115,4 +116,60 @@ export function tokenize(text: string): DisplayToken[] {
   assertSupported(text);
   const tok = getTokenizer();
   return tok.encode(normalizeText(text)).map((id) => ({ id, text: tok.tokenText(id) }));
+}
+
+/** Each token of a sentence with its token row, position row and their sum, for the number strip. */
+export function embeddedTokens(text: string): EmbeddedToken[] {
+  assertSupported(text);
+  const tok = getTokenizer();
+  const { wte, wpe } = getModel();
+  return tok.encode(normalizeText(text)).map((id, position) => {
+    const token = Array.from(rowView(wte, id));
+    const place = Array.from(rowView(wpe, position));
+    return {
+      token: { id, text: tok.decode([id]) },
+      tokenRow: token.map((v) => round(v, 3)),
+      positionRow: place.map((v) => round(v, 3)),
+      sum: token.map((v, i) => round(v + place[i], 3)),
+    };
+  });
+}
+
+export const NEIGHBOR_COUNT = 5;
+
+/**
+ * For each word, the tokens whose embedding rows point the most the same way (cosine similarity).
+ * Byte tokens and the end-of-story marker are left out, since they are not words.
+ */
+export function nearestTokens(words: readonly string[]): NearestTokens[] {
+  const tok = getTokenizer();
+  const { wte } = getModel();
+  const isWord = (id: number) =>
+    !tok.tokenText(id).startsWith('<0x') && id !== tok.specialTokenId(END_OF_STORY);
+  return words.map((word) => {
+    assertSupported(word);
+    const ids = tok.encode(normalizeText(word));
+    if (ids.length !== 1) throw new Error(`demo-data: "${word}" is ${ids.length} tokens, not one`);
+    const [id] = ids;
+    const row = rowView(wte, id);
+    const scored: { id: number; score: number }[] = [];
+    for (let other = 0; other < wte.rows; other++) {
+      if (other === id || !isWord(other)) continue;
+      scored.push({ id: other, score: cosine(row, rowView(wte, other)) });
+    }
+    scored.sort((a, b) => b.score - a.score || a.id - b.id);
+    return {
+      word: { id, text: tok.decode([id]) },
+      neighbors: scored.slice(0, NEIGHBOR_COUNT).map(({ id: n, score }) => ({
+        token: { id: n, text: tok.decode([n]) },
+        score: round(score, 2),
+      })),
+    };
+  });
+}
+
+/** Cosine similarity of two position rows, rounded to 2 decimals. */
+export function positionSimilarity(a: number, b: number): number {
+  const { wpe } = getModel();
+  return round(cosine(rowView(wpe, a), rowView(wpe, b)), 2);
 }
