@@ -10,8 +10,12 @@ interface Props {
   keep?: Keep;
   caption?: string;
 }
-const { text, temperature, keep, caption = 'Drag the temperature, then press Sample a few times.' } =
-  Astro.props;
+const {
+  text,
+  temperature,
+  keep,
+  caption = 'Drag the temperature, then press Sample a few times.',
+} = Astro.props;
 ---
 
 <Figure

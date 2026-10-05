@@ -7,11 +7,15 @@ interface Props {
   text: string;
   caption?: string;
 }
-const { text, caption = 'Each score is the last list times that token's own row.' } = Astro.props;
+const { text, caption = "Each score is the last list times that token's own row." } = Astro.props;
 const { hidden, rows } = tiedScores(text);
 const last = text.split(' ').at(-1);
-const SHOWN = 3;
-const list = (values: number[]) => values.slice(0, SHOWN).map((v) => v.toFixed(2)).join(', ');
+const SHOWN = 2;
+const list = (values: number[]) =>
+  values
+    .slice(0, SHOWN)
+    .map((v) => v.toFixed(2))
+    .join(', ');
 ---
 
 <Figure
@@ -20,33 +24,30 @@ const list = (values: number[]) => values.slice(0, SHOWN).map((v) => v.toFixed(2
 >
   <div class="tied-figure">
     <p class="tied-hidden">
-      The final list for <strong>{last}</strong> starts <code>{list(hidden)}, …</code> and has 128 numbers.
+      The final list for <strong>{last}</strong> starts <code>{list(hidden)}, …</code> and has 128
+      numbers.
     </p>
-    <div class="attn-scroll">
-      <table class="tied-table">
-        <thead>
+    <table class="tied-table">
+      <thead>
+        <tr>
+          <th scope="col">Token</th>
+          <th scope="col">Its row</th>
+          <th scope="col">Score</th>
+        </tr>
+      </thead>
+      <tbody>
+        {rows.map(({ token, row, score }) => (
           <tr>
-            <th scope="col">Token</th>
-            <th scope="col">Its embedding row</th>
-            <th scope="col">Score</th>
+            <th scope="row">
+              <span class="token-chip">{shownToken(token.text)}</span>
+            </th>
+            <td>
+              <code>{list(row)}, …</code>
+            </td>
+            <td class="tied-score">{score.toFixed(2)}</td>
           </tr>
-        </thead>
-        <tbody>
-          {
-            rows.map(({ token, row, score }) => (
-              <tr>
-                <th scope="row">
-                  <span class="token-chip">{shownToken(token.text)}</span>
-                </th>
-                <td>
-                  <code>{list(row)}, …</code>
-                </td>
-                <td class="tied-score">{score.toFixed(2)}</td>
-              </tr>
-            ))
-          }
-        </tbody>
-      </table>
-    </div>
+        ))}
+      </tbody>
+    </table>
   </div>
 </Figure>
