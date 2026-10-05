@@ -79,6 +79,32 @@ test('long text shows the last 24 tokens in the grid', async ({ page }) => {
   await expect(dog).toHaveAttribute('aria-checked', 'true');
 });
 
+test('a link opens the playground with its text, and the address follows the text', async ({
+  page,
+}) => {
+  await page.goto(`${PAGE}?text=${encodeURIComponent('The cat sat on the')}`);
+  const box = page.getByRole('textbox', { name: 'Your text' });
+  await expect(box).toHaveValue('The cat sat on the');
+  await expect(page.getByRole('list', { name: 'Tokens' }).getByRole('listitem')).toHaveCount(5, {
+    timeout: 20_000,
+  });
+  await box.fill('Once upon a time');
+  await expect(page).toHaveURL(/\?text=Once\+upon\+a\+time$/);
+  await page.getByRole('button', { name: 'Start over' }).first().click();
+  await expect(page).toHaveURL(/playground\/$/);
+});
+
+test('Copy link copies the address with the text', async ({ page, context, browserName }) => {
+  test.skip(browserName !== 'chromium', 'Only Chromium lets a test read the clipboard.');
+  await context.grantPermissions(['clipboard-read', 'clipboard-write']);
+  await ready(page);
+  await page.getByRole('textbox', { name: 'Your text' }).fill('Ben ran');
+  await expect(page).toHaveURL(/text=Ben\+ran/);
+  await page.getByRole('button', { name: 'Copy link' }).click();
+  await expect(page.getByRole('button', { name: 'Link copied' })).toBeVisible();
+  expect(await page.evaluate(() => navigator.clipboard.readText())).toMatch(/text=Ben\+ran$/);
+});
+
 test('every stage shows the real numbers', async ({ page }) => {
   await ready(page);
   await page.getByRole('radio', { name: 'Embeddings' }).check();

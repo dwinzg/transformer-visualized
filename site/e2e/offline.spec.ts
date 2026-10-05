@@ -27,4 +27,9 @@ test('pages and the playground work offline after one visit', async ({ page, con
   await page.goto('playground/');
   await expect(page.getByRole('list', { name: 'Tokens' })).toBeVisible({ timeout: 20_000 });
   await expect(page.locator('.sampling-summary')).toContainText('gets 11.5%');
+  // A shared link opens offline too.
+  await page.goto('playground/?text=The%20cat%20sat');
+  await expect(page.getByRole('list', { name: 'Tokens' }).getByRole('listitem')).toHaveCount(3, {
+    timeout: 20_000,
+  });
 });
