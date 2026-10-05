@@ -158,11 +158,18 @@ describe('embeddings, as the Embeddings chapter quotes them', () => {
     expect(near[1].neighbors.some((n) => n.token.text === ' tree')).toBe(false);
     expect(score(2, ' 3')).toBe(0.88);
     expect(score(3, 'Lily')).toBe(0.76);
+    for (const { word, neighbors } of near) {
+      for (const { token } of neighbors) {
+        expect(token.id).not.toBe(word.id);
+        expect(token.text).not.toMatch(/^<0x|<\|endoftext\|>/);
+      }
+    }
   });
   it('refuses a word that is more than one token', () => {
     expect(() => nearestTokens(['Tokenization'])).toThrow(/not one/);
   });
   it('makes nearby places alike and far places not', () => {
+    // Rows count from 0 here, and the chapter counts places from 1, so row 1 is place 2.
     expect(positionSimilarity(1, 2)).toBe(0.98);
     expect(positionSimilarity(1, 50)).toBe(-0.22);
   });
