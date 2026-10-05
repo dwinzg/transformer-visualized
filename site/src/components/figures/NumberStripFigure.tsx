@@ -1,5 +1,6 @@
 import { useId, useState, type KeyboardEvent } from 'react';
 import type { EmbeddedToken } from '../../lib/embeddings';
+import { spokenToken } from '../../lib/token-text';
 import { ChipPicker } from './ChipPicker';
 import './figures.css';
 
@@ -9,6 +10,13 @@ const VIEWS: Record<StripView, string> = {
   token: 'Token',
   position: 'Position',
   sum: 'Added together',
+};
+
+/** How the grid's name says each view. */
+const NAMES: Record<StripView, string> = {
+  token: 'token',
+  position: 'position',
+  sum: 'token plus position',
 };
 
 const COLUMNS = 16;
@@ -49,7 +57,7 @@ export default function NumberStripFigure({
   const token = tokens[picked];
   const row = rowFor(token, view);
   const size = row.length;
-  const changed = picked !== initialToken || view !== initialView || active !== 0;
+  const changed = picked !== initialToken || view !== initialView;
 
   const move = (event: KeyboardEvent<HTMLDivElement>) => {
     const next =
@@ -68,7 +76,7 @@ export default function NumberStripFigure({
                   : null;
     if (next === null) return;
     event.preventDefault();
-    setActive(Math.min(Math.max(next, 0), size - 1));
+    if (next >= 0 && next < size) setActive(next);
   };
 
   return (
@@ -112,7 +120,7 @@ export default function NumberStripFigure({
         className={`strip-grid strip-${view}`}
         role="listbox"
         tabIndex={0}
-        aria-label={`The ${size} ${VIEWS[view].toLowerCase()} numbers for ${token.token.text.trim()}`}
+        aria-label={`The ${size} ${NAMES[view]} numbers for ${spokenToken(token.token.text)}`}
         aria-activedescendant={`${id}-cell-${active}`}
         onKeyDown={move}
       >
@@ -147,7 +155,7 @@ export default function NumberStripFigure({
         ={' '}
         <span className={view === 'sum' ? 'is-current' : undefined}>{fmt(token.sum[active])}</span>
       </p>
-      <p className="strip-summary">
+      <p className="strip-summary" aria-live="polite">
         Blue is below zero and orange is above, and paler means closer to zero. {describe(row)}
       </p>
     </div>
