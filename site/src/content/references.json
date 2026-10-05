@@ -151,5 +151,35 @@
     "arxiv": "1301.3781v3",
     "note": "Word vectors learned from text, where words used alike get similar vectors.",
     "topics": ["tokens"]
+  },
+  {
+    "id": "jain2019",
+    "type": "paper",
+    "authors": [
+      { "family": "Jain", "given": "Sarthak" },
+      { "family": "Wallace", "given": "Byron C." }
+    ],
+    "title": "Attention is not Explanation",
+    "year": 2019,
+    "venue": "Proceedings of NAACL-HLT 2019",
+    "url": "https://arxiv.org/abs/1902.10186v3",
+    "arxiv": "1902.10186v3",
+    "note": "Found that attention weights often disagree with other measures of what mattered to a prediction.",
+    "topics": ["interpretability"]
+  },
+  {
+    "id": "wiegreffe2019",
+    "type": "paper",
+    "authors": [
+      { "family": "Wiegreffe", "given": "Sarah" },
+      { "family": "Pinter", "given": "Yuval" }
+    ],
+    "title": "Attention is not not Explanation",
+    "year": 2019,
+    "venue": "Proceedings of EMNLP-IJCNLP 2019",
+    "url": "https://arxiv.org/abs/1908.04626v2",
+    "arxiv": "1908.04626v2",
+    "note": "A reply arguing that whether attention explains depends on what you mean by explanation.",
+    "topics": ["interpretability"]
   }
 ]

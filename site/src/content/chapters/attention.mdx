@@ -1,0 +1,215 @@
+---
+title: Attention
+order: 3
+summary: Attention lets each token gather what it needs from itself and the tokens before it.
+goals:
+  - Say what attention does in one sentence
+  - Name the query, key and value and what each one is for
+  - Turn three scores into weights with softmax
+  - Read a real attention grid, and say what it can and cannot tell you
+minutes: 15
+recap:
+  - Attention lets each token pull in information from itself and the tokens before it.
+  - A token's query is matched with every key using a dot product, giving one score each.
+  - Softmax turns the scores into weights that add up to 1, and the token blends the values with them.
+  - Each layer has several heads, and each head learns its own way of looking.
+references:
+  - vaswani2017
+  - radford2019
+  - jain2019
+  - wiegreffe2019
+---
+
+<PredictReveal question="In &quot;Lily wanted to play with her&quot;, which earlier word should &quot;her&quot; look at most?" options={['Lily', 'play', 'with']} answer={0}>
+
+"Lily", because "her" stands for her. In one of the model's heads, "her" puts 0.66 of its attention on "Lily". Other heads look elsewhere, as you will see below.
+
+</PredictReveal>
+
+<Step title="Words need context" map="masked-attn">
+
+<AttentionGrid
+  text="Lily wanted to play with her"
+  layer={3}
+  head={3}
+  caption="Pick another token, layer or head."
+/>
+
+<Level of="story">
+
+On its own, "her" does not say who. The model has to look back and find "Lily". <Term id="attention">Attention</Term> is how it does that (<Ref id="vaswani2017" />).
+
+Each token looks at itself and the tokens before it, decides how much each one matters, and pulls in a mix of their numbers. In this head, "her" looks mostly at "Lily".
+
+</Level>
+
+<Level of="numbers">
+
+Each row of the grid is one token, and its weights add up to 1. In layer 3, head 3, "·her" gives 0.66 to "Lily" and spreads the rest thinly.
+
+The top right half is empty because no token can look ahead at the tokens after it.
+
+</Level>
+
+<Level of="formula">
+
+Token <Tex tex="i" /> gets a weighted mix of the value vectors <Tex tex="\mathbf{v}_j" /> of the tokens up to it.
+
+<Tex
+  display
+  tex="\mathbf{o}_i = \sum_{j \le i} a_{ij} \, \mathbf{v}_j, \qquad a_{ij} \ge 0, \quad \sum_{j \le i} a_{ij} = 1"
+/>
+
+</Level>
+
+<Level of="code">
+
+```ts
+trace.layers[2].heads[2].weights; // layer 3, head 3, 6 × 6, each row adds up to 1
+```
+
+</Level>
+
+</Step>
+
+<Step title="Questions, name tags and backpacks">
+
+<ToyAttention />
+
+<Level of="story">
+
+Each token makes three new lists from its numbers. Its <Term id="query">query</Term> is a question card, saying what it is looking for. Its <Term id="key">key</Term> is a name tag, saying what it has. Its <Term id="value">value</Term> is a backpack, holding what it will share.
+
+A token compares its question with every name tag, and takes the most from the backpacks whose tags match best. Press Next to see each step.
+
+</Level>
+
+<Level of="numbers">
+
+In the made-up example, "she" asks with (2, 0). Lily's tag (2, 0) scores 4, the tag of "ran" scores 0 and her own tag scores 2. After softmax, "she" takes 0.77 of Lily's backpack.
+
+In our model each head's lists have 32 numbers, so the scores are divided by the square root of 32, about 5.66.
+
+</Level>
+
+<Level of="formula">
+
+Stack the queries, keys and values of all tokens as the rows of <Tex tex="Q" />, <Tex tex="K" /> and <Tex tex="V" />. Then
+
+<Tex
+  display
+  tex="\operatorname{Attention}(Q, K, V) = \operatorname{softmax}\!\left(\frac{QK^\top}{\sqrt{d_k}} + M\right) V, \qquad M_{ij} = -\infty \text{ when } j > i"
+/>
+
+Each of <Tex tex="Q" />, <Tex tex="K" /> and <Tex tex="V" /> comes from the token vectors times a learned matrix, for example <Tex tex="Q = X W_Q" />. In our model <Tex tex="d_k = 32" />.
+
+</Level>
+
+<Level of="code">
+
+```ts
+const head = trace.layers[0].heads[0];
+head.q; // queries, 6 × 32 (keys head.k and values head.v are the same shape)
+head.scaledMasked; // scores divided by √32, with -Infinity where a token would look ahead
+```
+
+</Level>
+
+</Step>
+
+<Callout kind="analogy" title="Like a classroom">
+
+Each student holds up a question card, everyone wears a name tag, and each student copies a little from the backpacks of classmates whose tags match. **Where this breaks.** Real students pick one helper. A token always takes at least a little from every earlier token, and it can only look at classmates who came before it.
+
+</Callout>
+
+<Step title="Softmax turns scores into weights">
+
+<Level of="story">
+
+Scores can be any size, even below zero. <Term id="softmax">Softmax</Term> turns a row of scores into weights between 0 and 1 that add up to 1.
+
+It raises the number e, about 2.718, to the power of each score, then divides each result by their total. Bigger scores get a much bigger share, but every score that is not hidden gets at least a little.
+
+</Level>
+
+<Level of="numbers">
+
+Take the scores 1, 0 and 0. e to the power of 1 is 2.718, and e to the power of 0 is 1. The total is 4.718, so the weights are 0.58, 0.21 and 0.21.
+
+A hidden score counts as minus infinity, and e to the power of minus infinity is 0. So hidden tokens get a weight of exactly 0. This hiding is called the <Term id="causal-mask">causal mask</Term>.
+
+</Level>
+
+<Level of="formula">
+
+<Tex display tex="\operatorname{softmax}(\mathbf{z})_j = \frac{e^{z_j}}{\sum_k e^{z_k}}" />
+
+</Level>
+
+<Level of="code">
+
+```ts
+softmax([1, 0, 0]); // [0.576, 0.212, 0.212]
+```
+
+</Level>
+
+<Exercise prompt="Turn the scores 2, 0 and 0 into weights. What is the first weight? Use e to the power of 2 = 7.389." answer={0.79} tolerance={0.01}>
+
+e to the power of 2 is 7.389, and e to the power of 0 is 1, so the total is 9.389. The first weight is 7.389 divided by 9.389, about 0.79.
+
+</Exercise>
+
+</Step>
+
+<Step title="Many heads, many layers">
+
+<AttentionGrid
+  text="Lily wanted to play with her"
+  layer={2}
+  head={1}
+  caption="Try every head. Each one has its own pattern."
+/>
+
+<Level of="story">
+
+One way of looking is not enough. Each layer runs several <Term id="attention-head">attention heads</Term> side by side, each with its own questions, name tags and backpacks. They learn different jobs.
+
+In layer 2, head 1 often looks at the token just before. In layer 3, head 3 looks back at "Lily" from almost every word. Their results are joined and passed on to the next layer.
+
+</Level>
+
+<Level of="numbers">
+
+Our model has 4 layers with 4 heads each, 16 heads in all. Each head works with lists of 32 numbers, and the 4 heads together make 128 again. GPT-2 small has 12 layers (<Ref id="radford2019" />).
+
+</Level>
+
+<Level of="formula">
+
+The heads' outputs are placed side by side and mixed by one more learned matrix.
+
+<Tex
+  display
+  tex="\operatorname{MultiHead}(X) = \big[\,\text{head}_1 \;\cdots\; \text{head}_4\,\big] \, W_O"
+/>
+
+</Level>
+
+<Level of="code">
+
+```ts
+trace.layers[1].heads[0].weights; // layer 2, head 1
+trace.layers[0].attnConcat; // the 4 heads side by side, 6 × 128
+```
+
+</Level>
+
+</Step>
+
+<Callout kind="myth">
+
+Attention weights show where a head looked, not why the model decided what it did. Researchers found that quite different weights can lead to the same prediction (<Ref id="jain2019" />). Others argued the weights can still be useful clues, if you test them carefully (<Ref id="wiegreffe2019" />). Treat the grid as a hint, not an explanation.
+
+</Callout>
