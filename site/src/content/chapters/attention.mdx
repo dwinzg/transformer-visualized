@@ -20,9 +20,9 @@ references:
   - wiegreffe2019
 ---
 
-<PredictReveal question="In &quot;Lily wanted to play with her&quot;, which earlier word should &quot;her&quot; look at most?" options={['Lily', 'play', 'with']} answer={0}>
+<PredictReveal question="In &quot;Lily wanted to play with her&quot;, which earlier word does &quot;her&quot; look at most, in one of the model's heads?" options={['Lily', 'play', 'with']} answer={0}>
 
-"Lily", because "her" stands for her. In one of the model's heads, "her" puts 0.66 of its attention on "Lily". Other heads look elsewhere, as you will see below.
+"Lily", with 0.66. But this head looks back at "Lily" from almost every word, not just from "her". It seems to keep track of the main character. Other heads look elsewhere, as you will see below.
 
 </PredictReveal>
 
@@ -37,7 +37,7 @@ references:
 
 <Level of="story">
 
-On its own, "her" does not say who. The model has to look back and find "Lily". <Term id="attention">Attention</Term> is how it does that (<Ref id="vaswani2017" />).
+So far, each token has its own list of numbers, and nothing else. But a word means more with the words around it. <Term id="attention">Attention</Term> is how a token gathers that context (<Ref id="vaswani2017" />).
 
 Each token looks at itself and the tokens before it, decides how much each one matters, and pulls in a mix of their numbers. In this head, "her" looks mostly at "Lily".
 
@@ -45,9 +45,9 @@ Each token looks at itself and the tokens before it, decides how much each one m
 
 <Level of="numbers">
 
-Each row of the grid is one token, and its weights add up to 1. In layer 3, head 3, "·her" gives 0.66 to "Lily" and spreads the rest thinly.
+Each row of the grid is one token, and its weights add up to 1. In layer 3, head 3, "·her" gives 0.66 to "Lily" and spreads the rest thinly. Every other row looks most at "Lily" too.
 
-The top right half is empty because no token can look ahead at the tokens after it.
+The top right half is empty because no token can look ahead at the tokens after it. This is called the <Term id="causal-mask">causal mask</Term>. A 0.00 means less than 0.005, not exactly 0.
 
 </Level>
 
@@ -80,13 +80,13 @@ trace.layers[2].heads[2].weights; // layer 3, head 3, 6 × 6, each row adds up t
 
 Each token makes three new lists from its numbers. Its <Term id="query">query</Term> is a question card, saying what it is looking for. Its <Term id="key">key</Term> is a name tag, saying what it has. Its <Term id="value">value</Term> is a backpack, holding what it will share.
 
-A token compares its question with every name tag, and takes the most from the backpacks whose tags match best. Press Next to see each step.
+A token compares its question with every name tag using a <Term id="dot-product">dot product</Term>, and takes the most from the backpacks whose tags match best. Press Next to see each step.
 
 </Level>
 
 <Level of="numbers">
 
-In the made-up example, "she" asks with (2, 0). Lily's tag (2, 0) scores 4, the tag of "ran" scores 0 and her own tag scores 2. After softmax, "she" takes 0.77 of Lily's backpack.
+In the made-up example, "she" asks with (2, 0). Lily's tag (2, 0) scores 4, the tag of "ran" scores 0 and its own tag scores 2. Each list has 2 numbers, so the scores are divided by the square root of 2, about 1.41, giving 2.83, 0 and 1.41. After <Term id="softmax">softmax</Term>, "she" takes 0.77 of Lily's backpack.
 
 In our model each head's lists have 32 numbers, so the scores are divided by the square root of 32, about 5.66.
 
@@ -101,7 +101,7 @@ Stack the queries, keys and values of all tokens as the rows of <Tex tex="Q" />,
   tex="\operatorname{Attention}(Q, K, V) = \operatorname{softmax}\!\left(\frac{QK^\top}{\sqrt{d_k}} + M\right) V, \qquad M_{ij} = -\infty \text{ when } j > i"
 />
 
-Each of <Tex tex="Q" />, <Tex tex="K" /> and <Tex tex="V" /> comes from the token vectors times a learned matrix, for example <Tex tex="Q = X W_Q" />. In our model <Tex tex="d_k = 32" />.
+Each of <Tex tex="Q" />, <Tex tex="K" /> and <Tex tex="V" /> comes from the token vectors times a learned matrix, for example <Tex tex="Q = X W_Q" />. GPT-2 first normalizes the vectors and also adds a bias. In our model <Tex tex="d_k = 32" />.
 
 </Level>
 
@@ -119,7 +119,7 @@ head.scaledMasked; // scores divided by √32, with -Infinity where a token woul
 
 <Callout kind="analogy" title="Like a classroom">
 
-Each student holds up a question card, everyone wears a name tag, and each student copies a little from the backpacks of classmates whose tags match. **Where this breaks.** Real students pick one helper. A token always takes at least a little from every earlier token, and it can only look at classmates who came before it.
+Each student holds up a question card, everyone wears a name tag, and each student copies a little from the backpacks of classmates whose tags match. **Where this breaks.** A real student copies from one or two classmates. A token always takes at least a little from every earlier token, and it can only look at classmates who came before it.
 
 </Callout>
 
@@ -127,7 +127,7 @@ Each student holds up a question card, everyone wears a name tag, and each stude
 
 <Level of="story">
 
-Scores can be any size, even below zero. <Term id="softmax">Softmax</Term> turns a row of scores into weights between 0 and 1 that add up to 1.
+Scores can be any size, even below zero. Softmax turns a row of scores into weights between 0 and 1 that add up to 1.
 
 It raises the number e, about 2.718, to the power of each score, then divides each result by their total. Bigger scores get a much bigger share, but every score that is not hidden gets at least a little.
 
@@ -137,7 +137,7 @@ It raises the number e, about 2.718, to the power of each score, then divides ea
 
 Take the scores 1, 0 and 0. e to the power of 1 is 2.718, and e to the power of 0 is 1. The total is 4.718, so the weights are 0.58, 0.21 and 0.21.
 
-A hidden score counts as minus infinity, and e to the power of minus infinity is 0. So hidden tokens get a weight of exactly 0. This hiding is called the <Term id="causal-mask">causal mask</Term>.
+A hidden score counts as minus infinity, and e to the power of minus infinity is 0. So hidden tokens get a weight of exactly 0. This is how the causal mask works.
 
 </Level>
 
@@ -188,7 +188,7 @@ Our model has 4 layers with 4 heads each, 16 heads in all. Each head works with 
 
 <Level of="formula">
 
-The heads' outputs are placed side by side and mixed by one more learned matrix.
+The heads' outputs are placed side by side and mixed by one more learned matrix, plus a bias.
 
 <Tex
   display
@@ -210,6 +210,6 @@ trace.layers[0].attnConcat; // the 4 heads side by side, 6 × 128
 
 <Callout kind="myth">
 
-Attention weights show where a head looked, not why the model decided what it did. Researchers found that quite different weights can lead to the same prediction (<Ref id="jain2019" />). Others argued the weights can still be useful clues, if you test them carefully (<Ref id="wiegreffe2019" />). Treat the grid as a hint, not an explanation.
+Attention weights show where a head looked, not why the model decided what it did. In "Ben wanted to play with her", the head from the first grid puts 0.74 on "Ben", so it is not working out who "her" means. In other kinds of models, researchers found that quite different weights can lead to the same prediction (<Ref id="jain2019" />). Others argued the weights can still be useful clues, if you test them carefully (<Ref id="wiegreffe2019" />). Treat the grid as a hint, not an explanation.
 
 </Callout>
