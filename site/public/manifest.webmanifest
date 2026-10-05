@@ -1,0 +1,20 @@
+{
+  "name": "Transformer Visualized",
+  "short_name": "Transformers",
+  "description": "Follow a sentence through a real transformer, step by step, from a simple story to the exact math.",
+  "start_url": "/transformer-visualized/",
+  "scope": "/transformer-visualized/",
+  "display": "standalone",
+  "background_color": "#fbfbfd",
+  "theme_color": "#fbfbfd",
+  "icons": [
+    { "src": "icon-192.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "icon-512.png", "sizes": "512x512", "type": "image/png" },
+    {
+      "src": "icon-maskable-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ]
+}
