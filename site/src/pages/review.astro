@@ -1,0 +1,148 @@
+---
+import 'katex/dist/katex.min.css';
+import { getCollection } from 'astro:content';
+import Tex from '../components/mdx/Tex.astro';
+import BaseLayout from '../layouts/BaseLayout.astro';
+import { BLOCKS, TOUR } from '../lib/architecture-layout';
+import { formulaFor, mapPath, PARTS } from '../lib/concepts';
+import { withBase } from '../lib/paths';
+
+// One card per part of our GPT-2 style model, in the order a sentence passes through it.
+const parts = [...new Set(TOUR.gpt2.map((id) => BLOCKS.find((b) => b.id === id)!.part))].map(
+  (id) => PARTS[id],
+);
+const chapters = new Set(
+  (await getCollection('chapters', ({ data }) => !data.draft)).map((chapter) => chapter.id),
+);
+const chapterHref = (part: (typeof parts)[number]) =>
+  part.chapter && chapters.has(part.chapter)
+    ? withBase(`learn/${part.chapter}/${part.step ? `#${part.step}` : ''}`)
+    : undefined;
+
+const SIZES = [
+  ['Tokens in the example', '6'],
+  ['Numbers per token', '128'],
+  ['Blocks', '4'],
+  ['Heads per block', '4, with 32 numbers each'],
+  ['Feed-forward width', '512'],
+  ['Vocabulary', '4,096 tokens'],
+  ['Longest text', '128 tokens'],
+];
+---
+
+<BaseLayout
+  title="Quick review"
+  description="Every part of a GPT-2 style transformer on one page, with its shapes, formula and code."
+>
+  <section class="prose page">
+    <h1>Quick review</h1>
+    <p class="lede">
+      Every part of our model on one page, in the order the sentence "Lily wanted to play with her"
+      passes through it. Each card has the shapes, the formula and a line of code.
+    </p>
+    <dl class="sizes">
+      {SIZES.map(([name, value]) => (
+        <div>
+          <dt>{name}</dt>
+          <dd>{value}</dd>
+        </div>
+      ))}
+    </dl>
+    <ol class="cards">
+      {parts.map((part) => {
+        const formula = formulaFor(part, 'gpt2');
+        const chapter = chapterHref(part);
+        return (
+          <li class="card" id={part.id}>
+            <h2>{part.title}</h2>
+            <p>
+              {part.story} {part.notes?.gpt2}
+            </p>
+            <p class="card-numbers">{part.numbers}</p>
+            {formula && <Tex display tex={formula} />}
+            {/* A block of code that can scroll on a phone, so it can also take keyboard focus. */}
+            {part.code && (
+              <code class="card-code" tabindex="0">
+                {part.code}
+              </code>
+            )}
+            <p class="card-links">
+              {chapter && <a href={chapter}>Read the chapter</a>}
+              <a href={withBase(mapPath(part.id))}>See it on the map</a>
+            </p>
+          </li>
+        );
+      })}
+    </ol>
+  </section>
+</BaseLayout>
+
+<style>
+  .page {
+    padding-block: var(--space-12);
+  }
+  .lede {
+    color: var(--color-text-secondary);
+  }
+  .sizes {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(12rem, 1fr));
+    gap: var(--space-2) var(--space-6);
+    margin: var(--space-6) 0;
+  }
+  .sizes div {
+    display: flex;
+    justify-content: space-between;
+    gap: var(--space-3);
+    padding-block: var(--space-1);
+    border-bottom: 1px solid var(--color-separator);
+  }
+  .sizes dt {
+    color: var(--color-text-secondary);
+  }
+  .sizes dd {
+    margin: 0;
+    font-variant-numeric: tabular-nums;
+    text-align: right;
+  }
+  .cards {
+    display: grid;
+    gap: var(--space-6);
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+  .card {
+    min-width: 0;
+    padding: var(--space-5);
+    border: 1px solid var(--color-separator);
+    border-radius: var(--radius-lg);
+    background: var(--color-surface);
+  }
+  .card h2 {
+    margin-top: 0;
+  }
+  .card-numbers {
+    color: var(--color-text-secondary);
+  }
+  .card-code {
+    display: block;
+    margin-block: var(--space-4);
+    padding: var(--space-3);
+    overflow-x: auto;
+    white-space: pre;
+    border-radius: var(--radius-sm);
+    background: var(--color-surface-2);
+  }
+  .card-links {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-4);
+    margin-bottom: 0;
+  }
+  .card-links a {
+    display: inline-flex;
+    align-items: center;
+    min-height: var(--touch-target);
+  }
+</style>

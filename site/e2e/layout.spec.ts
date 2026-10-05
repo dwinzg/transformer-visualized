@@ -11,7 +11,7 @@ test.describe('home page', () => {
     );
     await expect(page.getByRole('link', { name: /Quick review/ })).toHaveAttribute(
       'href',
-      '/transformer-visualized/learn/?depth=formula',
+      '/transformer-visualized/review/',
     );
     await expect(page.getByText('Playground')).toBeVisible();
   });
