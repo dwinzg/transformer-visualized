@@ -27,7 +27,7 @@
     "id": "attention",
     "term": "Attention",
     "short": "The step where each token gathers information from itself and the tokens before it, taking more from the ones that match what it is looking for.",
-    "related": ["transformer"]
+    "related": ["transformer", "query", "attention-head"]
   },
   {
     "id": "parameter",
@@ -82,5 +82,41 @@
     "term": "Position embedding",
     "short": "A list of numbers for each place in the text, added to the token's list so the model knows the order.",
     "related": ["embedding"]
+  },
+  {
+    "id": "query",
+    "term": "Query",
+    "short": "The list of numbers a token uses to ask what it is looking for, like a question card.",
+    "related": ["key", "value", "attention"]
+  },
+  {
+    "id": "key",
+    "term": "Key",
+    "short": "The list of numbers that says what a token has, like a name tag. Queries are matched against keys.",
+    "related": ["query", "value"]
+  },
+  {
+    "id": "value",
+    "term": "Value",
+    "short": "The list of numbers a token shares when others look at it, like a backpack.",
+    "related": ["query", "key"]
+  },
+  {
+    "id": "attention-head",
+    "term": "Attention head",
+    "short": "One of several attention steps that run side by side in a layer, each with its own queries, keys and values.",
+    "related": ["attention"]
+  },
+  {
+    "id": "causal-mask",
+    "term": "Causal mask",
+    "short": "The rule that a token may only look at itself and the tokens before it, never at later ones.",
+    "related": ["attention", "softmax"]
+  },
+  {
+    "id": "softmax",
+    "term": "Softmax",
+    "short": "A way to turn any list of scores into numbers between 0 and 1 that add up to 1. Bigger scores get bigger shares.",
+    "related": ["probability", "attention"]
   }
 ]
