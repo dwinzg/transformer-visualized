@@ -11,7 +11,7 @@ const KEEPS: Record<Keep, string> = {
 };
 /** How many bars to draw. The rest of the top 50 still count toward every chance. */
 const SHOWN = 8;
-/** How many past picks to list. */
+/** How many picks to list. Every pick is counted, so the count keeps changing. */
 const PICKS = 8;
 
 const pct = (p: number) => (p > 0 && p < 0.001 ? '<0.1%' : `${(p * 100).toFixed(1)}%`);
@@ -44,7 +44,9 @@ export default function SamplingFigure({
   const below = c.top.slice(SHOWN);
   const otherP = c.other + below.reduce((sum, p) => sum + p, 0);
   const otherN = c.otherCount + below.filter((p) => p > 0).length;
-  const fill = (p: number) => ({ '--p': `${Math.max(p * 100, 0.5)}%` }) as React.CSSProperties;
+  // A token that is still in always shows a sliver, and one that is out shows none.
+  const fill = (p: number) =>
+    ({ '--p': `${p > 0 ? Math.max(p * 100, 0.5) : 0}%` }) as React.CSSProperties;
 
   return (
     <div className="sampling-figure">
@@ -60,7 +62,10 @@ export default function SamplingFigure({
             value={temperature}
             onChange={(event) => setTemperature(Number(event.target.value))}
           />
-          <output htmlFor={`${id}-t`}>{temperature.toFixed(1)}</output>
+          {/* The slider already says its value, so the output is for the eyes only. */}
+          <output htmlFor={`${id}-t`} aria-hidden="true">
+            {temperature.toFixed(1)}
+          </output>
         </label>
         <fieldset className="segmented">
           <legend className="visually-hidden">Which tokens stay in</legend>
@@ -79,7 +84,8 @@ export default function SamplingFigure({
       </div>
       <p className="sampling-summary" aria-live="polite">
         <span aria-hidden="true">{name(0)}</span>
-        <span className="visually-hidden">{say(0)}</span> has a {pct(c.top[0])} chance.
+        <span className="visually-hidden">{say(0)}</span> gets {pct(c.top[0])}.
+        {keep === 'greedy' && ' Greedy always takes the top token, so temperature changes nothing.'}
       </p>
       <ul className="prob-bars" aria-label="Chances for the next token">
         {data.top.slice(0, SHOWN).map((t, i) => (
@@ -104,7 +110,7 @@ export default function SamplingFigure({
         <button
           type="button"
           className="figure-button press"
-          onClick={() => setPicks([draw(c, Math.random()), ...picks].slice(0, PICKS))}
+          onClick={() => setPicks([draw(c, Math.random()), ...picks])}
         >
           Sample
         </button>
@@ -128,7 +134,8 @@ export default function SamplingFigure({
             'Press Sample to pick a token.'
           ) : (
             <>
-              Picked <strong aria-hidden="true">{name(picks[0])}</strong>
+              {/* The count changes on every press, so a repeat of the same token is announced too. */}
+              Pick {picks.length} is <strong aria-hidden="true">{name(picks[0])}</strong>
               <span className="visually-hidden">{say(picks[0])}</span>.
             </>
           )}
@@ -136,8 +143,9 @@ export default function SamplingFigure({
         {picks.length > 1 && (
           <span className="sampling-history">
             {' '}
-            Before that, <span aria-hidden="true">{picks.slice(1).map(name).join(', ')}</span>
-            <span className="visually-hidden">{picks.slice(1).map(say).join(', ')}</span>.
+            Before that,{' '}
+            <span aria-hidden="true">{picks.slice(1, PICKS).map(name).join(', ')}</span>
+            <span className="visually-hidden">{picks.slice(1, PICKS).map(say).join(', ')}</span>.
           </span>
         )}
       </p>

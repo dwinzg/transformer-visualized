@@ -226,6 +226,8 @@ export function nextScores(text: string): NextScores {
 }
 
 export interface TiedScores {
+  /** The last token of the text. */
+  last: DisplayToken;
   /** The last token's final list of numbers, after the last norm. */
   hidden: number[];
   /** The likeliest next tokens, each with its embedding row and its dot product with hidden. */
@@ -242,6 +244,7 @@ export function tiedScores(text: string, count = 5): TiedScores {
   const logits = rowView(trace.logits, ids.length - 1);
   const ranked = Array.from(logits.keys()).sort((a, b) => logits[b] - logits[a] || a - b);
   return {
+    last: toDisplay(ids).at(-1)!,
     hidden: Array.from(hidden, (v) => round(v, 3)),
     rows: ranked.slice(0, count).map((id) => {
       const row = rowView(wte, id);
