@@ -20,14 +20,18 @@ const chapterHref = (part: (typeof parts)[number]) =>
     : undefined;
 
 const SIZES = [
-  ['Tokens in the example', '6'],
-  ['Numbers per token', '128'],
-  ['Blocks', '4'],
-  ['Heads per block', '4, with 32 numbers each'],
+  ['Tokens in the example', 'T = 6'],
+  ['Numbers per token', 'd = 128'],
+  ['Blocks', 'L = 4'],
+  ['Heads per block', '4'],
+  ['Numbers per head', 'd_k = 32'],
   ['Feed-forward width', '512'],
   ['Vocabulary', '4,096 tokens'],
   ['Longest text', '128 tokens'],
 ];
+const SETUP = `const ids = tokenizer.encode('Lily wanted to play with her');
+const trace = forward(model, ids); // every value below lives on trace
+const probs = probabilities(rowView(trace.logits, ids.length - 1), 1);`;
 ---
 
 <BaseLayout
@@ -38,7 +42,8 @@ const SIZES = [
     <h1>Quick review</h1>
     <p class="lede">
       Every part of our model on one page, in the order the sentence "Lily wanted to play with her"
-      passes through it. Each card has the shapes, the formula and a line of code.
+      passes through it. Each card has the shapes, and where it helps, the formula and a line of
+      code.
     </p>
     <dl class="sizes">
       {SIZES.map(([name, value]) => (
@@ -48,6 +53,10 @@ const SIZES = [
         </div>
       ))}
     </dl>
+    <p>One forward pass gives every value on this page.</p>
+    <code class="card-code" tabindex="0">
+      {SETUP}
+    </code>
     <ol class="cards">
       {parts.map((part) => {
         const formula = formulaFor(part, 'gpt2');
@@ -67,8 +76,14 @@ const SIZES = [
               </code>
             )}
             <p class="card-links">
-              {chapter && <a href={chapter}>Read the chapter</a>}
-              <a href={withBase(mapPath(part.id))}>See it on the map</a>
+              {chapter && (
+                <a href={chapter}>
+                  Read the chapter<span class="visually-hidden"> on {part.title}</span>
+                </a>
+              )}
+              <a href={withBase(mapPath(part.id))}>
+                See it on the map<span class="visually-hidden">, {part.title}</span>
+              </a>
             </p>
           </li>
         );
