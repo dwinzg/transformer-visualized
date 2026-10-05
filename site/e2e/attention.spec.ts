@@ -16,6 +16,7 @@ test('the toy example steps through attention and back', async ({ page }) => {
   const title = figure.locator('.toy-title');
   const next = figure.getByRole('button', { name: 'Next' });
   await expect(title).toHaveText('Step 1 of 5. Match questions with name tags');
+  await expect(title.locator('..')).toHaveAttribute('aria-live', 'polite');
   await expect(figure.getByRole('button', { name: 'Previous' })).toHaveAttribute(
     'aria-disabled',
     'true',
@@ -45,7 +46,7 @@ test('the toy example works from the keyboard', async ({ page }) => {
   await expect(figure.locator('.toy-title')).toContainText('Step 3 of 5');
 });
 
-test('the grid starts on her, which looks most at Lily', async ({ page }) => {
+test('the grid starts on her, in the head that looks back at Lily', async ({ page }) => {
   await page.goto(CHAPTER);
   const figure = await hydrated(page, 'step-words-need-context');
   const summary = figure.locator('.attn-summary');
@@ -54,6 +55,11 @@ test('the grid starts on her, which looks most at Lily', async ({ page }) => {
   await expect(summary).toContainText('space her looks most at');
   await expect(summary).toContainText('Lily 0.66');
   await expect(figure.locator('tr.is-picked')).toContainText('0.66');
+  await expect(summary).toHaveAttribute('aria-live', 'polite');
+  await expect(figure.getByRole('button', { name: 'Start over' })).toHaveAttribute(
+    'aria-disabled',
+    'true',
+  );
 });
 
 test('picking a layer, head or token updates the grid, and Start over goes back', async ({
@@ -126,6 +132,22 @@ test.describe('on a phone', () => {
     const toy = await hydrated(page, 'step-questions-name-tags-and-backpacks');
     for (let i = 0; i < 4; i++) await toy.getByRole('button', { name: 'Next' }).click();
     await expectNoHorizontalScroll(page);
+    await page.evaluate(() => window.scrollTo(0, 0));
+    await expectNoA11yViolations(page);
+  });
+});
+
+test.describe('at 320px wide', () => {
+  test.use({ viewport: { width: 320, height: 640 } });
+
+  test('the page never scrolls sideways, and the grid can be scrolled from the keyboard', async ({
+    page,
+  }) => {
+    await page.goto(CHAPTER);
+    const figure = await hydrated(page, 'step-words-need-context');
+    await expectNoHorizontalScroll(page);
+    const scroller = figure.getByRole('group', { name: 'Attention grid' });
+    await expect(scroller).toHaveAttribute('tabindex', '0');
     await page.evaluate(() => window.scrollTo(0, 0));
     await expectNoA11yViolations(page);
   });
