@@ -20,7 +20,12 @@ async function work() {
   while (latest) {
     const { seq, text } = latest;
     latest = null;
-    send({ type: 'run', seq, run: runPlayground(model, tokenizer, text) });
+    try {
+      send({ type: 'run', seq, run: runPlayground(model, tokenizer, text) });
+    } catch {
+      // Say so, or the page would wait for this run forever.
+      send({ type: 'run-failed', seq });
+    }
     // Let messages that came in during the run update latest before the next one.
     await new Promise((resolve) => setTimeout(resolve, 0));
   }
