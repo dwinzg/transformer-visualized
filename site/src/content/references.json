@@ -134,5 +134,22 @@
     "doi": "10.18653/v1/P16-1162",
     "note": "Adapted byte pair encoding from data compression to split rare words into smaller pieces.",
     "topics": ["tokens"]
+  },
+  {
+    "id": "mikolov2013",
+    "type": "paper",
+    "authors": [
+      { "family": "Mikolov", "given": "Tomas" },
+      { "family": "Chen", "given": "Kai" },
+      { "family": "Corrado", "given": "Greg" },
+      { "family": "Dean", "given": "Jeffrey" }
+    ],
+    "title": "Efficient Estimation of Word Representations in Vector Space",
+    "year": 2013,
+    "venue": "ICLR 2013 Workshop",
+    "url": "https://arxiv.org/abs/1301.3781v3",
+    "arxiv": "1301.3781v3",
+    "note": "Word vectors learned from text, where words used alike get similar vectors.",
+    "topics": ["tokens"]
   }
 ]
