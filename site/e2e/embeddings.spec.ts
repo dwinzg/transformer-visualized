@@ -125,7 +125,8 @@ test('the map opens this chapter from the Position block', async ({ page }) => {
   await page.goto('learn/architecture/?part=position&view=gpt2');
   const map = page.locator('.arch-map');
   await map.scrollIntoViewIfNeeded();
-  await map.getByRole('link', { name: 'Read the chapter' }).click();
+  await expect(page.locator('astro-island', { has: map })).not.toHaveAttribute('ssr');
+  await page.locator('#part-article').getByRole('link', { name: 'Read the chapter' }).click();
   await expect(page).toHaveURL(/learn\/embeddings\/#step-each-place-gets-numbers-too$/);
 });
 

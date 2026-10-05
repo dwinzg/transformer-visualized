@@ -109,7 +109,8 @@ test('the map opens this chapter from the Inputs block', async ({ page }) => {
   await page.goto('learn/architecture/?part=input&view=gpt2');
   const map = page.locator('.arch-map');
   await map.scrollIntoViewIfNeeded();
-  await map.getByRole('link', { name: 'Read the chapter' }).click();
+  await expect(page.locator('astro-island', { has: map })).not.toHaveAttribute('ssr');
+  await page.locator('#part-article').getByRole('link', { name: 'Read the chapter' }).click();
   await expect(page).toHaveURL(/learn\/tokens\/#step-text-becomes-tokens$/);
 });
 
