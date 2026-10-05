@@ -14,14 +14,18 @@ const { count, size, warnings } = await generateSW({
   modifyURLPrefix: { '': BASE },
   // Links like learn/?depth=formula open the same page.
   ignoreURLParametersMatching: [/^depth$/, /^part$/, /^view$/, /^utm_/],
+  // Astro already puts a hash in these names, so they need no second one.
+  dontCacheBustURLsMatching: /\/_astro\//,
   cleanupOutdatedCaches: true,
+  // A new version waits until every open tab is closed. Taking over an open page would delete the
+  // old files its figures still load.
   clientsClaim: true,
-  skipWaiting: true,
   runtimeCaching: [
     {
       urlPattern: /\.(safetensors|json)$/,
       handler: 'CacheFirst',
-      options: { cacheName: 'model' },
+      // One model and one tokenizer. A retrained model gets a new name and pushes the old one out.
+      options: { cacheName: 'model', expiration: { maxEntries: 2 } },
     },
   ],
 });
