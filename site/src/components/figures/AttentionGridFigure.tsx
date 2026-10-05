@@ -12,6 +12,8 @@ interface Props {
   layer?: number;
   head?: number;
   row?: number;
+  /** How many earlier tokens are cut off. Then the rows no longer add up to 1. */
+  from?: number;
 }
 
 /** A token drawn with its space marks, and spoken with them too. */
@@ -50,12 +52,15 @@ export default function AttentionGridFigure({
   layer: startLayer = 0,
   head: startHead = 0,
   row: startRow = tokens.length - 1,
+  from = 0,
 }: Props) {
   const [layer, setLayer] = useState(startLayer);
   const [head, setHead] = useState(startHead);
-  // Until a token is picked, the start row is used, so it follows the end as the playground text grows.
-  const [picked, setRow] = useState<number | null>(null);
-  const row = Math.min(picked ?? startRow, tokens.length - 1);
+  // A pick counts from the first token of the whole text, so it stays on the same token when the
+  // cut moves. Until a token is picked, the start row is used.
+  const [picked, setPicked] = useState<number | null>(null);
+  const last = tokens.length - 1;
+  const row = Math.min(Math.max(picked === null ? startRow : picked - from, 0), last);
   const id = useId();
   const grid = weights[layer][head];
   const changed = layer !== startLayer || head !== startHead || row !== startRow;
@@ -91,7 +96,7 @@ export default function AttentionGridFigure({
             if (!changed) return;
             setLayer(startLayer);
             setHead(startHead);
-            setRow(null);
+            setPicked(null);
           }}
         >
           Start over
@@ -101,7 +106,7 @@ export default function AttentionGridFigure({
         label="Pick the token that looks"
         tokens={tokens}
         selected={row}
-        onSelect={setRow}
+        onSelect={(i) => setPicked(i + from)}
       />
       <p className="attn-summary" aria-live="polite">
         In layer {layer + 1}, head {head + 1},{' '}
@@ -115,7 +120,10 @@ export default function AttentionGridFigure({
         <table className="attn-grid">
           <caption className="visually-hidden">
             Attention weights in layer {layer + 1}, head {head + 1}. Each row is a token, and each
-            column is a token it can look at. Each row adds up to 1.
+            column is a token it can look at.{' '}
+            {from > 0
+              ? 'Weights on earlier tokens are left out, so a row can add up to less than 1.'
+              : 'Each row adds up to 1.'}
           </caption>
           <thead>
             <tr>
