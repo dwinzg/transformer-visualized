@@ -1,5 +1,6 @@
 import { useRef, type KeyboardEvent } from 'react';
 import type { DisplayToken } from '../../lib/guess-tree';
+import { shownToken, spokenToken } from '../../lib/token-text';
 import './figures.css';
 
 interface Props {
@@ -8,9 +9,6 @@ interface Props {
   selected: number;
   onSelect: (index: number) => void;
 }
-
-/** A space at the start of a token is part of it, so it is drawn as a dot. */
-export const shownToken = (text: string) => text.replace(/ /g, '\u00b7');
 
 /** Token chips that work as one radio group: arrow keys move, and the picked chip is checked. */
 export function ChipPicker({ label, tokens, selected, onSelect }: Props) {
@@ -45,7 +43,7 @@ export function ChipPicker({ label, tokens, selected, onSelect }: Props) {
           type="button"
           role="radio"
           aria-checked={i === selected}
-          aria-label={token.text.trim()}
+          aria-label={spokenToken(token.text)}
           tabIndex={i === selected ? 0 : -1}
           className="token-chip chip-option press"
           onClick={() => onSelect(i)}
