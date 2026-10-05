@@ -697,6 +697,10 @@ td.is-hidden {
 .attn-scroll {
   overflow-x: auto;
 }
+.attn-scroll:focus-visible {
+  outline: var(--focus-width) solid var(--color-focus);
+  outline-offset: var(--focus-offset);
+}
 .attn-grid td {
   min-width: 2.75rem;
   padding: var(--space-1);

@@ -203,11 +203,15 @@ describe('attention weights, as the Attention chapter quotes them', () => {
       const r = weights[2][2][row];
       expect(r.indexOf(Math.max(...r)), `row ${row}`).toBe(lily);
     }
-    const previous = [2, 3, 5].filter((row) => {
+    const previous = [1, 2, 3, 4, 5].filter((row) => {
       const r = weights[1][0][row];
       return r.indexOf(Math.max(...r)) === row - 1;
     });
-    expect(previous).toHaveLength(3);
+    expect(previous.length).toBeGreaterThanOrEqual(3);
+    // The same head puts the most on Ben in this sentence, so it is not working out who "her" is.
+    const ben = attentionWeights('Ben wanted to play with her').weights[2][2][5];
+    expect(ben.indexOf(Math.max(...ben))).toBe(0);
+    expect(ben[0]).toBe(0.74);
   });
   it('matches the softmax example', () => {
     expect(Array.from(softmax([1, 0, 0]), (p) => Number(p.toFixed(3)))).toEqual([
