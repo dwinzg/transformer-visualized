@@ -52,6 +52,16 @@ describe('chances', () => {
     expect(at1.top[0].toFixed(3)).toBe('0.115');
     expect(at1.top[1].toFixed(3)).toBe('0.102');
     expect(chances(data, 0.1, 'all').top[0].toFixed(2)).toBe('0.72');
+    expect(chances(data, 0.1, 'all').top[1].toFixed(2)).toBe('0.22');
+    expect(at1.top[2].toFixed(3)).toBe('0.085');
+    expect(at1.top[7].toFixed(3)).toBe('0.033');
+    expect(at1.top.reduce((s, p) => s + p, 0).toFixed(2)).toBe('0.80');
+    expect(chances(data, 0.5, 'all').top[0].toFixed(2)).toBe('0.27');
+    expect(chances(data, 0.5, 'top-p').top.filter((p) => p > 0)).toHaveLength(7);
+    const at2 = chances(data, 2, 'all');
+    expect(at2.top[0].toFixed(3)).toBe('0.015');
+    expect(at2.top.reduce((s, p) => s + p, 0).toFixed(2)).toBe('0.22');
+    expect(data.top[7].token.text).toBe(' mom');
     // The real model keeps 200. Grouping the other scores to 2 decimals can move that by one or two.
     expect(Math.abs(chances(data, 1, 'top-p').otherCount + 50 - 200)).toBeLessThanOrEqual(2);
   });
@@ -73,6 +83,8 @@ describe('draw', () => {
     expect(draw(c, 0.6)).toBe(2);
     expect(draw(c, 0.9)).toBe(-1);
     expect(draw({ top: [0.5, 0.5], other: 0, otherCount: 0 }, 0.999999)).toBe(1);
+    expect(draw({ top: [0.5, 0.5, 0], other: 0, otherCount: 0 }, 0.9999999)).toBe(1);
+    expect(draw({ top: [0, 0], other: 1, otherCount: 9 }, 0.5)).toBe(-1);
   });
 });
 
@@ -85,5 +97,8 @@ describe('tiedScores', () => {
     );
     tied.rows.forEach((r, i) => expect(r.score).toBeCloseTo(data.top[i].logit, 2));
     expect(tied.rows[0].score).toBe(2.6);
+    expect(tied.rows[1].score).toBe(2.48);
+    expect(tied.hidden.slice(0, 3).map((v) => v.toFixed(2))).toEqual(['0.82', '2.46', '-3.15']);
+    expect(tied.last.text).toBe(' her');
   });
 });
