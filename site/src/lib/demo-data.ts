@@ -11,6 +11,7 @@ import {
   type Model,
 } from '@transformer-visualized/engine';
 import { cosine, dot, round, type EmbeddedToken, type NearestTokens } from './embeddings';
+import { attentionView, embeddingView, scoresView, type AttentionData } from './model-views';
 import type { NextScores } from './prediction';
 import type { DisplayToken, Guess, GuessTree } from './guess-tree';
 
@@ -122,18 +123,8 @@ export function tokenize(text: string): DisplayToken[] {
 /** Each token of a sentence with its token row, position row and their sum, for the number strip. */
 export function embeddedTokens(text: string): EmbeddedToken[] {
   assertSupported(text);
-  const tok = getTokenizer();
-  const { wte, wpe } = getModel();
-  return tok.encode(normalizeText(text)).map((id, position) => {
-    const token = Array.from(rowView(wte, id));
-    const place = Array.from(rowView(wpe, position));
-    return {
-      token: { id, text: tok.decode([id]) },
-      tokenRow: token.map((v) => round(v, 3)),
-      positionRow: place.map((v) => round(v, 3)),
-      sum: token.map((v, i) => round(v + place[i], 3)),
-    };
-  });
+  const ids = getTokenizer().encode(normalizeText(text));
+  return embeddingView(toDisplay(ids), forward(getModel(), ids));
 }
 
 export const NEIGHBOR_COUNT = 5;
@@ -175,54 +166,18 @@ export function positionSimilarity(a: number, b: number): number {
   return round(cosine(rowView(wpe, a), rowView(wpe, b)), 2);
 }
 
-/**
- * Attention weights for a sentence, as [layer][head][row][column]. Rounded once, to the 2 decimals
- * the figure shows, so the page and the chapter text always agree.
- */
-export interface AttentionData {
-  tokens: DisplayToken[];
-  weights: number[][][][];
-}
-
+/** Attention weights for a sentence, as [layer][head][row][column]. */
 export function attentionWeights(text: string): AttentionData {
   assertSupported(text);
-  const tok = getTokenizer();
-  const ids = tok.encode(normalizeText(text));
-  const trace = forward(getModel(), ids);
-  return {
-    tokens: toDisplay(ids),
-    weights: trace.layers.map((layer) =>
-      layer.heads.map((head) =>
-        ids.map((_, row) => Array.from(rowView(head.weights, row), (w) => round(w, 2))),
-      ),
-    ),
-  };
+  const ids = getTokenizer().encode(normalizeText(text));
+  return attentionView(toDisplay(ids), forward(getModel(), ids));
 }
 
-const TOP_SCORES = 50;
-
-/**
- * The model's scores for the token after a text. The best 50 keep 3 decimals, which matters at low
- * temperature. The rest are grouped by score at 2 decimals, which is enough for their small share.
- */
+/** The model's scores for the token after a text. */
 export function nextScores(text: string): NextScores {
   assertSupported(text);
   const ids = getTokenizer().encode(normalizeText(text));
-  const trace = forward(getModel(), ids);
-  const logits = rowView(trace.logits, ids.length - 1);
-  const ranked = Array.from(logits.keys()).sort((a, b) => logits[b] - logits[a] || a - b);
-  const groups = new Map<number, number>();
-  for (const id of ranked.slice(TOP_SCORES)) {
-    const logit = round(logits[id], 2);
-    groups.set(logit, (groups.get(logit) ?? 0) + 1);
-  }
-  return {
-    tokens: toDisplay(ids),
-    top: ranked
-      .slice(0, TOP_SCORES)
-      .map((id) => ({ token: guessDisplayToken(id), logit: round(logits[id], 3) })),
-    rest: [...groups].sort((a, b) => b[0] - a[0]),
-  };
+  return scoresView(toDisplay(ids), forward(getModel(), ids), guessDisplayToken);
 }
 
 export interface TiedScores {
