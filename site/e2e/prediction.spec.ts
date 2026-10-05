@@ -22,18 +22,23 @@ test('temperature reshapes the chances, and Start over goes back', async ({ page
   await page.goto(CHAPTER);
   const figure = await hydrated(page, 'step-scores-become-chances');
   const summary = figure.locator('.sampling-summary');
-  const slider = figure.getByRole('slider', { name: 'Temperature' });
-  await expect(summary).toContainText('has a 11.5% chance');
+  const slider = figure.getByRole('slider', { name: 'Temperature', exact: true });
+  await expect(summary).toContainText('gets 11.5%');
   await expect(summary).toHaveAttribute('aria-live', 'polite');
   await slider.fill('0.1');
   await expect(figure.locator('output')).toHaveText('0.1');
-  await expect(summary).toContainText('has a 72.4% chance');
+  await expect(summary).toContainText('gets 72.4%');
   await slider.focus();
   await page.keyboard.press('ArrowRight');
   await expect(figure.locator('output')).toHaveText('0.2');
+  await page.keyboard.press('End');
+  await expect(figure.locator('output')).toHaveText('2.0');
+  await page.keyboard.press('Home');
+  await expect(figure.locator('output')).toHaveText('0.1');
   await figure.getByRole('button', { name: 'Start over' }).click();
   await expect(figure.locator('output')).toHaveText('1.0');
-  await expect(summary).toContainText('has a 11.5% chance');
+  await expect(summary).toContainText('gets 11.5%');
+  await expect(figure.locator('.prob-bar').last()).toContainText('4,088 other tokens');
 });
 
 test('the keep rules take tokens out of the running', async ({ page }) => {
@@ -44,6 +49,7 @@ test('the keep rules take tokens out of the running', async ({ page }) => {
   await expect(bars.nth(4)).not.toHaveClass(/is-out/);
   await expect(bars.nth(5)).toHaveClass(/is-out/);
   await expect(bars.nth(5)).toContainText('out');
+  await expect(bars.last()).toContainText('Other tokens');
   await expect(bars.last()).toContainText('out');
   await figure.getByRole('radio', { name: 'Top-p, p = 0.9' }).check();
   await expect(bars.last()).not.toHaveClass(/is-out/);
@@ -61,10 +67,29 @@ test('greedy always samples the top token', async ({ page }) => {
   await sample.focus();
   await page.keyboard.press('Enter');
   await page.keyboard.press('Enter');
-  await expect(picks).toContainText('Picked');
+  // Each pick is counted, so a screen reader hears every press even when the token repeats.
+  await expect(picks.locator('[aria-live]')).toContainText('Pick 2 is');
   await expect(picks).toContainText('space ball');
   await expect(picks).toContainText('Before that');
   await expect(picks).not.toContainText('rarer');
+});
+
+test('the temperature step starts at 0.5, and Start over goes back there', async ({ page }) => {
+  await page.goto(CHAPTER);
+  const figure = await hydrated(page, 'step-turning-the-temperature-up-or-down');
+  const slider = figure.getByRole('slider', { name: 'Temperature', exact: true });
+  await expect(slider).toHaveValue('0.5');
+  await slider.fill('2');
+  await figure.getByRole('button', { name: 'Start over' }).click();
+  await expect(slider).toHaveValue('0.5');
+});
+
+test('the tied scores table names tokens with their leading space', async ({ page }) => {
+  await page.goto(CHAPTER);
+  const step = page.locator('#step-one-score-for-every-token');
+  await expect(step.locator('tbody tr').first().locator('.visually-hidden')).toHaveText(
+    'space ball',
+  );
 });
 
 test('the exercise checks a chance at temperature 0.5', async ({ page }) => {
