@@ -87,7 +87,7 @@ export const PARTS: Record<PartId, Part> = {
       'A table of 128 positions by 128 numbers. Row 0 goes to the first token, row 1 to the second.',
     formula: {
       original: String.raw`PE_{(pos,\,2i)} = \sin\!\left(pos / 10000^{2i/d}\right)`,
-      gpt2: String.raw`\mathbf{h}_i = W_E[t_i] + W_P[i]`,
+      gpt2: String.raw`\mathbf{h}_i = W_E[t_i] + W_P[i-1]`,
     },
     code: 'trace.embeddings // tokenEmbeddings + positionEmbeddings',
     glossary: 'position-embedding',

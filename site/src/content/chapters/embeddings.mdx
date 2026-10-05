@@ -25,7 +25,7 @@ references:
 
 <Level of="story">
 
-The model cannot do math with an id like 665. So each token id picks one row from a big table, a list of 128 numbers called an <Term id="embedding">embedding</Term>. A token gets the same list every time it appears.
+An id like 665 is only a label, and its size means nothing. So each id picks one row from a big table, a list of 128 numbers called an <Term id="embedding">embedding</Term>. A token gets the same list every time it appears.
 
 These numbers start out random. Training nudges them, bit by bit, until they help the model guess well. Tap a cell to see one number.
 
@@ -62,7 +62,7 @@ trace.tokenEmbeddings; // one row per token, 6 × 128
 
 <PredictReveal question="Which word has numbers most like &quot;happy&quot;?" options={['glad', 'sad', 'tree']} answer={0}>
 
-"Glad", with a score of 0.61. But "sad" is close behind at 0.49. Words that show up in the same kinds of sentences get similar numbers, even when they mean opposite things.
+"Glad", with a similarity of 0.61 out of 1. But "sad" is not far behind at 0.49. Words that show up in the same kinds of sentences get similar numbers, even when they mean opposite things.
 
 </PredictReveal>
 
@@ -80,15 +80,15 @@ The model found this on its own, because it helps to guess the next word. Pick a
 
 <Level of="numbers">
 
-The score is the cosine similarity. 1 means the two lists point the same way, 0 means they are unrelated and -1 means they point opposite ways.
+The score is the cosine similarity. 1 means the two lists point the same way, 0 means they have nothing in common and -1 means they point opposite ways.
 
-"·girl" and "·boy" score 0.74. "·three" and "·3" score 0.88, so the model learned that a digit and its word mean the same. "·Lily" and "Lily" at the start of a text score 0.76, even though the Tokens chapter showed they are two different tokens.
+"·girl" and "·boy" score 0.74. "·three" and "·3" score 0.88, so the model uses the word and the digit almost alike. ("·3" is one of the few numbers with a token of its own.) "·Lily" and "Lily" at the start of a text score 0.76, even though the Tokens chapter showed they are two different tokens.
 
 </Level>
 
 <Level of="formula">
 
-Cosine similarity divides the dot product of two vectors by their lengths, so only their direction counts.
+Cosine similarity divides the <Term id="dot-product">dot product</Term> of two vectors by their lengths, so only their direction counts.
 
 <Tex
   display
@@ -102,7 +102,7 @@ Cosine similarity divides the dot product of two vectors by their lengths, so on
 ```ts
 const dot = (a, b) => a.reduce((sum, x, k) => sum + x * b[k], 0);
 const cosine = (a, b) => dot(a, b) / Math.sqrt(dot(a, a) * dot(b, b));
-cosine(rowView(model.wte, girl), rowView(model.wte, boy)); // 0.74
+cosine(rowView(model.wte, 477), rowView(model.wte, 497)); // ·girl and ·boy, 0.74
 ```
 
 </Level>
@@ -111,7 +111,7 @@ cosine(rowView(model.wte, girl), rowView(model.wte, boy)); // 0.74
 
 <Callout kind="analogy" title="Like places on a map">
 
-Think of each word as a town on a map, with towns that are used alike sitting close together. **Where this breaks.** A map has 2 directions. These lists have 128, and most single numbers do not mean anything simple on their own, like size or color.
+Think of each word as a town on a map, with towns that are used alike sitting close together. **Where this breaks.** A map has 2 directions. These lists have 128, and single numbers rarely mean anything simple on their own, like size or color.
 
 </Callout>
 
@@ -121,7 +121,7 @@ Think of each word as a town on a map, with towns that are used alike sitting cl
 
 To compare two lists, multiply the numbers in matching places and add up the results. This is the <Term id="dot-product">dot product</Term>.
 
-It is big when both lists have large numbers in the same places with the same signs. It is near zero when they have nothing in common. The dot product comes back in the attention chapter, where it decides which words look at which.
+It is big when both lists have large numbers in the same places with the same signs. It is near zero when they have nothing in common, and below zero when the signs disagree. The dot product comes back in the attention chapter, where it decides which tokens look at which.
 
 </Level>
 
@@ -177,7 +177,7 @@ So the model also learns one list of 128 numbers for each place in the text, cal
 
 Our model has 128 position lists, one for each place, so it reads at most 128 tokens at a time. Nearby places get similar lists. Places 2 and 3 score 0.98, while places 2 and 51 score -0.22.
 
-GPT-2 learns these lists, like the first GPT did (<Ref id="radford2018" />). The original transformer used fixed sine and cosine waves instead (<Ref id="vaswani2017" />).
+Our model learns these lists, like GPT (<Ref id="radford2018" />) and GPT-2. The original transformer used fixed sine and cosine waves instead (<Ref id="vaswani2017" />).
 
 </Level>
 
@@ -185,8 +185,10 @@ GPT-2 learns these lists, like the first GPT did (<Ref id="radford2018" />). The
 
 <Tex
   display
-  tex="\mathbf{h}_i^{(0)} = W_E[t_i] + W_P[i], \qquad W_P \in \mathbb{R}^{128 \times 128}"
+  tex="\mathbf{h}_i = W_E[t_i] + W_P[i-1], \qquad W_P \in \mathbb{R}^{128 \times 128}"
 />
+
+Places count from 1 but table rows count from 0, so place <Tex tex="i" /> uses row <Tex tex="i-1" />.
 
 </Level>
 
