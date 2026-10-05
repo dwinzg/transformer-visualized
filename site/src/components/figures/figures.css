@@ -905,6 +905,9 @@ td.is-hidden {
   gap: var(--space-4);
   min-width: 0;
 }
+.playground .tokenizer-head label {
+  margin-right: auto;
+}
 .playground-status {
   margin: 0;
   color: var(--color-text-secondary);

@@ -13,7 +13,7 @@ const { count, size, warnings } = await generateSW({
   swDest: 'dist/sw.js',
   modifyURLPrefix: { '': BASE },
   // Links like learn/?depth=formula open the same page.
-  ignoreURLParametersMatching: [/^depth$/, /^part$/, /^view$/, /^utm_/],
+  ignoreURLParametersMatching: [/^depth$/, /^part$/, /^view$/, /^text$/, /^utm_/],
   // Astro already puts a hash in these names, so they need no second one.
   dontCacheBustURLsMatching: /\/_astro\//,
   cleanupOutdatedCaches: true,
