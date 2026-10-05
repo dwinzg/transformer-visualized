@@ -5,8 +5,6 @@ import BaseLayout from '../layouts/BaseLayout.astro';
 import { guessTree } from '../lib/demo-data';
 import { withBase } from '../lib/paths';
 
-// Interim target for the Quick review door until the /review/ page exists.
-const quickReviewHref = withBase('learn/?depth=formula');
 const trees = [
   'Once upon a time, there was a',
   'The cat sat on the',
@@ -37,7 +35,7 @@ const trees = [
       <span class="way-title">Learn from scratch</span>
       <span class="way-text">No math needed. Start with a story and go deeper when you like.</span>
     </a>
-    <a class="way press" href={quickReviewHref}>
+    <a class="way press" href={withBase('review/')}>
       <span class="way-title">Quick review</span>
       <span class="way-text">Formulas, shapes and code for a refresher.</span>
     </a>
