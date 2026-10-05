@@ -14,6 +14,8 @@ interface Props {
   row?: number;
   /** How many earlier tokens are cut off. Then the rows no longer add up to 1. */
   from?: number;
+  /** Scores before softmax, [layer][head][row][column up to row]. Shown when given. */
+  scores?: number[][][][];
 }
 
 /** A token drawn with its space marks, and spoken with them too. */
@@ -53,6 +55,7 @@ export default function AttentionGridFigure({
   head: startHead = 0,
   row: startRow = tokens.length - 1,
   from = 0,
+  scores,
 }: Props) {
   const [layer, setLayer] = useState(startLayer);
   const [head, setHead] = useState(startHead);
@@ -168,6 +171,44 @@ export default function AttentionGridFigure({
           </tbody>
         </table>
       </div>
+      {scores && (
+        <details className="attn-scores">
+          <summary>
+            How <Shown token={tokens[row]} /> gets its weights
+          </summary>
+          <p>
+            Each score is the query of <Shown token={tokens[row]} /> times the key of another token,
+            divided by √32. Softmax turns the scores into weights, so a bigger score gets a bigger
+            weight.
+          </p>
+          <div className="attn-score-scroll" tabIndex={0} role="group" aria-label="Scores">
+            <table className="attn-score-table">
+              <caption className="visually-hidden">
+                Scores and weights for {spokenToken(tokens[row].text)} in layer {layer + 1}, head{' '}
+                {head + 1}.
+              </caption>
+              <thead>
+                <tr>
+                  <th scope="col">Token</th>
+                  <th scope="col">Score</th>
+                  <th scope="col">Weight</th>
+                </tr>
+              </thead>
+              <tbody>
+                {scores[layer][head][row].map((score, j) => (
+                  <tr key={j}>
+                    <th scope="row">
+                      <Shown token={tokens[j]} />
+                    </th>
+                    <td>{score.toFixed(2)}</td>
+                    <td>{grid[row][j].toFixed(2)}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </details>
+      )}
       <details className="attn-text">
         <summary>Top three for every token</summary>
         <ul>

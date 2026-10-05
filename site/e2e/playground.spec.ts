@@ -113,6 +113,10 @@ test('every stage shows the real numbers', async ({ page }) => {
   await page.getByRole('group', { name: 'Layer' }).getByRole('radio', { name: '3' }).check();
   await page.getByRole('group', { name: 'Head' }).getByRole('radio', { name: '3' }).check();
   await expect(page.locator('.attn-summary')).toContainText('Lily 0.66');
+  await page.getByText(/How .* gets its weights/).click();
+  const lily = page.locator('.attn-score-table tbody tr').first();
+  await expect(lily.locator('th')).toContainText('Lily');
+  await expect(lily.locator('td').last()).toHaveText('0.66');
   await page.getByRole('radio', { name: 'Feed forward' }).check();
   await expect(page.locator('.ffn-summary')).toContainText('of 512 neurons');
   await expect(page.locator('.ffn-figure .prob-bar')).toHaveCount(8);
@@ -152,6 +156,7 @@ test.describe('at 320px wide', () => {
     await expect(page.locator('.tokenizer-count')).toContainText('35 tokens');
     for (const stage of ['Embeddings', 'Attention', 'Feed forward', 'Next token']) {
       await page.getByRole('radio', { name: stage }).check();
+      if (stage === 'Attention') await page.getByText(/How .* gets its weights/).click();
       await expectNoHorizontalScroll(page);
     }
     await page.evaluate(() => window.scrollTo(0, 0));

@@ -15,7 +15,7 @@ export function runPlayground(model: Model, tokenizer: Tokenizer, text: string) 
   const tokens = ids.map((n) => displayToken(tokenizer, n));
   if (ids.length === 0) return { text, tokens, cut: 0, limit, views: null };
   const trace = forward(model, ids);
-  const attention = attentionView(tokens, trace);
+  const attention = attentionView(tokens, trace, true);
   const from = Math.max(tokens.length - GRID_TOKENS, 0);
   return {
     text,
@@ -28,6 +28,10 @@ export function runPlayground(model: Model, tokenizer: Tokenizer, text: string) 
         from,
         tokens: attention.tokens.slice(from),
         weights: attention.weights.map((heads) =>
+          heads.map((grid) => grid.slice(from).map((row) => row.slice(from))),
+        ),
+        // Rows only hold the tokens they can see, so the same cut keeps them lined up.
+        scores: attention.scores!.map((heads) =>
           heads.map((grid) => grid.slice(from).map((row) => row.slice(from))),
         ),
       },
