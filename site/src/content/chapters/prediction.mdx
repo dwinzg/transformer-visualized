@@ -1,0 +1,203 @@
+---
+title: Prediction
+order: 4
+summary: The last token's numbers become a score for every token, and the scores become chances to pick from.
+goals:
+  - Say how the model turns its last list of numbers into one score per token
+  - Turn scores into chances, and say what temperature does to them
+  - Tell greedy, top-k and top-p sampling apart
+minutes: 12
+recap:
+  - The last token's final list is compared with every row of the embedding table, giving 4,096 scores.
+  - Softmax turns the scores into chances, and one token is picked at random by those chances.
+  - Low temperature makes the top guess win more often. High temperature spreads the chances out.
+  - Greedy always takes the top guess. Top-k and top-p pick only from the likeliest tokens.
+references:
+  - press2017
+  - holtzman2020
+  - radford2019
+---
+
+<Step title="One score for every token" map="linear">
+
+<TiedScores text="Lily wanted to play with her" />
+
+<Level of="story">
+
+After attention, each token's list also passes through a small network of its own, and the whole block repeats 4 times. Then only the last token's list is used.
+
+The model compares that list with every row of the embedding table from the start, using a dot product. That gives one score for each of the 4,096 tokens, called a <Term id="logit">logit</Term>. Tokens whose rows match best get the highest scores.
+
+</Level>
+
+<Level of="numbers">
+
+The final list for "·her" starts 0.82, 2.46 and -3.15. Its dot product with the row for "·ball" is 2.60, the highest of all 4,096 scores. "·friends" comes next at 2.48.
+
+Using the same table twice is called tying the weights (<Ref id="press2017" />). It saves 524,288 numbers, and GPT-2 does it too (<Ref id="radford2019" />).
+
+</Level>
+
+<Level of="formula">
+
+With <Tex tex="\mathbf{h}" /> the last token's list after the final norm, the scores are
+
+<Tex display tex="\mathbf{z} = W_E \, \mathbf{h}, \qquad z_t = W_E[t] \cdot \mathbf{h}" />
+
+so token <Tex tex="t" /> gets the <Term id="dot-product">dot product</Term> of its own embedding row with <Tex tex="\mathbf{h}" />.
+
+</Level>
+
+<Level of="code">
+
+```ts
+const trace = forward(model, ids);
+trace.logits; // 6 × 4,096, one row of scores per token
+const scores = rowView(trace.logits, ids.length - 1); // the last row is the guess
+```
+
+</Level>
+
+</Step>
+
+<PredictReveal question="After &quot;Lily wanted to play with her&quot;, which word gets the highest chance?" options={['ball', 'friends', 'mom']} answer={0}>
+
+"Ball", with 11.5%. But "friends" is close at 10.2%, and "mom" has only 3.3%. No single word is very likely, so the model spreads its chances.
+
+</PredictReveal>
+
+<Step title="Scores become chances" map="softmax">
+
+<Sampling text="Lily wanted to play with her" caption="Press Sample a few times." />
+
+<Level of="story">
+
+Scores are not chances yet. <Term id="softmax">Softmax</Term> turns them into chances between 0 and 1 that add up to 1, just as it did inside attention.
+
+Then a token is picked at random, where each token's chance of being picked is its probability. This is called <Term id="sampling">sampling</Term>. Press Sample a few times. The same chances can give a different word each time.
+
+</Level>
+
+<Level of="numbers">
+
+"·ball" gets 11.5%, "·friends" 10.2% and "·toy" 8.5%. The 50 best tokens hold 80% of the chance together. The other 4,046 tokens share the last 20%, so a rarer word gets picked about one time in five.
+
+</Level>
+
+<Level of="formula">
+
+<Tex display tex="P(t) = \frac{e^{z_t}}{\sum_{s} e^{z_s}}" />
+
+The sum runs over all 4,096 tokens.
+
+</Level>
+
+<Level of="code">
+
+```ts
+const probs = probabilities(scores, 1); // softmax at temperature 1
+const next = sample(probs, createRng(1)); // one token id, picked at random
+```
+
+</Level>
+
+</Step>
+
+<Step title="Turning the temperature up or down" map="output">
+
+<Sampling
+  text="Lily wanted to play with her"
+  temperature={0.5}
+  caption="Try 0.1, then 2."
+/>
+
+<Level of="story">
+
+Before softmax, every score is divided by a number called the <Term id="temperature">temperature</Term>.
+
+A low temperature makes the gaps between scores bigger, so the top guess wins more often and the text gets safer. A high temperature shrinks the gaps, so rare words get picked more and the text gets wilder. At 1, the chances are the model's own.
+
+</Level>
+
+<Level of="numbers">
+
+At temperature 0.1, "·ball" gets 72% and "·friends" 22%. At 0.5, "·ball" gets 27%. At 2, "·ball" gets only 1.5%, and the 50 best tokens hold just 22% together.
+
+</Level>
+
+<Level of="formula">
+
+With temperature <Tex tex="T" />,
+
+<Tex display tex="P_T(t) = \frac{e^{z_t / T}}{\sum_{s} e^{z_s / T}}" />
+
+As <Tex tex="T" /> goes to 0, all the chance goes to the top score. As <Tex tex="T" /> grows, the chances move toward equal.
+
+</Level>
+
+<Level of="code">
+
+```ts
+probabilities(scores, 0.1); // sharp, "·ball" gets 0.72
+probabilities(scores, 2); // flat, "·ball" gets 0.015
+```
+
+</Level>
+
+<Exercise prompt="Two tokens have scores 2 and 0. At temperature 0.5, what is the first one's chance? Use e to the power of 4 = 54.6." answer={0.98} tolerance={0.01}>
+
+Dividing by 0.5 gives 4 and 0. e to the power of 4 is 54.6, and e to the power of 0 is 1, so the total is 55.6. The chance is 54.6 divided by 55.6, about 0.98. At temperature 1 it would be about 0.88.
+
+</Exercise>
+
+</Step>
+
+<Step title="Greedy, top-k and top-p">
+
+<Sampling
+  text="Lily wanted to play with her"
+  keep="greedy"
+  caption="Switch between the rules and watch which tokens stay in."
+/>
+
+<Level of="story">
+
+<Term id="greedy">Greedy</Term> decoding skips the dice and always takes the top guess. It gives the same text every time, which often ends up dull and repeats itself (<Ref id="holtzman2020" />).
+
+<Term id="top-k">Top-k</Term> picks only from the k likeliest tokens. <Term id="top-p">Top-p</Term> picks from the fewest likeliest tokens whose chances add up to p. Both stop very rare words from sneaking in.
+
+</Level>
+
+<Level of="numbers">
+
+With top-k and k = 5, only "·ball", "·friends", "·toy", "·doll" and "·new" stay in, and their chances are scaled up to add to 1.
+
+With top-p and p = 0.9, the number kept depends on how sure the model is. At temperature 1 it keeps about 200 tokens. At temperature 0.5 it keeps only 7.
+
+</Level>
+
+<Level of="formula">
+
+Top-p keeps the smallest set <Tex tex="V_p" /> of likeliest tokens with <Tex tex="\sum_{t \in V_p} P(t) \ge p" />, then rescales.
+
+<Tex display tex="P'(t) = \frac{P(t)}{\sum_{s \in V_p} P(s)} \text{ for } t \in V_p, \text{ and } 0 \text{ otherwise}" />
+
+</Level>
+
+<Level of="code">
+
+```ts
+argmax(scores); // greedy, the id of "·ball"
+nextTokenDistribution(scores, { temperature: 1, topK: 5 });
+nextTokenDistribution(scores, { temperature: 1, topP: 0.9 });
+```
+
+</Level>
+
+</Step>
+
+<Callout kind="analogy" title="Like a raffle">
+
+Each token holds raffle tickets, as many as its chance. Temperature changes how unevenly the tickets are handed out, and top-k and top-p take tickets away from the long tail. **Where this breaks.** The model only hands out the tickets. The drawing happens outside the model, in a few lines of code, and you can change it without retraining anything.
+
+</Callout>

@@ -181,5 +181,38 @@
     "arxiv": "1908.04626v2",
     "note": "A reply arguing that whether attention explains depends on what you mean by explanation.",
     "topics": ["interpretability"]
+  },
+  {
+    "id": "press2017",
+    "type": "paper",
+    "authors": [
+      { "family": "Press", "given": "Ofir" },
+      { "family": "Wolf", "given": "Lior" }
+    ],
+    "title": "Using the Output Embedding to Improve Language Models",
+    "year": 2017,
+    "venue": "Proceedings of EACL 2017",
+    "url": "https://arxiv.org/abs/1608.05859v3",
+    "arxiv": "1608.05859v3",
+    "note": "Showed that a language model can reuse its input embedding table to score the next token, with fewer numbers to learn.",
+    "topics": ["prediction"]
+  },
+  {
+    "id": "holtzman2020",
+    "type": "paper",
+    "authors": [
+      { "family": "Holtzman", "given": "Ari" },
+      { "family": "Buys", "given": "Jan" },
+      { "family": "Du", "given": "Li" },
+      { "family": "Forbes", "given": "Maxwell" },
+      { "family": "Choi", "given": "Yejin" }
+    ],
+    "title": "The Curious Case of Neural Text Degeneration",
+    "year": 2020,
+    "venue": "ICLR 2020",
+    "url": "https://arxiv.org/abs/1904.09751v2",
+    "arxiv": "1904.09751v2",
+    "note": "Introduced top-p (nucleus) sampling, and showed that always taking the likeliest token gives dull, repetitive text.",
+    "topics": ["prediction"]
   }
 ]
