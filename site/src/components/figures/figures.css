@@ -245,7 +245,8 @@
   justify-content: space-between;
   gap: var(--space-3);
 }
-.arch-views {
+.arch-views,
+.segmented {
   display: inline-flex;
   flex-wrap: wrap;
   gap: var(--space-1);
@@ -255,15 +256,18 @@
   border-radius: var(--radius-lg);
   background: var(--color-surface-2);
 }
-.arch-views label {
+.arch-views label,
+.segmented label {
   position: relative;
 }
-.arch-views input {
+.arch-views input,
+.segmented input {
   position: absolute;
   opacity: 0;
   inset: 0;
 }
-.arch-views span {
+.arch-views span,
+.segmented span {
   display: inline-flex;
   align-items: center;
   min-height: var(--touch-target);
@@ -272,12 +276,14 @@
   font-size: var(--text-subheadline);
   cursor: pointer;
 }
-.arch-views input:checked + span {
+.arch-views input:checked + span,
+.segmented input:checked + span {
   background: var(--color-segment-selected);
   border: 1px solid var(--color-control-border);
   font-weight: 600;
 }
-.arch-views input:focus-visible + span {
+.arch-views input:focus-visible + span,
+.segmented input:focus-visible + span {
   outline: var(--focus-width) solid var(--color-focus);
   outline-offset: var(--focus-offset);
 }
@@ -469,4 +475,117 @@
 .tokenizer-notes .tokenizer-unseen {
   color: var(--color-text);
   font-weight: 600;
+}
+
+/* Token chips that work as radio buttons. */
+.chip-picker {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+.chip-option {
+  min-height: var(--touch-target);
+  justify-content: center;
+  color: var(--color-text);
+  font: inherit;
+  font-size: var(--text-body);
+  cursor: pointer;
+}
+.chip-option[aria-checked='true'] {
+  border: 2px solid var(--color-accent);
+  background: var(--color-surface-2);
+  font-weight: 600;
+}
+.chip-option:focus-visible {
+  outline: var(--focus-width) solid var(--color-focus);
+  outline-offset: var(--focus-offset);
+}
+
+/* Number strip. Blue is below zero and orange above, never the only cue (see the readout). */
+.strip-figure,
+.nearest-figure {
+  display: grid;
+  gap: var(--space-3);
+}
+.strip-controls {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+}
+.strip-grid {
+  --strip-negative: var(--concept-query);
+  --strip-positive: var(--concept-output);
+  display: grid;
+  grid-template-columns: repeat(16, 1fr);
+  gap: 2px;
+  padding: var(--space-2);
+  border: 1px solid var(--color-control-border);
+  border-radius: var(--radius-md);
+  background: var(--color-surface);
+}
+.strip-grid:focus-visible {
+  outline: var(--focus-width) solid var(--color-focus);
+  outline-offset: var(--focus-offset);
+}
+.strip-position {
+  box-shadow: inset 6px 0 0 var(--concept-position);
+}
+.strip-cell {
+  aspect-ratio: 1;
+  border-radius: 2px;
+  cursor: crosshair;
+}
+.strip-cell.is-active {
+  outline: 2px solid var(--color-text);
+  outline-offset: 1px;
+}
+.strip-readout {
+  margin: 0;
+  font-family: var(--font-mono);
+  font-size: var(--text-footnote);
+  font-variant-numeric: tabular-nums;
+}
+.strip-readout .is-current {
+  font-weight: 700;
+}
+.strip-summary {
+  margin: 0;
+  color: var(--color-text-secondary);
+  font-size: var(--text-footnote);
+}
+
+/* Nearest tokens. */
+.nearest-title {
+  margin: 0;
+}
+.nearest-list {
+  display: grid;
+  gap: var(--space-2);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.nearest-row {
+  display: grid;
+  grid-template-columns: minmax(6rem, auto) 1fr 3rem;
+  align-items: center;
+  gap: var(--space-3);
+}
+.nearest-bar {
+  height: 0.75rem;
+  border-radius: var(--radius-pill);
+  background: var(--color-surface-2);
+  overflow: hidden;
+}
+.nearest-bar span {
+  display: block;
+  height: 100%;
+  background: var(--concept-residual);
+}
+.nearest-score {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  text-align: right;
 }
