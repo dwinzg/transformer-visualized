@@ -1,3 +1,4 @@
+import AttentionGrid from './AttentionGrid.astro';
 import Callout from './Callout.astro';
 import Exercise from './Exercise.astro';
 import Figure from '../Figure.astro';
@@ -13,9 +14,11 @@ import Step from './Step.astro';
 import Term from './Term.astro';
 import Tex from './Tex.astro';
 import Tokenizer from './Tokenizer.astro';
+import ToyAttention from './ToyAttention.astro';
 
 /** Components every chapter can use without importing them. */
 export const mdxComponents = {
+  AttentionGrid,
   Callout,
   Exercise,
   Figure,
@@ -31,4 +34,5 @@ export const mdxComponents = {
   Tex,
   Term,
   Tokenizer,
+  ToyAttention,
 };

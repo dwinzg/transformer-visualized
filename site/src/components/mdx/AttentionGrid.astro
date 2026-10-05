@@ -1,0 +1,30 @@
+---
+import Figure from '../Figure.astro';
+import Island from '../figures/AttentionGridFigure.tsx';
+import { attentionWeights } from '../../lib/demo-data';
+
+interface Props {
+  text: string;
+  /** Starting layer, head and row, counting from 1 like the labels. */
+  layer?: number;
+  head?: number;
+  row?: number;
+  caption?: string;
+}
+const { text, layer = 1, head = 1, row, caption = 'Pick a layer and a head.' } = Astro.props;
+const data = attentionWeights(text);
+---
+
+<Figure
+  caption={caption}
+  description="A grid of the real model's attention weights for the sentence. Each row is a token and each column a token it can look at. A summary under the controls names where the picked token looks most."
+>
+  <Island
+    client:visible
+    tokens={data.tokens}
+    weights={data.weights}
+    layer={layer - 1}
+    head={head - 1}
+    row={row === undefined ? undefined : row - 1}
+  />
+</Figure>

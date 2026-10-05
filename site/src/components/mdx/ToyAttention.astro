@@ -1,0 +1,11 @@
+---
+import Figure from '../Figure.astro';
+import Island from '../figures/ToyAttentionFigure.tsx';
+---
+
+<Figure
+  caption="Step through attention with three tokens."
+  description="Three tokens, each with a question, a name tag and a backpack of two numbers. A table shows the scores, then the hidden future, then the weights, one step at a time."
+>
+  <Island client:visible />
+</Figure>
