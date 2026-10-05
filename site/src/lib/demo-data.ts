@@ -9,6 +9,7 @@ import {
   Tokenizer,
   unsupportedCharacters,
   type Model,
+  type Trace,
 } from '@transformer-visualized/engine';
 import { cosine, dot, round, type EmbeddedToken, type NearestTokens } from './embeddings';
 import { attentionView, embeddingView, scoresView, type AttentionData } from './model-views';
@@ -171,6 +172,12 @@ export function attentionWeights(text: string): AttentionData {
   assertSupported(text);
   const ids = getTokenizer().encode(normalizeText(text));
   return attentionView(toDisplay(ids), forward(getModel(), ids));
+}
+
+/** Every value from one forward pass over a text. */
+export function traceOf(text: string): Trace {
+  assertSupported(text);
+  return forward(getModel(), getTokenizer().encode(normalizeText(text)));
 }
 
 /** The model's scores for the token after a text. */
