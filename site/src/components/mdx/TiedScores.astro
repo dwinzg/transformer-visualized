@@ -1,16 +1,15 @@
 ---
 import Figure from '../Figure.astro';
 import { tiedScores } from '../../lib/demo-data';
-import { shownToken } from '../../lib/token-text';
+import { shownToken, spokenToken } from '../../lib/token-text';
 
 interface Props {
   text: string;
   caption?: string;
 }
 const { text, caption = "Each score is the last list times that token's own row." } = Astro.props;
-const { hidden, rows } = tiedScores(text);
-const last = text.split(' ').at(-1);
-const SHOWN = 2;
+const { last, hidden, rows } = tiedScores(text);
+const SHOWN = 3;
 const list = (values: number[]) =>
   values
     .slice(0, SHOWN)
@@ -24,8 +23,12 @@ const list = (values: number[]) =>
 >
   <div class="tied-figure">
     <p class="tied-hidden">
-      The final list for <strong>{last}</strong> starts <code>{list(hidden)}, …</code> and has 128
-      numbers.
+      The final list for{' '}
+      <strong>
+        <span aria-hidden="true">{shownToken(last.text)}</span>
+        <span class="visually-hidden">{spokenToken(last.text)}</span>
+      </strong>{' '}
+      starts <code>{list(hidden)}, …</code> and has {hidden.length} numbers.
     </p>
     <table class="tied-table">
       <thead>
@@ -39,7 +42,16 @@ const list = (values: number[]) =>
         {rows.map(({ token, row, score }) => (
           <tr>
             <th scope="row">
-              <span class="token-chip">{shownToken(token.text)}</span>
+              <span class="token-chip">
+                {token.special ? (
+                  token.text
+                ) : (
+                  <>
+                    <span aria-hidden="true">{shownToken(token.text)}</span>
+                    <span class="visually-hidden">{spokenToken(token.text)}</span>
+                  </>
+                )}
+              </span>
             </th>
             <td>
               <code>{list(row)}, …</code>
