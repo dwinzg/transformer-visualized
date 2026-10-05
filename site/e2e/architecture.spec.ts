@@ -15,15 +15,51 @@ async function openMap(page: Page, query = ''): Promise<Locator> {
 }
 
 const panel = (map: Locator) => map.locator('.arch-panel');
+const title = (map: Locator) => panel(map).locator('.arch-title');
+const article = (page: Page) => page.locator('#part-article');
 
-test('picking a block explains it, with the formula at the Formula level', async ({ page }) => {
+test('picking a block explains it beside the map and in full below it', async ({ page }) => {
   const map = await openMap(page);
   await map.getByRole('radio', { name: 'Masked multi-head attention' }).click();
-  await expect(panel(map).getByRole('heading', { name: 'Masked attention' })).toBeVisible();
+  await expect(title(map)).toHaveText('Masked attention');
   await expect(panel(map)).toContainText('cannot look ahead');
-  await expect(panel(map).locator('.katex')).toHaveCount(0);
-  await page.getByRole('radio', { name: 'Formula', exact: true }).check();
-  await expect(panel(map).locator('.katex')).toHaveCount(1);
+  const full = article(page);
+  await expect(full.getByRole('heading', { level: 2 })).toHaveText('Masked attention');
+  await expect(full.locator('.katex')).toHaveCount(1);
+  for (const name of ['Sizes', 'Formula', 'In PyTorch', 'In our engine']) {
+    await expect(full.getByRole('heading', { level: 3, name })).toBeVisible();
+  }
+  await expect(full.locator('.arch-prints')).toContainText('0.1737');
+});
+
+test('the article pages through the tour and moves to the next heading', async ({ page }) => {
+  await openMap(page, '?part=final-norm&view=gpt2');
+  const full = article(page);
+  await expect(full.locator('.arch-prints')).toContainText('tensor([ 0.8167,  2.4633, -3.1536');
+  await full.getByRole('button', { name: /^Next/ }).click();
+  await expect(full.getByRole('heading', { level: 2 })).toHaveText('Linear');
+  await expect(full.getByRole('heading', { level: 2 })).toBeFocused();
+  await expect(page.locator('.arch-count')).toHaveText('10 of 12');
+  await full.getByRole('button', { name: /^Previous Final norm/ }).click();
+  await expect(full.getByRole('heading', { level: 2 })).toHaveText('Final norm');
+});
+
+test("the paper's view adds the paper's version of a part", async ({ page }) => {
+  await openMap(page, '?part=position');
+  const full = article(page);
+  await expect(full.getByRole('heading', { name: "The paper's version" })).toBeVisible();
+  await expect(full).toContainText('tensor([0.8415, 0.5403, 0.7617, 0.6479])');
+});
+
+test('the setup and every snippet can be copied', async ({ page, context, browserName }) => {
+  test.skip(browserName !== 'chromium', 'Only Chromium lets a test read the clipboard.');
+  await context.grantPermissions(['clipboard-read', 'clipboard-write']);
+  await openMap(page, '?part=embedding&view=gpt2');
+  const full = article(page);
+  await full.getByText('Run the code yourself').click();
+  await full.getByRole('button', { name: 'Copy PyTorch setup' }).click();
+  await expect(full.getByRole('button', { name: 'Copied PyTorch setup' })).toBeVisible();
+  expect(await page.evaluate(() => navigator.clipboard.readText())).toContain('load_file');
 });
 
 test('the tour walks every part and stops at the end', async ({ page }) => {
@@ -32,7 +68,7 @@ test('the tour walks every part and stops at the end', async ({ page }) => {
   for (let i = 0; i < 20; i++) await next.click();
   await expect(map.locator('.arch-count')).toHaveText('20 of 20');
   await expect(next).toHaveAttribute('aria-disabled', 'true');
-  await expect(panel(map).getByRole('heading')).toHaveText('Output');
+  await expect(title(map)).toHaveText('Output');
   await map.getByRole('button', { name: 'Previous' }).click();
   await expect(map.locator('.arch-count')).toHaveText('19 of 20');
 });
@@ -43,7 +79,7 @@ test('the GPT-2 view drops the encoder and cross-attention and adds a final norm
   const map = await openMap(page);
   await expect(map.getByRole('radio', { name: 'Outputs (shifted right)' })).toBeVisible();
   await map.getByRole('radio', { name: 'Multi-head attention', exact: true }).click();
-  await expect(panel(map).getByRole('heading')).toHaveText('Cross-attention');
+  await expect(title(map)).toHaveText('Cross-attention');
   const original = map.getByRole('radio', { name: 'Original paper' });
   const gpt2 = map.getByRole('radio', { name: 'GPT-2 style (our model)' });
   await original.focus();
@@ -77,15 +113,15 @@ test("a lesson link opens our model's block, not the encoder's", async ({ page }
 
 test('a link can open the map at one part', async ({ page }) => {
   const map = await openMap(page, '?part=cross-attn&view=gpt2');
-  await expect(panel(map).getByRole('heading')).toHaveText('Cross-attention');
+  await expect(title(map)).toHaveText('Cross-attention');
   const unknown = await openMap(page, '?part=nope');
   await expect(panel(unknown)).toContainText('Tap a part');
 });
 
-test('a depth link reaches the map even though it loads later', async ({ page }) => {
-  const map = await openMap(page, '?part=softmax&depth=formula');
-  await expect(panel(map).locator('.katex')).toHaveCount(1);
-  await expect(panel(map)).toContainText('4,096 chances');
+test('a part link shows its whole article even though the map loads later', async ({ page }) => {
+  await openMap(page, '?part=softmax');
+  await expect(article(page).locator('.katex')).toHaveCount(1);
+  await expect(article(page)).toContainText('4,096 chances');
 });
 
 test('arrow keys move through the parts', async ({ page }) => {
@@ -106,7 +142,7 @@ test('the tour keeps its buttons and the text on screen', async ({ page }) => {
   const next = map.getByRole('button', { name: 'Next' });
   for (let i = 0; i < 3; i++) await next.click();
   await expect(next).toBeInViewport();
-  await expect(panel(map).getByRole('heading')).toBeInViewport();
+  await expect(title(map)).toBeInViewport();
 });
 
 test('start over at rest does nothing, so the tour still advances after it', async ({ page }) => {
@@ -129,25 +165,23 @@ test('start over clears the pick and returns to the original view', async ({ pag
   await expect(map.getByRole('radio', { name: 'Outputs (shifted right)' })).toBeVisible();
 });
 
-test('the panel links to the glossary, and says when a chapter is still coming', async ({
-  page,
-}) => {
+test('the article links to its chapter and the glossary', async ({ page }) => {
   const map = await openMap(page);
   await map.getByRole('radio', { name: 'Feed forward' }).first().click();
-  await expect(panel(map)).toContainText('Chapter coming soon');
+  await expect(article(page).getByRole('link', { name: 'Read the chapter' })).toHaveCount(0);
   await map.getByRole('radio', { name: 'Inputs' }).first().click();
-  await expect(panel(map).getByRole('link', { name: 'Read the chapter' })).toHaveAttribute(
+  await expect(article(page).getByRole('link', { name: 'Read the chapter' })).toHaveAttribute(
     'href',
     /learn\/tokens\/#step-text-becomes-tokens$/,
   );
-  await panel(map).getByRole('link', { name: 'What the word means' }).click();
+  await article(page).getByRole('link', { name: 'What the word means' }).click();
   await expect(page).toHaveURL(/glossary\/#token$/);
 });
 
 test('the map is accessible after interaction in both themes', async ({ page }) => {
   const map = await openMap(page);
   await map.getByRole('radio', { name: 'Feed forward', exact: true }).click();
-  await page.getByRole('radio', { name: 'Code', exact: true }).check();
+  await article(page).getByText('Run the code yourself').click();
   for (const colorScheme of ['light', 'dark'] as const) {
     await page.emulateMedia({ colorScheme });
     await expectNoA11yViolations(page);
@@ -157,14 +191,15 @@ test('the map is accessible after interaction in both themes', async ({ page }) 
 test.describe('on a phone', () => {
   test.use({ viewport: { width: 390, height: 844 } });
 
-  test('the page never scrolls sideways', async ({ page }) => {
-    await openMap(page);
+  test('the page never scrolls sideways, with an article open', async ({ page }) => {
+    await openMap(page, '?part=masked-attn&view=gpt2');
+    await expect(article(page).getByRole('heading', { level: 2 })).toBeVisible();
     await expectNoHorizontalScroll(page);
   });
 
   test('tapping a block shows its text', async ({ page }) => {
     const map = await openMap(page);
     await map.getByRole('radio', { name: 'Softmax' }).click();
-    await expect(panel(map).getByRole('heading')).toBeInViewport();
+    await expect(title(map)).toBeInViewport();
   });
 });

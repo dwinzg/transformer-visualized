@@ -9,6 +9,10 @@ test.describe('home page', () => {
       'href',
       '/transformer-visualized/learn/',
     );
+    await expect(page.getByRole('link', { name: /The whole model/ })).toHaveAttribute(
+      'href',
+      '/transformer-visualized/learn/architecture/',
+    );
     await expect(page.getByRole('link', { name: /Quick review/ })).toHaveAttribute(
       'href',
       '/transformer-visualized/review/',

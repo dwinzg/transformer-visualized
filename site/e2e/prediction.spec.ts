@@ -131,7 +131,8 @@ test('the map opens this chapter from the Linear block', async ({ page }) => {
   await page.goto('learn/architecture/?part=linear&view=gpt2');
   const map = page.locator('.arch-map');
   await map.scrollIntoViewIfNeeded();
-  await map.getByRole('link', { name: 'Read the chapter' }).click();
+  await expect(page.locator('astro-island', { has: map })).not.toHaveAttribute('ssr');
+  await page.locator('#part-article').getByRole('link', { name: 'Read the chapter' }).click();
   await expect(page).toHaveURL(/learn\/prediction\/#step-one-score-for-every-token$/);
 });
 
