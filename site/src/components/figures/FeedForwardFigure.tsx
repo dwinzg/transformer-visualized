@@ -17,7 +17,9 @@ export default function FeedForwardFigure({
   activations: number[][][];
 }) {
   const [layer, setLayer] = useState(0);
-  const [row, setRow] = useState(tokens.length - 1);
+  // Until a token is picked, the last one is shown, even as the text changes.
+  const [picked, setRow] = useState<number | null>(null);
+  const row = Math.min(picked ?? tokens.length - 1, tokens.length - 1);
   const id = useId();
   const values = activations[layer][row];
   const strongest = values
@@ -47,7 +49,8 @@ export default function FeedForwardFigure({
       <p className="ffn-summary" aria-live="polite">
         In layer {layer + 1}, <span aria-hidden="true">{shownToken(tokens[row].text)}</span>
         <span className="visually-hidden">{spokenToken(tokens[row].text)}</span> turns on {on} of{' '}
-        {values.length} neurons. The strongest are below.
+        {values.length} neurons. A neuron is on when its number is above zero. The strongest are
+        below.
       </p>
       <ul className="prob-bars" aria-label="The strongest neurons">
         {strongest.map(({ value, neuron }) => (

@@ -1,4 +1,4 @@
-import { useEffect, useId, useState } from 'react';
+import { useId, useRef, useState } from 'react';
 import type { DisplayToken } from '../../lib/guess-tree';
 import { chances, draw, TOP_K, TOP_P, type Keep, type NextScores } from '../../lib/prediction';
 import { shownToken, spokenToken } from '../../lib/token-text';
@@ -43,7 +43,12 @@ export default function SamplingFigure({
   const [keep, setKeep] = useState<Keep>(startKeep);
   const [picks, setPicks] = useState<number[]>([]);
   // Picks point into the chances, so new chances start a new list. The settings stay.
-  useEffect(() => setPicks([]), [data]);
+  const [pickedFrom, setPickedFrom] = useState(data);
+  if (pickedFrom !== data) {
+    setPickedFrom(data);
+    setPicks([]);
+  }
+  const sample = useRef<HTMLButtonElement>(null);
   const id = useId();
   const c = chances(data, temperature, keep);
   const changed = temperature !== startTemperature || keep !== startKeep || picks.length > 0;
@@ -117,6 +122,7 @@ export default function SamplingFigure({
       </ul>
       <div className="loop-controls">
         <button
+          ref={sample}
           type="button"
           className="figure-button press"
           onClick={() => setPicks([draw(c, Math.random()), ...picks])}
@@ -127,7 +133,11 @@ export default function SamplingFigure({
           <button
             type="button"
             className="figure-button press"
-            onClick={() => onAdd(data.top[picks[0]].token)}
+            onClick={() => {
+              onAdd(data.top[picks[0]].token);
+              // This button goes away with the new text, so keep the focus close by.
+              sample.current?.focus();
+            }}
           >
             Add <span aria-hidden="true">{name(picks[0])}</span>
             <span className="visually-hidden">{say(picks[0])}</span> to the text
