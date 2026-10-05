@@ -697,6 +697,8 @@ td.is-hidden {
   margin: 0;
 }
 .attn-scroll {
+  /* Keeps the hidden screen reader text inside the scroll box, so it cannot widen the page. */
+  position: relative;
   overflow-x: auto;
 }
 .attn-scroll:focus-visible {
@@ -820,6 +822,11 @@ td.is-hidden {
 .playground-status {
   margin: 0;
   color: var(--color-text-secondary);
+}
+.playground-note {
+  margin: 0 0 var(--space-4);
+  color: var(--color-text-secondary);
+  font-size: var(--text-footnote);
 }
 .playground-panel {
   min-width: 0;

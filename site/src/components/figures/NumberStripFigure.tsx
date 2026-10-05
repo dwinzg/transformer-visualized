@@ -50,14 +50,16 @@ export default function NumberStripFigure({
   view?: StripView;
   token?: number;
 }) {
-  const [picked, setPicked] = useState(initialToken);
+  // Until a token is picked, the start token is used, so it follows the end as the playground text grows.
+  const [picked, setPicked] = useState<number | null>(null);
   const [view, setView] = useState<StripView>(initialView);
   const [active, setActive] = useState(0);
   const id = useId();
-  const token = tokens[picked];
+  const at = Math.min(picked ?? initialToken, tokens.length - 1);
+  const token = tokens[at];
   const row = rowFor(token, view);
   const size = row.length;
-  const changed = picked !== initialToken || view !== initialView;
+  const changed = at !== initialToken || view !== initialView;
 
   const move = (event: KeyboardEvent<HTMLDivElement>) => {
     const next =
@@ -84,7 +86,7 @@ export default function NumberStripFigure({
       <ChipPicker
         label="Pick a token"
         tokens={tokens.map((t) => t.token)}
-        selected={picked}
+        selected={at}
         onSelect={setPicked}
       />
       <div className="strip-controls">
@@ -108,7 +110,7 @@ export default function NumberStripFigure({
           aria-disabled={!changed}
           onClick={() => {
             if (!changed) return;
-            setPicked(initialToken);
+            setPicked(null);
             setView(initialView);
             setActive(0);
           }}

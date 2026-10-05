@@ -1,4 +1,4 @@
-import { useDeferredValue, useEffect, useId, useMemo, useState } from 'react';
+import { useEffect, useId, useMemo, useRef, useState } from 'react';
 import {
   forward,
   normalizeText,
@@ -18,6 +18,10 @@ import './figures.css';
 
 const START = 'Lily wanted to play with her';
 const MAX_LENGTH = 400;
+/** How long typing must pause before the model runs again. */
+const WAIT_MS = 250;
+/** A grid for every token would be huge, so attention shows the last few. */
+const GRID_TOKENS = 24;
 
 type Stage = 'embeddings' | 'attention' | 'ffn' | 'output';
 const STAGES: Record<Stage, string> = {
@@ -35,9 +39,14 @@ export default function Playground() {
   const [loaded, setLoaded] = useState<{ model: Model; tokenizer: Tokenizer } | null>(null);
   const [failed, setFailed] = useState(false);
   const [attempt, setAttempt] = useState(0);
+  const status = useRef<HTMLDivElement>(null);
   const id = useId();
-  // Typing stays smooth, and the model catches up when the browser is free.
-  const input = useDeferredValue(text);
+  // The model runs once typing pauses, so every key press stays quick.
+  const [input, setInput] = useState(text);
+  useEffect(() => {
+    const timer = setTimeout(() => setInput(text), WAIT_MS);
+    return () => clearTimeout(timer);
+  }, [text]);
 
   useEffect(() => setMounted(true), []);
   useEffect(() => {
@@ -59,15 +68,24 @@ export default function Playground() {
     // The model reads at most contextLength tokens, so a long text keeps its end.
     const ids = all.slice(-model.config.contextLength);
     const tokens = ids.map((n) => displayToken(tokenizer, n));
-    if (ids.length === 0) return { tokens, cut: 0, views: null };
+    const limit = model.config.contextLength;
+    if (ids.length === 0) return { tokens, cut: 0, limit, views: null };
     const trace = forward(model, ids);
+    const attention = attentionView(tokens, trace);
+    const from = Math.max(tokens.length - GRID_TOKENS, 0);
     return {
       tokens,
       cut: all.length - ids.length,
+      limit,
       views: {
-        key: ids.join(','),
         embeddings: embeddingView(tokens, trace),
-        attention: attentionView(tokens, trace),
+        attention: {
+          from,
+          tokens: attention.tokens.slice(from),
+          weights: attention.weights.map((heads) =>
+            heads.map((grid) => grid.slice(from).map((row) => row.slice(from))),
+          ),
+        },
         scores: scoresView(
           tokens,
           trace,
@@ -114,14 +132,18 @@ export default function Playground() {
       )}
 
       {!run ? (
-        <div role="status" className="playground-status">
+        <div role="status" className="playground-status" tabIndex={-1} ref={status}>
           {failed ? (
             <>
               The model did not load. Check your connection, then{' '}
               <button
                 type="button"
                 className="figure-button press"
-                onClick={() => setAttempt((n) => n + 1)}
+                onClick={() => {
+                  setAttempt((n) => n + 1);
+                  // The button goes away while loading, so the message keeps the focus.
+                  status.current?.focus();
+                }}
               >
                 Try again
               </button>
@@ -152,11 +174,12 @@ export default function Playground() {
           </ol>
           <p className="tokenizer-count">
             {run.tokens.length} {run.tokens.length === 1 ? 'token' : 'tokens'}.
-            {run.cut > 0 && ` The model reads at most 128, so the first ${run.cut} are left out.`}
+            {run.cut > 0 &&
+              ` The model reads at most ${run.limit}, so the first ${run.cut} are left out.`}
           </p>
 
           <fieldset className="segmented playground-stages">
-            <legend className="visually-hidden">Show</legend>
+            <legend className="visually-hidden">Stage</legend>
             {(Object.keys(STAGES) as Stage[]).map((s) => (
               <label key={s}>
                 <input
@@ -172,30 +195,31 @@ export default function Playground() {
 
           <section className="playground-panel" aria-label={STAGES[stage]}>
             {stage === 'embeddings' && (
-              <NumberStripFigure
-                key={run.views.key}
-                tokens={run.views.embeddings}
-                token={run.tokens.length - 1}
-              />
+              <NumberStripFigure tokens={run.views.embeddings} token={run.tokens.length - 1} />
             )}
             {stage === 'attention' && (
-              <AttentionGridFigure
-                key={run.views.key}
-                tokens={run.views.attention.tokens}
-                weights={run.views.attention.weights}
-              />
+              <>
+                {run.views.attention.from > 0 && (
+                  <p className="playground-note">
+                    The grid shows the last {GRID_TOKENS} tokens. Weights on earlier tokens are left
+                    out, so a row can add up to less than 1.
+                  </p>
+                )}
+                <AttentionGridFigure
+                  tokens={run.views.attention.tokens}
+                  weights={run.views.attention.weights}
+                />
+              </>
             )}
             {stage === 'ffn' && (
-              <FeedForwardFigure
-                key={run.views.key}
-                tokens={run.tokens}
-                activations={run.views.activations}
-              />
+              <FeedForwardFigure tokens={run.tokens} activations={run.views.activations} />
             )}
             {stage === 'output' && (
               <SamplingFigure
                 data={run.views.scores}
-                onAdd={(token) => setText((t) => t + token.text)}
+                onAdd={(token) =>
+                  setText((t) => (t.length + token.text.length > MAX_LENGTH ? t : t + token.text))
+                }
               />
             )}
           </section>

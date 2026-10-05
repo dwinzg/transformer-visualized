@@ -53,7 +53,9 @@ export default function AttentionGridFigure({
 }: Props) {
   const [layer, setLayer] = useState(startLayer);
   const [head, setHead] = useState(startHead);
-  const [row, setRow] = useState(startRow);
+  // Until a token is picked, the start row is used, so it follows the end as the playground text grows.
+  const [picked, setRow] = useState<number | null>(null);
+  const row = Math.min(picked ?? startRow, tokens.length - 1);
   const id = useId();
   const grid = weights[layer][head];
   const changed = layer !== startLayer || head !== startHead || row !== startRow;
@@ -89,7 +91,7 @@ export default function AttentionGridFigure({
             if (!changed) return;
             setLayer(startLayer);
             setHead(startHead);
-            setRow(startRow);
+            setRow(null);
           }}
         >
           Start over
