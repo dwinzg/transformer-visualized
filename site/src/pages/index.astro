@@ -39,10 +39,10 @@ const trees = [
       <span class="way-title">Quick review</span>
       <span class="way-text">Formulas, shapes and code for a refresher.</span>
     </a>
-    <div class="way way-soon">
+    <a class="way press" href={withBase('playground/')}>
       <span class="way-title">Playground</span>
-      <span class="way-text">Type your own sentence and see every number. Coming soon.</span>
-    </div>
+      <span class="way-text">Type your own sentence and look inside the model.</span>
+    </a>
   </section>
 </BaseLayout>
 
@@ -88,9 +88,6 @@ const trees = [
     font-weight: 600;
   }
   .way-text {
-    color: var(--color-text-secondary);
-  }
-  .way-soon .way-title {
     color: var(--color-text-secondary);
   }
   @media (max-width: 52rem) {

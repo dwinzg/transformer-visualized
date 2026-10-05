@@ -1,0 +1,27 @@
+---
+import Playground from '../components/figures/Playground.tsx';
+import BaseLayout from '../layouts/BaseLayout.astro';
+---
+
+<BaseLayout
+  title="Playground"
+  description="Type any text and watch the real tiny model read it, from tokens to the next-token guess."
+>
+  <section class="prose page">
+    <h1>Playground</h1>
+    <p class="lede">
+      Type anything and watch the real model read it, right here in your browser. Pick a stage to
+      look inside, or sample the next token and add it to your text.
+    </p>
+    <Playground client:load />
+  </section>
+</BaseLayout>
+
+<style>
+  .page {
+    padding-block: var(--space-12);
+  }
+  .lede {
+    color: var(--color-text-secondary);
+  }
+</style>

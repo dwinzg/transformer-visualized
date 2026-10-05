@@ -23,6 +23,9 @@ type Token = NextScores['top'][number]['token'];
 const show = (t: Token) => (t.special ? t.text : shownToken(t.text));
 const speak = (t: Token) => (t.special ? t.text.slice(1, -1) : spokenToken(t.text));
 
+/** Byte pieces and the end-of-story marker have no plain text to add back to a sentence. */
+const addable = (t: Token) => !t.special && !t.text.startsWith('<0x');
+
 /** The real next-token chances after a sentence, reshaped by temperature and a keep rule. */
 export default function SamplingFigure({
   data,
@@ -120,7 +123,7 @@ export default function SamplingFigure({
         >
           Sample
         </button>
-        {onAdd && picks.length > 0 && picks[0] >= 0 && (
+        {onAdd && picks.length > 0 && picks[0] >= 0 && addable(data.top[picks[0]].token) && (
           <button
             type="button"
             className="figure-button press"
