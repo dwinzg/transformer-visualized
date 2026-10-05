@@ -9,7 +9,7 @@ import { TOUR, BLOCKS } from '../../lib/architecture-layout';
 import { formulaFor, PARTS, VIEWS, type PartId, type View } from '../../lib/concepts';
 import { traceOf } from '../../lib/demo-data';
 import { withBase } from '../../lib/paths';
-import { PYTORCH, SETUP } from '../../lib/pytorch';
+import { PYTORCH, SECOND_NORM, SETUP, type Snippet } from '../../lib/pytorch';
 
 // Draft chapters get no page, so they count as missing.
 const chapters = new Set(
@@ -45,15 +45,15 @@ for (const part of Object.values(PARTS)) {
 
 // What each snippet prints comes from one run of our engine, so the page and PyTorch agree.
 const trace = traceOf('Lily wanted to play with her');
+const toArticle = (snippet: Snippet): Article => ({
+  shape: snippet.shape,
+  code: snippet.code,
+  prints: snippet.prints?.(trace),
+  paper: snippet.paper,
+});
 const articles: Partial<Record<PartId, Article>> = {};
-for (const [id, snippet] of Object.entries(PYTORCH) as [PartId, (typeof PYTORCH)[PartId]][]) {
-  if (!snippet) continue;
-  articles[id] = {
-    shape: snippet.shape,
-    code: snippet.code,
-    prints: snippet.prints?.(trace),
-    paper: snippet.paper,
-  };
+for (const [id, snippet] of Object.entries(PYTORCH) as [PartId, Snippet][]) {
+  articles[id] = toArticle(snippet);
 }
 
 // The text version follows the paper's tour, then adds the part only GPT-2 has.
@@ -81,6 +81,7 @@ const outline = [
         formulas={formulas}
         links={links}
         articles={articles}
+        secondNorm={toArticle(SECOND_NORM)}
         setup={SETUP}
       />
     </Figure>
@@ -89,7 +90,7 @@ const outline = [
       GPT-2 keeps only the right-hand side, because it continues text instead of translating it.
     </p>
     <div id="part-article" class="part-article">
-      <p>Pick a part on the map to read about it here.</p>
+      <p>The text version below describes every part.</p>
     </div>
     <details class="outline">
       <summary>Text version</summary>
