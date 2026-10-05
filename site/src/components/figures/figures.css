@@ -220,6 +220,8 @@
   display: grid;
   gap: var(--space-4);
   align-content: start;
+  /* Long text or code must wrap or scroll inside, not push past the figure. */
+  min-width: 0;
 }
 /* On wide screens the text and tour buttons sit beside the tall drawing and follow the reader
    down it. On narrow screens they sit above it. */
@@ -407,12 +409,10 @@
 .arch-panel p {
   margin: 0 0 var(--space-2);
 }
-.arch-title {
+.arch-panel .arch-title {
   margin: 0 0 var(--space-2);
   font-size: var(--text-title-3);
-}
-.arch-numbers {
-  color: var(--color-text-secondary);
+  font-weight: 600;
 }
 .arch-formula {
   overflow-x: auto;
@@ -429,6 +429,91 @@
 }
 .arch-links span {
   color: var(--color-text-secondary);
+}
+
+/* The long article below the map. */
+.part-article {
+  display: grid;
+  gap: var(--space-4);
+  margin-top: var(--space-8);
+  scroll-margin-top: calc(var(--header-height, 0px) + var(--space-4));
+}
+.arch-article {
+  min-width: 0;
+}
+.arch-article h2 {
+  scroll-margin-top: calc(var(--header-height, 0px) + var(--space-4));
+}
+.arch-article h2:focus {
+  outline: none;
+}
+.arch-article h3 {
+  margin-top: var(--space-6);
+  font-size: var(--text-headline);
+}
+.arch-setup {
+  padding: var(--space-3) var(--space-4);
+  border: 1px solid var(--color-separator);
+  border-radius: var(--radius-md);
+}
+.arch-setup summary {
+  display: flex;
+  align-items: center;
+  min-height: var(--touch-target);
+  cursor: pointer;
+  font-weight: 600;
+}
+.arch-snippet {
+  display: grid;
+  gap: var(--space-2);
+}
+.arch-snippet button {
+  justify-self: end;
+}
+.arch-snippet pre,
+.arch-prints {
+  margin: 0;
+  overflow-x: auto;
+}
+.arch-snippet pre:focus-visible,
+.arch-prints:focus-visible,
+.arch-formula:focus-visible,
+.arch-code:focus-visible {
+  outline: var(--focus-width) solid var(--color-focus);
+  outline-offset: var(--focus-offset);
+}
+.arch-prints-label {
+  margin: var(--space-3) 0 var(--space-1);
+}
+.arch-prints {
+  color: var(--color-text-secondary);
+}
+.arch-pager {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: var(--space-3);
+  margin-top: var(--space-6);
+}
+.arch-pager button {
+  display: grid;
+  min-height: var(--touch-target);
+  padding: var(--space-2) var(--space-4);
+  border: 1px solid var(--color-control-border);
+  border-radius: var(--radius-md);
+  background: var(--color-surface);
+  color: var(--color-text);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+.arch-pager button:last-child {
+  margin-left: auto;
+  text-align: right;
+}
+.arch-pager-label {
+  color: var(--color-text-secondary);
+  font-size: var(--text-footnote);
 }
 
 /* Live tokenizer. */

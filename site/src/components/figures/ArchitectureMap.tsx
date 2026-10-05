@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState, type KeyboardEvent } from 'react';
+import { createPortal } from 'react-dom';
 import {
   BLOCKS,
   BOX,
@@ -13,7 +14,6 @@ import {
   type Block,
 } from '../../lib/architecture-layout';
 import { isPartId, PARTS, type PartId, type View } from '../../lib/concepts';
-import { DEPTH_EVENT, DEPTHS, isDepth, pageDepth, type Depth } from '../../lib/depth';
 import './figures.css';
 
 interface Props {
@@ -21,6 +21,45 @@ interface Props {
   formulas: Partial<Record<PartId, Partial<Record<View, string>>>>;
   /** Hrefs with the site base. chapter is set only when that chapter exists. */
   links: Partial<Record<PartId, { chapter?: string; glossary?: string }>>;
+  /** PyTorch for each part, with what it prints for our sentence. */
+  articles: Partial<Record<PartId, Article>>;
+  /** The PyTorch setup every snippet needs. */
+  setup: string;
+}
+
+export interface Article {
+  shape: string;
+  code: string;
+  prints?: string;
+  paper?: { code: string; prints?: string };
+}
+
+/** The page's spot for the long article, below the figure. */
+const ARTICLE_ID = 'part-article';
+
+/** A code block with a Copy button. */
+function Code({ code, label }: { code: string; label: string }) {
+  const [copied, setCopied] = useState(false);
+  return (
+    <div className="arch-snippet">
+      <button
+        type="button"
+        className="figure-button press"
+        onClick={() =>
+          navigator.clipboard?.writeText(code).then(
+            () => setCopied(true),
+            () => setCopied(false),
+          )
+        }
+      >
+        {copied ? 'Copied' : 'Copy'}
+        <span className="visually-hidden"> {label}</span>
+      </button>
+      <pre tabIndex={0} aria-label={label}>
+        <code>{code}</code>
+      </pre>
+    </div>
+  );
 }
 
 const VIEW_LABELS: Record<View, string> = {
@@ -47,22 +86,22 @@ function arrows(view: View): [Block, Block][] {
 }
 
 /** A clickable redrawing of Figure 1 of Vaswani et al. 2017, with a guided tour. */
-export default function ArchitectureMap({ formulas, links }: Props) {
+export default function ArchitectureMap({ formulas, links, articles, setup }: Props) {
   const [view, setView] = useState<View>('original');
   const [selected, setSelected] = useState<string | null>(null);
-  const [depth, setDepth] = useState<Depth>('story');
+  const [target, setTarget] = useState<HTMLElement | null>(null);
   const buttons = useRef(new Map<string, HTMLButtonElement>());
   const scroller = useRef<HTMLDivElement>(null);
   const panel = useRef<HTMLDivElement>(null);
+  const title = useRef<HTMLHeadingElement>(null);
   const focusNext = useRef<string | null>(null);
+  const focusTitle = useRef(false);
 
   useEffect(() => {
-    setDepth(pageDepth());
-    const onChange = (event: Event) => {
-      const detail = (event as CustomEvent<unknown>).detail;
-      if (isDepth(detail)) setDepth(detail);
-    };
-    document.addEventListener(DEPTH_EVENT, onChange);
+    // The page's placeholder is for readers without JavaScript. This island fills the spot now.
+    const spot = document.getElementById(ARTICLE_ID);
+    spot?.replaceChildren();
+    setTarget(spot);
 
     // ?part= picks a part, switching to the view that shows it when the default one hides it.
     const params = new URL(location.href).searchParams;
@@ -78,7 +117,6 @@ export default function ArchitectureMap({ formulas, links }: Props) {
     } else if (wanted === 'gpt2') {
       setView('gpt2');
     }
-    return () => document.removeEventListener(DEPTH_EVENT, onChange);
   }, []);
 
   // On narrow screens the drawing scrolls sideways inside its frame. Center the picked block there,
@@ -90,8 +128,13 @@ export default function ArchitectureMap({ formulas, links }: Props) {
     frame.scrollLeft = button.offsetLeft + button.offsetWidth / 2 - frame.clientWidth / 2;
   }, [selected, view]);
 
-  // Move focus after the render that creates the target button.
+  // Move focus after the render that creates the target button or article.
   useEffect(() => {
+    if (focusTitle.current) {
+      focusTitle.current = false;
+      title.current?.scrollIntoView({ block: 'start' });
+      title.current?.focus({ preventScroll: true });
+    }
     if (!focusNext.current) return;
     buttons.current.get(focusNext.current)?.focus();
     focusNext.current = null;
@@ -101,7 +144,6 @@ export default function ArchitectureMap({ formulas, links }: Props) {
   const index = selected ? tour.indexOf(selected) : -1;
   const block = selected ? byId.get(selected) : undefined;
   const part = block ? PARTS[block.part] : undefined;
-  const level = DEPTHS.indexOf(depth);
 
   const pick = (id: string, focus = false) => {
     setSelected(id);
@@ -139,9 +181,118 @@ export default function ArchitectureMap({ formulas, links }: Props) {
   const formula = part ? formulas[part.id]?.[view] : undefined;
   const note = (block?.notes ?? part?.notes)?.[view];
   const link = part ? links[part.id] : undefined;
+  const article = part ? articles[part.id] : undefined;
+  // Box names, since GPT-2's two norms share one part.
+  const titleAt = (i: number) => blockName(byId.get(tour[i])!, view);
+  // The article's own buttons move the reader to the top of the next article.
+  const read = (i: number) => {
+    pick(tour[i]);
+    focusTitle.current = true;
+  };
+
+  const articleView = (
+    <>
+      <details className="arch-setup">
+        <summary>Run the code yourself</summary>
+        <p>
+          Every part below has a few lines of PyTorch. Run this setup once, next to{' '}
+          <code>model.safetensors</code> from the repository. Then run the parts in the order of the
+          GPT-2 tour, and each one prints the same numbers as our model.
+        </p>
+        <Code code={setup} label="PyTorch setup" />
+      </details>
+      {part ? (
+        <article className="arch-article" aria-labelledby={`${ARTICLE_ID}-title`}>
+          <h2 id={`${ARTICLE_ID}-title`} ref={title} tabIndex={-1}>
+            {part.title}
+          </h2>
+          <p>{part.story}</p>
+          {note && <p>{note}</p>}
+          <h3>Sizes</h3>
+          <p>{part.numbers}</p>
+          {article && (
+            <p>
+              <code>{article.shape}</code>
+            </p>
+          )}
+          {formula && (
+            <>
+              <h3>Formula</h3>
+              {/* Focusable, so a wide formula can be scrolled with keys on a phone. */}
+              <div
+                className="arch-formula"
+                tabIndex={0}
+                role="group"
+                aria-label={`Formula for ${part.title}`}
+                dangerouslySetInnerHTML={{ __html: formula }}
+              />
+            </>
+          )}
+          {article && (
+            <>
+              <h3>In PyTorch</h3>
+              {!article.prints && <p>Our model has no encoder, so this uses random numbers.</p>}
+              <Code code={article.code} label={`PyTorch for ${part.title}`} />
+              {article.prints && (
+                <>
+                  <p className="arch-prints-label">It prints</p>
+                  <pre className="arch-prints" tabIndex={0}>
+                    <code>{article.prints}</code>
+                  </pre>
+                </>
+              )}
+              {view === 'original' && article.paper && (
+                <>
+                  <h3>The paper&apos;s version</h3>
+                  <Code code={article.paper.code} label={`The paper's ${part.title}`} />
+                  {article.paper.prints && (
+                    <pre className="arch-prints" tabIndex={0}>
+                      <code>{article.paper.prints}</code>
+                    </pre>
+                  )}
+                </>
+              )}
+            </>
+          )}
+          {part.code && (
+            <>
+              <h3>In our engine</h3>
+              <pre className="arch-code" tabIndex={0}>
+                <code>{part.code}</code>
+              </pre>
+            </>
+          )}
+          <p className="arch-links">
+            {link?.chapter && <a href={link.chapter}>Read the chapter</a>}
+            {link?.glossary && <a href={link.glossary}>What the word means</a>}
+          </p>
+          <nav className="arch-pager" aria-label="Parts">
+            {index > 0 && (
+              <button type="button" className="press" onClick={() => read(index - 1)}>
+                <span className="arch-pager-label">Previous</span> {titleAt(index - 1)}
+              </button>
+            )}
+            {index < tour.length - 1 && (
+              <button type="button" className="press" onClick={() => read(index + 1)}>
+                <span className="arch-pager-label">Next</span> {titleAt(index + 1)}
+              </button>
+            )}
+          </nav>
+        </article>
+      ) : (
+        <p className="arch-article">
+          Pick a part on the map to read about it here, or{' '}
+          <button type="button" className="figure-button press" onClick={() => read(0)}>
+            start with {titleAt(0)}
+          </button>
+        </p>
+      )}
+    </>
+  );
 
   return (
     <div className="arch-map">
+      {target && createPortal(articleView, target)}
       <div className="arch-side">
         <div className="arch-controls">
           <fieldset className="arch-views">
@@ -197,25 +348,11 @@ export default function ArchitectureMap({ formulas, links }: Props) {
         <div className="arch-panel" ref={panel}>
           {part ? (
             <>
-              <h2 className="arch-title">{part.title}</h2>
+              <p className="arch-title">{part.title}</p>
               <p>{part.story}</p>
               {note && <p>{note}</p>}
-              {level >= 1 && <p className="arch-numbers">{part.numbers}</p>}
-              {level >= 2 && formula && (
-                <div className="arch-formula" dangerouslySetInnerHTML={{ __html: formula }} />
-              )}
-              {level >= 3 && part.code && (
-                <pre className="arch-code">
-                  <code>{part.code}</code>
-                </pre>
-              )}
-              <p className="arch-links">
-                {link?.chapter ? (
-                  <a href={link.chapter}>Read the chapter</a>
-                ) : (
-                  <span>Chapter coming soon</span>
-                )}
-                {link?.glossary && <a href={link.glossary}>What the word means</a>}
+              <p>
+                <a href={`#${ARTICLE_ID}`}>Sizes, formula and code below</a>
               </p>
             </>
           ) : (

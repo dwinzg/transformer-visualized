@@ -14,15 +14,18 @@ from safetensors.torch import load_file
 
 torch.set_printoptions(precision=4, sci_mode=False)
 w = load_file("model.safetensors")  # models/tiny in this repo
-ids = torch.tensor([665, 408, 266, 324, 329, 336])  # "Lily wanted to play with her"
+# "Lily wanted to play with her"
+ids = torch.tensor([665, 408, 266, 324, 329, 336])
 T, d, heads = len(ids), 128, 4
-mask = torch.ones(T, T).tril().bool()  # a token sees itself and the tokens before it
+# A token sees itself and the tokens before it.
+mask = torch.ones(T, T).tril().bool()
 
 def linear(x, name):
     return x @ w[name + ".weight"].T + w[name + ".bias"]
 
 def layer_norm(x, name):
-    return F.layer_norm(x, (d,), w[name + ".weight"], w[name + ".bias"], eps=1e-5)`;
+    weight, bias = w[name + ".weight"], w[name + ".bias"]
+    return F.layer_norm(x, (d,), weight, bias, eps=1e-5)`;
 
 export interface Snippet {
   /** Sizes in our model, in and out. */
@@ -35,8 +38,12 @@ export interface Snippet {
 }
 
 const LAST = 5;
-const fmt = (values: ArrayLike<number>) =>
-  `tensor([${Array.from(values, (v) => v.toFixed(4)).join(', ')}])`;
+/** Prints like PyTorch, which pads every number to the same width. */
+function fmt(values: ArrayLike<number>): string {
+  const text = Array.from(values, (v) => v.toFixed(4));
+  const width = Math.max(...text.map((t) => t.length));
+  return `tensor([${text.map((t) => t.padStart(width)).join(', ')}])`;
+}
 /** The first four numbers of the last token's row. */
 const head4 = (m: { data: Float32Array; cols: number }) =>
   fmt(m.data.subarray(LAST * m.cols, LAST * m.cols + 4));
@@ -59,7 +66,8 @@ export const PYTORCH: Partial<Record<PartId, Snippet>> = {
   },
   embedding: {
     shape: '6 ids → 6 × 128',
-    code: `tok = w["wte.weight"][ids]  # one row of 128 numbers per token
+    code: `# One row of 128 numbers per token.
+tok = w["wte.weight"][ids]
 print(tok[-1, :4])  # the first four numbers of "her"`,
     prints: (t) => head4(t.tokenEmbeddings),
   },
@@ -91,11 +99,15 @@ x = layer_norm(x + sublayer(x), "...")`,
   },
   'masked-attn': {
     shape: '6 × 128 → 4 heads of 6 × 6 weights → 6 × 128',
-    code: `q, k, v = linear(a, "h.0.attn.c_attn").split(d, dim=1)  # each 6 × 128
-q, k, v = (m.view(T, heads, -1).transpose(0, 1) for m in (q, k, v))  # 4 × 6 × 32
+    code: `# Queries, keys and values, each 6 × 128.
+q, k, v = linear(a, "h.0.attn.c_attn").split(d, dim=1)
+# Split into 4 heads of 32 numbers, so 4 × 6 × 32.
+q, k, v = (m.view(T, heads, -1).transpose(0, 1) for m in (q, k, v))
 scores = q @ k.transpose(1, 2) / math.sqrt(d // heads)  # 4 × 6 × 6
-weights = scores.masked_fill(~mask, float("-inf")).softmax(-1)
-out = (weights @ v).transpose(0, 1).reshape(T, d)  # heads side by side
+scores = scores.masked_fill(~mask, float("-inf"))
+weights = scores.softmax(-1)  # each row adds up to 1
+# Mix the values, then put the heads side by side again.
+out = (weights @ v).transpose(0, 1).reshape(T, d)
 x = x + linear(out, "h.0.attn.c_proj")  # add it back
 print(weights[0, -1])  # where "her" looks in head 1`,
     prints: (t) => {
@@ -105,34 +117,44 @@ print(weights[0, -1])  # where "her" looks in head 1`,
   },
   'enc-attn': {
     shape: '6 × 64 → 6 × 6 → 6 × 64, for one of 8 heads',
-    code: `q, k, v = torch.randn(3, T, 64)  # one head, with the paper's 64 numbers
-weights = (q @ k.T / math.sqrt(64)).softmax(-1)  # 6 × 6, no mask
+    code: `# One head, with the paper's 64 numbers.
+q, k, v = torch.randn(3, T, 64)
+# No mask, so each word sees every word. 6 × 6.
+weights = (q @ k.T / math.sqrt(64)).softmax(-1)
 out = weights @ v`,
   },
   'cross-attn': {
     shape: '6 × 64 and 9 × 64 → 6 × 9 → 6 × 64',
-    code: `src = torch.randn(9, 64)  # the encoded source sentence, 9 words
+    code: `src = torch.randn(9, 64)  # the encoded source, 9 words
 q = torch.randn(T, 64)  # the translation so far
-weights = (q @ src.T / math.sqrt(64)).softmax(-1)  # 6 × 9
+# Each word of the translation looks at the source. 6 × 9.
+weights = (q @ src.T / math.sqrt(64)).softmax(-1)
 out = weights @ src`,
   },
   ffn: {
     shape: '6 × 128 → 6 × 512 → 6 × 128',
-    code: `hidden = linear(layer_norm(x, "h.0.ln_2"), "h.0.mlp.c_fc")  # 6 × 512
+    code: `b = layer_norm(x, "h.0.ln_2")
+hidden = linear(b, "h.0.mlp.c_fc")  # 6 × 512
 hidden = F.gelu(hidden, approximate="tanh")
-x = x + linear(hidden, "h.0.mlp.c_proj")  # back to 6 × 128, added
+# Back to 6 × 128, then add it.
+x = x + linear(hidden, "h.0.mlp.c_proj")
 print(x[-1, :4])  # what leaves block 1`,
     prints: (t) => head4(t.layers[0].output),
   },
   stack: {
     shape: '6 × 128 → 6 × 128, 4 times',
-    code: `def block(x, n):
+    code: `# The same steps as above, for block n.
+def block(x, n):
     p = f"h.{n}."
-    q, k, v = linear(layer_norm(x, p + "ln_1"), p + "attn.c_attn").split(d, dim=1)
+    a = layer_norm(x, p + "ln_1")
+    q, k, v = linear(a, p + "attn.c_attn").split(d, dim=1)
     q, k, v = (m.view(T, heads, -1).transpose(0, 1) for m in (q, k, v))
-    weights = (q @ k.transpose(1, 2) / math.sqrt(d // heads)).masked_fill(~mask, float("-inf")).softmax(-1)
-    x = x + linear((weights @ v).transpose(0, 1).reshape(T, d), p + "attn.c_proj")
-    hidden = F.gelu(linear(layer_norm(x, p + "ln_2"), p + "mlp.c_fc"), approximate="tanh")
+    scores = q @ k.transpose(1, 2) / math.sqrt(d // heads)
+    weights = scores.masked_fill(~mask, float("-inf")).softmax(-1)
+    out = (weights @ v).transpose(0, 1).reshape(T, d)
+    x = x + linear(out, p + "attn.c_proj")
+    b = layer_norm(x, p + "ln_2")
+    hidden = F.gelu(linear(b, p + "mlp.c_fc"), approximate="tanh")
     return x + linear(hidden, p + "mlp.c_proj")
 
 x = tok + pos
@@ -158,7 +180,9 @@ print(z[-1, :4])  # scores for tokens 0 to 3`,
     code: `p = z[-1].softmax(-1)  # adds up to 1
 print(p.topk(3).indices)  # the three likeliest next tokens`,
     prints: (t) => {
-      const row = Array.from(t.logits.data.subarray(LAST * t.logits.cols, (LAST + 1) * t.logits.cols));
+      const row = Array.from(
+        t.logits.data.subarray(LAST * t.logits.cols, (LAST + 1) * t.logits.cols),
+      );
       const top = row
         .map((v, id) => [v, id] as const)
         .sort((a, b) => b[0] - a[0])
