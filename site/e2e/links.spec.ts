@@ -5,7 +5,7 @@ async function expectMapAt(page: Page, title: string | null): Promise<void> {
   await expect(page).toHaveURL(/learn\/architecture\//);
   const map = page.locator('.arch-map');
   await map.scrollIntoViewIfNeeded();
-  const heading = map.locator('.arch-panel h2');
+  const heading = map.locator('.arch-panel .arch-title');
   if (title) await expect(heading).toHaveText(title);
   else await expect(map.locator('.arch-panel')).toContainText('Tap a part');
 }
