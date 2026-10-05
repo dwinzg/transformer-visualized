@@ -774,6 +774,10 @@ td.is-hidden {
 .prob-bar.is-out {
   color: var(--color-text-secondary);
 }
+/* A token that is out has no bar, so its edge line goes too. */
+.prob-bar.is-out .prob-fill {
+  border-right-color: transparent;
+}
 .prob-bar.is-out .prob-word {
   text-decoration: line-through;
 }
