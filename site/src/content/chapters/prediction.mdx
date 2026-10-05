@@ -14,6 +14,7 @@ recap:
   - Greedy always takes the top guess. Top-k and top-p pick only from the likeliest tokens.
 references:
   - press2017
+  - radford2018
   - holtzman2020
   - radford2019
 ---
@@ -24,9 +25,9 @@ references:
 
 <Level of="story">
 
-After attention, each token's list also passes through a small network of its own, and the whole block repeats 4 times. Then only the last token's list is used.
+After attention, each token's list also passes through a small network of its own. Each step adds to the list instead of replacing it, and the whole block repeats 4 times. A last norm tidies the list.
 
-The model compares that list with every row of the embedding table from the start, using a dot product. That gives one score for each of the 4,096 tokens, called a <Term id="logit">logit</Term>. Tokens whose rows match best get the highest scores.
+Then the last token's list is compared with every row of the embedding table, using a <Term id="dot-product">dot product</Term>. That gives each of the 4,096 tokens a score, called a <Term id="logit">logit</Term>.
 
 </Level>
 
@@ -34,17 +35,17 @@ The model compares that list with every row of the embedding table from the star
 
 The final list for "·her" starts 0.82, 2.46 and -3.15. Its dot product with the row for "·ball" is 2.60, the highest of all 4,096 scores. "·friends" comes next at 2.48.
 
-Using the same table twice is called tying the weights (<Ref id="press2017" />). It saves 524,288 numbers, and GPT-2 does it too (<Ref id="radford2019" />).
+Using the same table twice is called tying the weights (<Ref id="press2017" />). In our model it saves 524,288 numbers. GPT-2 does it too, like the first GPT (<Ref id="radford2018" />, <Ref id="radford2019" />).
 
 </Level>
 
 <Level of="formula">
 
-With <Tex tex="\mathbf{h}" /> the last token's list after the final norm, the scores are
+With <Tex tex="\mathbf{u}" /> the last token's list after the final norm, the scores are
 
-<Tex display tex="\mathbf{z} = W_E \, \mathbf{h}, \qquad z_t = W_E[t] \cdot \mathbf{h}" />
+<Tex display tex="\mathbf{z} = \mathbf{u} \, W_E^\top, \qquad z_t = W_E[t] \cdot \mathbf{u}" />
 
-so token <Tex tex="t" /> gets the <Term id="dot-product">dot product</Term> of its own embedding row with <Tex tex="\mathbf{h}" />.
+so token <Tex tex="t" /> gets the dot product of its own embedding row with <Tex tex="\mathbf{u}" />.
 
 </Level>
 
@@ -68,13 +69,13 @@ const scores = rowView(trace.logits, ids.length - 1); // the last row is the gue
 
 <Step title="Scores become chances" map="softmax">
 
-<Sampling text="Lily wanted to play with her" caption="Press Sample a few times." />
+<Sampling text="Lily wanted to play with her" caption="The real chances after the sentence." />
 
 <Level of="story">
 
 Scores are not chances yet. <Term id="softmax">Softmax</Term> turns them into chances between 0 and 1 that add up to 1, just as it did inside attention.
 
-Then a token is picked at random, where each token's chance of being picked is its probability. This is called <Term id="sampling">sampling</Term>. Press Sample a few times. The same chances can give a different word each time.
+Then a token is picked at random, using those chances. This is called <Term id="sampling">sampling</Term>. Press Sample a few times. The same chances can give a different word each time.
 
 </Level>
 
@@ -103,7 +104,7 @@ const next = sample(probs, createRng(1)); // one token id, picked at random
 
 </Step>
 
-<Step title="Turning the temperature up or down" map="output">
+<Step title="Turning the temperature up or down">
 
 <Sampling
   text="Lily wanted to play with her"
@@ -127,11 +128,11 @@ At temperature 0.1, "·ball" gets 72% and "·friends" 22%. At 0.5, "·ball" gets
 
 <Level of="formula">
 
-With temperature <Tex tex="T" />,
+With temperature <Tex tex="\tau" />,
 
-<Tex display tex="P_T(t) = \frac{e^{z_t / T}}{\sum_{s} e^{z_s / T}}" />
+<Tex display tex="P_\tau(t) = \frac{e^{z_t / \tau}}{\sum_{s} e^{z_s / \tau}}" />
 
-As <Tex tex="T" /> goes to 0, all the chance goes to the top score. As <Tex tex="T" /> grows, the chances move toward equal.
+As <Tex tex="\tau" /> goes to 0, all the chance goes to the top score. As <Tex tex="\tau" /> grows, the chances move toward equal.
 
 </Level>
 
@@ -152,7 +153,7 @@ Dividing by 0.5 gives 4 and 0. e to the power of 4 is 54.6, and e to the power o
 
 </Step>
 
-<Step title="Greedy, top-k and top-p">
+<Step title="Greedy, top-k and top-p" map="output">
 
 <Sampling
   text="Lily wanted to play with her"
@@ -162,7 +163,7 @@ Dividing by 0.5 gives 4 and 0. e to the power of 4 is 54.6, and e to the power o
 
 <Level of="story">
 
-<Term id="greedy">Greedy</Term> decoding skips the dice and always takes the top guess. It gives the same text every time, which often ends up dull and repeats itself (<Ref id="holtzman2020" />).
+<Term id="greedy">Greedy</Term> decoding skips the draw and always takes the top guess. It gives the same text every time, which often ends up dull and repeats itself (<Ref id="holtzman2020" />).
 
 <Term id="top-k">Top-k</Term> picks only from the k likeliest tokens. <Term id="top-p">Top-p</Term> picks from the fewest likeliest tokens whose chances add up to p. Both stop very rare words from sneaking in.
 
