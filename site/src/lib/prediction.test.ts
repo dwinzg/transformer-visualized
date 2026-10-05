@@ -16,7 +16,12 @@ describe('nextScores', () => {
     expect(data.top).toHaveLength(50);
     expect(logits).toHaveLength(4096);
     expect(logits).toEqual([...logits].sort((a, b) => b - a));
-    expect(data.top.slice(0, 4).map((t) => t.token.text)).toEqual([' ball', ' friends', ' toy', ' doll']);
+    expect(data.top.slice(0, 4).map((t) => t.token.text)).toEqual([
+      ' ball',
+      ' friends',
+      ' toy',
+      ' doll',
+    ]);
   });
 });
 
@@ -33,7 +38,10 @@ describe('chances', () => {
         const got = chances(data, temperature, keep);
         got.top.forEach((p, i) => expect(p).toBeCloseTo(want[i], 5));
         const rest = Array.from(want.slice(50));
-        expect(got.other).toBeCloseTo(rest.reduce((s, x) => s + x, 0), 5);
+        expect(got.other).toBeCloseTo(
+          rest.reduce((s, x) => s + x, 0),
+          5,
+        );
         // In 'all', every token stays in, even ones whose chance is too small for a float.
         expect(got.otherCount).toBe(keep === 'all' ? 4046 : rest.filter((x) => x > 0).length);
       });
@@ -72,7 +80,9 @@ describe('tiedScores', () => {
   it('scores each top token with a dot product that equals the model score', () => {
     const tied = tiedScores(SENTENCE);
     expect(tied.hidden).toHaveLength(128);
-    expect(tied.rows.map((r) => r.token.text)).toEqual(data.top.slice(0, 5).map((t) => t.token.text));
+    expect(tied.rows.map((r) => r.token.text)).toEqual(
+      data.top.slice(0, 5).map((t) => t.token.text),
+    );
     tied.rows.forEach((r, i) => expect(r.score).toBeCloseTo(data.top[i].logit, 2));
     expect(tied.rows[0].score).toBe(2.6);
   });

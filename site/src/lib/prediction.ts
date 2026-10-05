@@ -38,7 +38,8 @@ export function chances({ top, rest }: NextScores, temperature: number, keep: Ke
     const otherCount = rest.reduce((s, [, n]) => s + n, 0);
     return { top: p, other: Math.max(0, 1 - p.reduce((s, x) => s + x, 0)), otherCount };
   }
-  if (keep === 'greedy') return { top: p.map((_, i) => (i === 0 ? 1 : 0)), other: 0, otherCount: 0 };
+  if (keep === 'greedy')
+    return { top: p.map((_, i) => (i === 0 ? 1 : 0)), other: 0, otherCount: 0 };
   if (keep === 'top-k') {
     const kept = p.map((x, i) => (i < TOP_K ? x : 0));
     const sum = kept.reduce((s, x) => s + x, 0);
