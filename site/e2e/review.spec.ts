@@ -29,6 +29,18 @@ test('a card opens its chapter step and its place on the map', async ({ page }) 
   await expect(page).toHaveURL(/learn\/architecture\/\?part=ffn&view=gpt2$/);
 });
 
+test('every chapter link lands on a step that exists', async ({ page }) => {
+  await page.goto(PAGE);
+  const hrefs = await page
+    .locator('.card a[href*="#"]')
+    .evaluateAll((links) => links.map((a) => (a as HTMLAnchorElement).href));
+  expect(hrefs.length).toBeGreaterThan(5);
+  for (const href of hrefs) {
+    await page.goto(href);
+    await expect(page.locator(`#${new URL(href).hash.slice(1)}`)).toHaveCount(1);
+  }
+});
+
 test('the page is accessible in both themes', async ({ page }) => {
   await page.goto(PAGE);
   for (const colorScheme of ['light', 'dark'] as const) {
@@ -43,5 +55,6 @@ test.describe('at 320px wide', () => {
   test('the page never scrolls sideways', async ({ page }) => {
     await page.goto(PAGE);
     await expectNoHorizontalScroll(page);
+    await expectNoA11yViolations(page);
   });
 });

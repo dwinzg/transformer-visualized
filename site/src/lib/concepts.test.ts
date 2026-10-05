@@ -121,3 +121,23 @@ describe('architecture layout', () => {
     expect(firstBlockFor('cross-attn', 'gpt2')).toBeUndefined();
   });
 });
+
+describe('the code lines', () => {
+  it('only name values the engine really traces', async () => {
+    const { flattenTrace, forward, loadModel } = await import('@transformer-visualized/engine');
+    const bytes = readFileSync(new URL('../../../models/tiny/model.safetensors', import.meta.url));
+    const buffer = new ArrayBuffer(bytes.byteLength);
+    new Uint8Array(buffer).set(bytes);
+    const trace = forward(loadModel(buffer), [1, 2, 3]);
+    const paths = [...flattenTrace(trace).keys()];
+    for (const part of Object.values(PARTS)) {
+      for (const [, path] of (part.code ?? '').matchAll(/trace\.([\w.[\]]+)/g)) {
+        const flat = path.replace(/\[(\d+)\]/g, '.$1').replace(/\.length$/, '');
+        expect(
+          paths.some((p) => p === flat || p.startsWith(`${flat}.`)),
+          `${part.id}: trace.${path}`,
+        ).toBe(true);
+      }
+    }
+  });
+});
