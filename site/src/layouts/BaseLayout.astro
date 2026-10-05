@@ -23,6 +23,8 @@ const fullTitle = title === 'Transformer Visualized' ? title : `${title} · Tran
     <title>{fullTitle}</title>
     <meta name="description" content={description} />
     <link rel="icon" href={withBase('favicon.svg')} type="image/svg+xml" />
+    <link rel="manifest" href={withBase('manifest.webmanifest')} />
+    <link rel="apple-touch-icon" href={withBase('apple-touch-icon.png')} />
     <meta
       name="theme-color"
       content="#fbfbfd"
@@ -45,6 +47,10 @@ const fullTitle = title === 'Transformer Visualized' ? title : `${title} · Tran
       }
     </script>
     <slot name="head" />
+    <script is:inline define:vars={{ sw: withBase('sw.js') }}>
+      // Keeps the site for offline use. Only the built site has sw.js, so the dev server's 404 is ignored.
+      if ('serviceWorker' in navigator) navigator.serviceWorker.register(sw).catch(() => {});
+    </script>
   </head>
   <body>
     <a class="skip-link" href="#main">

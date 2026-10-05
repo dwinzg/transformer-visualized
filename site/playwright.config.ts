@@ -11,6 +11,9 @@ export default defineConfig({
   use: {
     baseURL: `http://localhost:${PORT}/transformer-visualized/`,
     trace: 'retain-on-failure',
+    // A service worker answers requests before page.route can see them, so tests block it.
+    // The offline test turns it back on.
+    serviceWorkers: 'block',
   },
   projects: [
     { name: 'chromium', use: { ...devices['Desktop Chrome'] } },
