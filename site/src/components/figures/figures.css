@@ -249,6 +249,8 @@
 .segmented {
   display: inline-flex;
   flex-wrap: wrap;
+  /* A fieldset is as wide as its content by default, which stops the options from wrapping. */
+  min-width: 0;
   gap: var(--space-1);
   margin: 0;
   padding: var(--space-1);
@@ -749,11 +751,16 @@ td.is-hidden {
 }
 .sampling-temperature {
   display: flex;
+  flex: 1 1 16rem;
   align-items: center;
   gap: var(--space-2);
+  max-width: 22rem;
 }
 .sampling-temperature input {
-  width: 10rem;
+  /* Firefox will not shrink a range input below its own width unless the width is set. */
+  flex: 1 1 0;
+  width: 0;
+  min-width: 4rem;
   min-height: var(--touch-target);
   accent-color: var(--concept-output);
 }
@@ -785,14 +792,18 @@ td.is-hidden {
   margin: 0;
 }
 .tied-table {
+  width: 100%;
   border-collapse: collapse;
   font-variant-numeric: tabular-nums;
 }
 .tied-table th,
 .tied-table td {
-  padding: var(--space-1) var(--space-3);
+  padding: var(--space-1) var(--space-2);
   text-align: left;
   border-bottom: 1px solid var(--color-separator);
+}
+.tied-table code {
+  white-space: normal;
 }
 .tied-table .tied-score {
   font-family: var(--font-mono);
