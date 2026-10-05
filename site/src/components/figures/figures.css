@@ -427,9 +427,6 @@
   flex-wrap: wrap;
   gap: var(--space-4);
 }
-.arch-links span {
-  color: var(--color-text-secondary);
-}
 
 /* The long article below the map. */
 .part-article {
@@ -444,7 +441,7 @@
 .arch-article h2 {
   scroll-margin-top: calc(var(--header-height, 0px) + var(--space-4));
 }
-.arch-article h2:focus {
+.arch-article h2:focus:not(:focus-visible) {
   outline: none;
 }
 .arch-article h3 {

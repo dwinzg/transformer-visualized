@@ -44,6 +44,13 @@ test('the article pages through the tour and moves to the next heading', async (
   await expect(full.getByRole('heading', { level: 2 })).toHaveText('Final norm');
 });
 
+test("GPT-2's second norm runs ln_2, with its own numbers", async ({ page }) => {
+  const map = await openMap(page, '?view=gpt2');
+  await map.getByRole('radio', { name: 'Norm, before feed forward' }).click();
+  await expect(article(page)).toContainText('h.0.ln_2');
+  await expect(article(page).locator('.arch-prints')).toContainText('-0.0422');
+});
+
 test("the paper's view adds the paper's version of a part", async ({ page }) => {
   await openMap(page, '?part=position');
   const full = article(page);
@@ -60,6 +67,10 @@ test('the setup and every snippet can be copied', async ({ page, context, browse
   await full.getByRole('button', { name: 'Copy PyTorch setup' }).click();
   await expect(full.getByRole('button', { name: 'Copied PyTorch setup' })).toBeVisible();
   expect(await page.evaluate(() => navigator.clipboard.readText())).toContain('load_file');
+  await full.getByRole('button', { name: 'Copy PyTorch for Embedding' }).click();
+  await full.getByRole('button', { name: /^Next/ }).click();
+  // A new part starts with fresh Copy buttons.
+  await expect(full.getByRole('button', { name: 'Copy PyTorch for Position' })).toBeVisible();
 });
 
 test('the tour walks every part and stops at the end', async ({ page }) => {

@@ -33,8 +33,8 @@ export interface Snippet {
   code: string;
   /** What the last line prints, from the engine's trace. Missing when the numbers are random. */
   prints?: (trace: Trace) => string;
-  /** The paper's version, shown in the original view, when it differs from GPT-2's. */
-  paper?: { code: string; prints?: string };
+  /** The paper's version, shown in the original view. A sketch has no Copy button. */
+  paper?: { code: string; prints?: string; sketch?: boolean };
 }
 
 const LAST = 5;
@@ -57,6 +57,17 @@ function sinusoid(pos: number): string {
   });
   return fmt(values);
 }
+
+/**
+ * GPT-2's second norm box, before the feed-forward layer. It is the same part as the first, but
+ * by then attention has changed x, so it runs ln_2 and prints different numbers.
+ */
+export const SECOND_NORM: Snippet = {
+  shape: '6 × 128 → 6 × 128',
+  code: `b = layer_norm(x, "h.0.ln_2")  # norm again, before feed forward
+print(b[-1, :4])`,
+  prints: (t) => head4(t.layers[0].ln2.out),
+};
 
 export const PYTORCH: Partial<Record<PartId, Snippet>> = {
   input: {
@@ -93,8 +104,9 @@ print(pe[1, :4])  # position 1`,
 print(a[-1, :4])`,
     prints: (t) => head4(t.layers[0].ln1.out),
     paper: {
-      code: `# The paper adds first and norms after.
-x = layer_norm(x + sublayer(x), "...")`,
+      code: `# The paper adds first and norms after. A sketch, not runnable.
+x = layer_norm(x + sublayer(x))`,
+      sketch: true,
     },
   },
   'masked-attn': {
@@ -133,8 +145,7 @@ out = weights @ src`,
   },
   ffn: {
     shape: '6 × 128 → 6 × 512 → 6 × 128',
-    code: `b = layer_norm(x, "h.0.ln_2")
-hidden = linear(b, "h.0.mlp.c_fc")  # 6 × 512
+    code: `hidden = linear(b, "h.0.mlp.c_fc")  # 6 × 512, from the norm above
 hidden = F.gelu(hidden, approximate="tanh")
 # Back to 6 × 128, then add it.
 x = x + linear(hidden, "h.0.mlp.c_proj")
