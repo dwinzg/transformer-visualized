@@ -48,6 +48,10 @@ This is a learning resource. It is the guide we wish we had when we were first l
 
 <img src="docs/images/use-8-review.png" alt="The quick review page with the model's sizes and the first card" width="600">
 
+**9. Read about each part.** The map from the paper links every box to a short article with its sizes, formula and a few lines of PyTorch. The code runs on our real model and prints the same numbers you see on the page.
+
+<img src="docs/images/use-9-article.png" alt="The article for masked attention, with sizes, the formula, PyTorch code and what it prints" width="600">
+
 Every figure has a Start over button, and everything works with a keyboard and a screen reader.
 
 ## What you can do
@@ -63,7 +67,7 @@ Every figure has a Start over button, and everything works with a keyboard and a
 **Ready now**
 
 - Five chapters, from what a language model does to how it picks the next word. They cover tokens, embeddings and position, attention, and prediction.
-- A map of the whole model that links each part to its chapter.
+- A map of the whole model, with a short article for each part. Each article has sizes, the formula and PyTorch code you can run.
 - The playground, where you type your own text and look inside the model.
 - A quick review page with every formula in one place.
 - The glossary and the references page.
