@@ -13,7 +13,10 @@ test.describe('home page', () => {
       'href',
       '/transformer-visualized/review/',
     );
-    await expect(page.getByText('Playground')).toBeVisible();
+    await expect(page.getByRole('link', { name: /Playground/ })).toHaveAttribute(
+      'href',
+      '/transformer-visualized/playground/',
+    );
   });
 
   test('has no accessibility violations in either theme', async ({ page }) => {
