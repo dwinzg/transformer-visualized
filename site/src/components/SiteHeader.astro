@@ -130,6 +130,14 @@ const current = Astro.url.pathname;
       clip-path: inset(50%);
       white-space: nowrap;
     }
+    /* The mark already pushes the links to the right, so the gaps can be small. Wider fallback
+       fonts, like Linux's, still fit on one row. */
+    .nav {
+      column-gap: var(--space-1);
+    }
+    .links {
+      gap: 0;
+    }
     .links a {
       padding: 0 var(--space-2);
     }
