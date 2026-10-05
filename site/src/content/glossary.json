@@ -118,5 +118,41 @@
     "term": "Softmax",
     "short": "A way to turn any list of scores into numbers between 0 and 1 that add up to 1. Bigger scores get bigger shares.",
     "related": ["probability", "attention"]
+  },
+  {
+    "id": "logit",
+    "term": "Logit",
+    "short": "The raw score a model gives one possible next token, before softmax turns the scores into probabilities. It can be any size, even below zero.",
+    "related": ["softmax", "probability"]
+  },
+  {
+    "id": "temperature",
+    "term": "Temperature",
+    "short": "A number the scores are divided by before softmax. Low makes the top guess win more often, and high spreads the chances out.",
+    "related": ["logit", "softmax", "sampling"]
+  },
+  {
+    "id": "sampling",
+    "term": "Sampling",
+    "short": "Picking the next token at random, where each token's chance of being picked is its probability.",
+    "related": ["temperature", "greedy", "top-k", "top-p"]
+  },
+  {
+    "id": "greedy",
+    "term": "Greedy decoding",
+    "short": "Always picking the single most likely next token. It gives the same text every time.",
+    "related": ["sampling"]
+  },
+  {
+    "id": "top-k",
+    "term": "Top-k sampling",
+    "short": "Sampling only from the k most likely tokens, after dropping all the others.",
+    "related": ["sampling", "top-p"]
+  },
+  {
+    "id": "top-p",
+    "term": "Top-p sampling",
+    "short": "Sampling only from the fewest most likely tokens whose probabilities add up to at least p. Also called nucleus sampling.",
+    "related": ["sampling", "top-k"]
   }
 ]
