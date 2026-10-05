@@ -42,29 +42,27 @@ export function attentionView(tokens: DisplayToken[], trace: Trace): AttentionDa
   };
 }
 
-const TOP_SCORES = 50;
-
 /**
- * The scores for the token after the text. The best 50 keep 3 decimals, which matters at low
- * temperature. The rest are grouped by score at 2 decimals, which is enough for their small share.
+ * The scores for the token after the text. The best ones (50 by default) keep 3 decimals, which
+ * matters at low temperature. The rest are grouped by score at 2 decimals, which is enough for
+ * their small share. The playground keeps every token, so any pick can be named.
  */
 export function scoresView(
   tokens: DisplayToken[],
   trace: Trace,
   display: (id: number) => DisplayToken,
+  keep = 50,
 ): NextScores {
   const logits = rowView(trace.logits, tokens.length - 1);
   const ranked = Array.from(logits.keys()).sort((a, b) => logits[b] - logits[a] || a - b);
   const groups = new Map<number, number>();
-  for (const id of ranked.slice(TOP_SCORES)) {
+  for (const id of ranked.slice(keep)) {
     const logit = round(logits[id], 2);
     groups.set(logit, (groups.get(logit) ?? 0) + 1);
   }
   return {
     tokens,
-    top: ranked
-      .slice(0, TOP_SCORES)
-      .map((id) => ({ token: display(id), logit: round(logits[id], 3) })),
+    top: ranked.slice(0, keep).map((id) => ({ token: display(id), logit: round(logits[id], 3) })),
     rest: [...groups].sort((a, b) => b[0] - a[0]),
   };
 }

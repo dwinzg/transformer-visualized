@@ -1,4 +1,5 @@
-import { useId, useState } from 'react';
+import { useEffect, useId, useState } from 'react';
+import type { DisplayToken } from '../../lib/guess-tree';
 import { chances, draw, TOP_K, TOP_P, type Keep, type NextScores } from '../../lib/prediction';
 import { shownToken, spokenToken } from '../../lib/token-text';
 import './figures.css';
@@ -27,14 +28,19 @@ export default function SamplingFigure({
   data,
   temperature: startTemperature = 1,
   keep: startKeep = 'all',
+  onAdd,
 }: {
   data: NextScores;
   temperature?: number;
   keep?: Keep;
+  /** When set, a button adds the latest pick to the text. */
+  onAdd?: (token: DisplayToken) => void;
 }) {
   const [temperature, setTemperature] = useState(startTemperature);
   const [keep, setKeep] = useState<Keep>(startKeep);
   const [picks, setPicks] = useState<number[]>([]);
+  // Picks point into the chances, so new chances start a new list. The settings stay.
+  useEffect(() => setPicks([]), [data]);
   const id = useId();
   const c = chances(data, temperature, keep);
   const changed = temperature !== startTemperature || keep !== startKeep || picks.length > 0;
@@ -114,6 +120,16 @@ export default function SamplingFigure({
         >
           Sample
         </button>
+        {onAdd && picks.length > 0 && picks[0] >= 0 && (
+          <button
+            type="button"
+            className="figure-button press"
+            onClick={() => onAdd(data.top[picks[0]].token)}
+          >
+            Add <span aria-hidden="true">{name(picks[0])}</span>
+            <span className="visually-hidden">{say(picks[0])}</span> to the text
+          </button>
+        )}
         <button
           type="button"
           className="figure-button press"
