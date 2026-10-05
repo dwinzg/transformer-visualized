@@ -47,7 +47,7 @@ const chapters = (await getCollection('chapters', ({ data }) => !data.draft)).so
 <script>
   import { applyDepthFromQuery } from '../../lib/depth';
 
-  // The "Quick review" door links here with ?depth=formula.
+  // A ?depth= link opens the chapter list at that level.
   applyDepthFromQuery();
 </script>
 
