@@ -22,7 +22,9 @@ const chapters = (await getCollection('chapters', ({ data }) => !data.draft)).so
     <DepthDial />
     <a class="map-row press" href={withBase('learn/architecture/')}>
       <span class="title">The transformer at a glance</span>
-      <span class="summary">A clickable map of the whole model.</span>
+      <span class="summary">
+        A clickable map of the whole model, with sizes, formulas and PyTorch for every part.
+      </span>
     </a>
     <ol class="chapters">
       {chapters.map((chapter) => (
