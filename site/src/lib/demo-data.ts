@@ -10,7 +10,8 @@ import {
   unsupportedCharacters,
   type Model,
 } from '@transformer-visualized/engine';
-import { cosine, round, type EmbeddedToken, type NearestTokens } from './embeddings';
+import { cosine, dot, round, type EmbeddedToken, type NearestTokens } from './embeddings';
+import type { NextScores } from './prediction';
 import type { DisplayToken, Guess, GuessTree } from './guess-tree';
 
 /**
@@ -195,5 +196,60 @@ export function attentionWeights(text: string): AttentionData {
         ids.map((_, row) => Array.from(rowView(head.weights, row), (w) => round(w, 2))),
       ),
     ),
+  };
+}
+
+const TOP_SCORES = 50;
+
+/**
+ * The model's scores for the token after a text. The best 50 keep 3 decimals, which matters at low
+ * temperature. The rest are grouped by score at 2 decimals, which is enough for their small share.
+ */
+export function nextScores(text: string): NextScores {
+  assertSupported(text);
+  const ids = getTokenizer().encode(normalizeText(text));
+  const trace = forward(getModel(), ids);
+  const logits = rowView(trace.logits, ids.length - 1);
+  const ranked = Array.from(logits.keys()).sort((a, b) => logits[b] - logits[a] || a - b);
+  const groups = new Map<number, number>();
+  for (const id of ranked.slice(TOP_SCORES)) {
+    const logit = round(logits[id], 2);
+    groups.set(logit, (groups.get(logit) ?? 0) + 1);
+  }
+  return {
+    tokens: toDisplay(ids),
+    top: ranked
+      .slice(0, TOP_SCORES)
+      .map((id) => ({ token: guessDisplayToken(id), logit: round(logits[id], 3) })),
+    rest: [...groups].sort((a, b) => b[0] - a[0]),
+  };
+}
+
+export interface TiedScores {
+  /** The last token's final list of numbers, after the last norm. */
+  hidden: number[];
+  /** The likeliest next tokens, each with its embedding row and its dot product with hidden. */
+  rows: { token: DisplayToken; row: number[]; score: number }[];
+}
+
+/** The top next tokens' scores worked out by hand, as the dot product with each embedding row. */
+export function tiedScores(text: string, count = 5): TiedScores {
+  assertSupported(text);
+  const ids = getTokenizer().encode(normalizeText(text));
+  const { wte } = getModel();
+  const trace = forward(getModel(), ids);
+  const hidden = rowView(trace.lnFinal.out, ids.length - 1);
+  const logits = rowView(trace.logits, ids.length - 1);
+  const ranked = Array.from(logits.keys()).sort((a, b) => logits[b] - logits[a] || a - b);
+  return {
+    hidden: Array.from(hidden, (v) => round(v, 3)),
+    rows: ranked.slice(0, count).map((id) => {
+      const row = rowView(wte, id);
+      return {
+        token: guessDisplayToken(id),
+        row: Array.from(row, (v) => round(v, 3)),
+        score: round(dot(hidden, row), 2),
+      };
+    }),
   };
 }
