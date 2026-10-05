@@ -30,7 +30,8 @@ export default function Playground() {
   const [run, setRun] = useState<PlaygroundRun | null>(null);
   const worker = useRef<Worker | null>(null);
   const seq = useRef(0);
-  const [failed, setFailed] = useState(false);
+  /** Why the model is not showing anything new, if something went wrong. */
+  const [failed, setFailed] = useState<'load' | 'run' | null>(null);
   const [attempt, setAttempt] = useState(0);
   const status = useRef<HTMLDivElement>(null);
   const id = useId();
@@ -63,18 +64,23 @@ export default function Playground() {
   }, [mounted, input]);
   // The model loads and runs in a worker. Try again starts a fresh one.
   useEffect(() => {
-    setFailed(false);
+    setFailed(null);
     const w = new Worker(new URL('../../lib/playground.worker.ts', import.meta.url), {
       type: 'module',
     });
     w.onmessage = (event: MessageEvent<WorkerMessage>) => {
       const message = event.data;
       if (message.type === 'ready') setReady(true);
-      else if (message.type === 'failed') setFailed(true);
+      else if (message.type === 'failed') setFailed('load');
       // Only the newest text counts. An older run that finishes late is dropped.
-      else if (message.seq === seq.current) setRun(message.run);
+      else if (message.seq !== seq.current) return;
+      else if (message.type === 'run-failed') setFailed('run');
+      else {
+        setFailed(null);
+        setRun(message.run);
+      }
     };
-    w.onerror = () => setFailed(true);
+    w.onerror = () => setFailed('load');
     worker.current = w;
     return () => {
       w.terminate();
@@ -134,11 +140,13 @@ export default function Playground() {
         </p>
       )}
 
-      {!run ? (
+      {(!run || failed) && (
         <div role="status" className="playground-status" tabIndex={-1} ref={status}>
           {failed ? (
             <>
-              The model did not load. Check your connection, then{' '}
+              {failed === 'load'
+                ? 'The model did not load. Check your connection, then'
+                : 'The model could not run on this text.'}{' '}
               <button
                 type="button"
                 className="figure-button press"
@@ -155,7 +163,8 @@ export default function Playground() {
             'Loading the model, about 5 MB. This happens once.'
           )}
         </div>
-      ) : !run.views ? (
+      )}
+      {!run ? null : !run.views ? (
         <p className="playground-status">Type something to see what the model does with it.</p>
       ) : (
         <>
@@ -179,6 +188,8 @@ export default function Playground() {
             {run.tokens.length} {run.tokens.length === 1 ? 'token' : 'tokens'}.
             {run.cut > 0 &&
               ` The model reads at most ${run.limit}, so the first ${run.cut} are left out.`}
+            {/* The old numbers stay up until the new ones arrive, so say they are on the way. */}
+            {run.text !== text && !failed && ' Updating.'}
           </p>
 
           <fieldset className="segmented playground-stages">

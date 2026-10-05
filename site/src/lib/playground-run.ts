@@ -43,4 +43,7 @@ export type PlaygroundRun = ReturnType<typeof runPlayground>;
 
 /** Messages from the playground worker. */
 export type WorkerMessage =
-  { type: 'ready' } | { type: 'failed' } | { type: 'run'; seq: number; run: PlaygroundRun };
+  | { type: 'ready' }
+  | { type: 'failed' }
+  | { type: 'run-failed'; seq: number }
+  | { type: 'run'; seq: number; run: PlaygroundRun };
