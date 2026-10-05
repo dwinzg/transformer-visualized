@@ -24,10 +24,14 @@ const Shown = ({ token }: { token: DisplayToken }) => (
 
 /** The other tokens a row looked at, biggest weight first. */
 function top(row: number[], tokens: DisplayToken[], count: number) {
-  return row
-    .map((w, j) => ({ w, token: tokens[j] }))
-    .sort((a, b) => b.w - a.w)
-    .slice(0, count);
+  return (
+    row
+      .map((w, j) => ({ w, token: tokens[j] }))
+      .sort((a, b) => b.w - a.w)
+      .slice(0, count)
+      // A weight that rounds to 0.00 is not worth naming, but the top one always is.
+      .filter(({ w }, k) => k === 0 || w >= 0.005)
+  );
 }
 
 /** The top weights in a row, like "Lily 0.66, ·her 0.20". */
@@ -98,12 +102,14 @@ export default function AttentionGridFigure({
         onSelect={setRow}
       />
       <p className="attn-summary" aria-live="polite">
-        In layer {layer + 1}, head {head + 1}, <strong>
+        In layer {layer + 1}, head {head + 1},{' '}
+        <strong>
           <Shown token={tokens[row]} />
-        </strong> looks
-        most at <Describe row={visible} tokens={tokens} />.
+        </strong>{' '}
+        looks most at <Describe row={visible} tokens={tokens} />.
       </p>
-      <div className="attn-scroll">
+      {/* Focusable, so the grid can be scrolled with keys where a phone is too narrow. */}
+      <div className="attn-scroll" tabIndex={0} role="group" aria-label="Attention grid">
         <table className="attn-grid">
           <caption className="visually-hidden">
             Attention weights in layer {layer + 1}, head {head + 1}. Each row is a token, and each
@@ -140,7 +146,6 @@ export default function AttentionGridFigure({
                   >
                     {j > i ? (
                       <>
-                        <span aria-hidden="true">·</span>
                         <span className="visually-hidden">hidden</span>
                       </>
                     ) : (
@@ -158,7 +163,8 @@ export default function AttentionGridFigure({
         <ul>
           {tokens.map((token, i) => (
             <li key={i}>
-              <Shown token={token} /> looks at <Describe row={grid[i].slice(0, i + 1)} tokens={tokens} />.
+              <Shown token={token} /> looks at{' '}
+              <Describe row={grid[i].slice(0, i + 1)} tokens={tokens} />.
             </li>
           ))}
         </ul>

@@ -31,6 +31,7 @@ describe('toyAttention', () => {
   });
   it('gives the numbers the chapter quotes', () => {
     expect(toy.scores[2]).toEqual([4, 0, 2]);
+    expect(toy.scaled[2].map((s) => Number(s.toFixed(2)))).toEqual([2.83, 0, 1.41]);
     expect(toy.weights[2].map((w) => Number(w.toFixed(2)))).toEqual([0.77, 0.05, 0.19]);
   });
 });

@@ -31,7 +31,7 @@ const STAGE_TEXT: Record<ToyStage, { title: string; text: string }> = {
   },
   output: {
     title: 'Blend the backpacks',
-    text: "Each token fills a new backpack with a mix of the others' backpacks, using its weights.",
+    text: 'Each token fills a new backpack with a mix of the backpacks it can see, its own included, using its weights.',
   },
 };
 
