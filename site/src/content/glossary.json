@@ -58,5 +58,29 @@
     "term": "Byte pair encoding",
     "short": "A way to build a vocabulary. Start with single bytes, then keep joining the pair of pieces that appears together most often.",
     "related": ["vocabulary", "token"]
+  },
+  {
+    "id": "embedding",
+    "term": "Embedding",
+    "short": "The list of numbers a model uses for a token. Each token id picks one row of a learned table.",
+    "related": ["vector", "token-id", "position-embedding"]
+  },
+  {
+    "id": "vector",
+    "term": "Vector",
+    "short": "A list of numbers. Ours have 128 numbers each.",
+    "related": ["embedding", "dot-product"]
+  },
+  {
+    "id": "dot-product",
+    "term": "Dot product",
+    "short": "A way to compare two lists of numbers. Multiply the numbers in matching places and add up the results.",
+    "related": ["vector"]
+  },
+  {
+    "id": "position-embedding",
+    "term": "Position embedding",
+    "short": "A list of numbers for each place in the text, added to the token's list so the model knows the order.",
+    "related": ["embedding"]
   }
 ]
