@@ -1,6 +1,7 @@
-import { useId, useState } from 'react';
+import { Fragment, useId, useState } from 'react';
 import type { DisplayToken } from '../../lib/guess-tree';
-import { ChipPicker, shownToken } from './ChipPicker';
+import { shownToken, spokenToken } from '../../lib/token-text';
+import { ChipPicker } from './ChipPicker';
 import './figures.css';
 
 interface Props {
@@ -13,7 +14,13 @@ interface Props {
   row?: number;
 }
 
-const name = (token: DisplayToken) => token.text.trim();
+/** A token drawn with its space marks, and spoken with them too. */
+const Shown = ({ token }: { token: DisplayToken }) => (
+  <>
+    <span aria-hidden="true">{shownToken(token.text)}</span>
+    <span className="visually-hidden">{spokenToken(token.text)}</span>
+  </>
+);
 
 /** The other tokens a row looked at, biggest weight first. */
 function top(row: number[], tokens: DisplayToken[], count: number) {
@@ -23,10 +30,14 @@ function top(row: number[], tokens: DisplayToken[], count: number) {
     .slice(0, count);
 }
 
-const describe = (row: number[], tokens: DisplayToken[], count: number) =>
-  top(row, tokens, count)
-    .map(({ w, token }) => `${name(token)} ${w.toFixed(2)}`)
-    .join(', ');
+/** The top weights in a row, like "Lily 0.66, ·her 0.20". */
+const Describe = ({ row, tokens }: { row: number[]; tokens: DisplayToken[] }) =>
+  top(row, tokens, 3).map(({ w, token }, k) => (
+    <Fragment key={k}>
+      {k > 0 && ', '}
+      <Shown token={token} /> {w.toFixed(2)}
+    </Fragment>
+  ));
 
 /** The real model's attention weights for one sentence, one layer and head at a time. */
 export default function AttentionGridFigure({
@@ -87,8 +98,10 @@ export default function AttentionGridFigure({
         onSelect={setRow}
       />
       <p className="attn-summary" aria-live="polite">
-        In layer {layer + 1}, head {head + 1}, <strong>{shownToken(tokens[row].text)}</strong> looks
-        most at {describe(visible, tokens, 3)}.
+        In layer {layer + 1}, head {head + 1}, <strong>
+          <Shown token={tokens[row]} />
+        </strong> looks
+        most at <Describe row={visible} tokens={tokens} />.
       </p>
       <div className="attn-scroll">
         <table className="attn-grid">
@@ -101,7 +114,7 @@ export default function AttentionGridFigure({
               <td />
               {tokens.map((token, j) => (
                 <th key={j} scope="col">
-                  {shownToken(token.text)}
+                  <Shown token={token} />
                 </th>
               ))}
             </tr>
@@ -109,7 +122,9 @@ export default function AttentionGridFigure({
           <tbody>
             {tokens.map((token, i) => (
               <tr key={i} className={i === row ? 'is-picked' : undefined}>
-                <th scope="row">{shownToken(token.text)}</th>
+                <th scope="row">
+                  <Shown token={token} />
+                </th>
                 {grid[i].map((w, j) => (
                   <td
                     key={j}
@@ -143,7 +158,7 @@ export default function AttentionGridFigure({
         <ul>
           {tokens.map((token, i) => (
             <li key={i}>
-              {shownToken(token.text)} looks at {describe(grid[i].slice(0, i + 1), tokens, 3)}.
+              <Shown token={token} /> looks at <Describe row={grid[i].slice(0, i + 1)} tokens={tokens} />.
             </li>
           ))}
         </ul>
