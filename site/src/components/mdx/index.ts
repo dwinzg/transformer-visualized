@@ -10,8 +10,10 @@ import NumberStrip from './NumberStrip.astro';
 import Pipeline from './Pipeline.astro';
 import PredictReveal from './PredictReveal.astro';
 import Ref from './Ref.astro';
+import Sampling from './Sampling.astro';
 import Step from './Step.astro';
 import Term from './Term.astro';
+import TiedScores from './TiedScores.astro';
 import Tex from './Tex.astro';
 import Tokenizer from './Tokenizer.astro';
 import ToyAttention from './ToyAttention.astro';
@@ -30,9 +32,11 @@ export const mdxComponents = {
   Pipeline,
   PredictReveal,
   Ref,
+  Sampling,
   Step,
   Tex,
   Term,
+  TiedScores,
   Tokenizer,
   ToyAttention,
 };
