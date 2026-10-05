@@ -809,3 +809,23 @@ td.is-hidden {
   font-family: var(--font-mono);
   text-align: right;
 }
+
+/* Playground and its feed-forward view. */
+.playground,
+.ffn-figure {
+  display: grid;
+  gap: var(--space-4);
+  min-width: 0;
+}
+.playground-status {
+  margin: 0;
+  color: var(--color-text-secondary);
+}
+.playground-panel {
+  min-width: 0;
+  padding-top: var(--space-4);
+  border-top: 1px solid var(--color-separator);
+}
+.ffn-summary {
+  margin: 0;
+}
