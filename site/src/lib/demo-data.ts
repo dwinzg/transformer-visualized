@@ -173,3 +173,27 @@ export function positionSimilarity(a: number, b: number): number {
   const { wpe } = getModel();
   return round(cosine(rowView(wpe, a), rowView(wpe, b)), 2);
 }
+
+/**
+ * Attention weights for a sentence, as [layer][head][row][column]. Rounded once, to the 2 decimals
+ * the figure shows, so the page and the chapter text always agree.
+ */
+export interface AttentionData {
+  tokens: DisplayToken[];
+  weights: number[][][][];
+}
+
+export function attentionWeights(text: string): AttentionData {
+  assertSupported(text);
+  const tok = getTokenizer();
+  const ids = tok.encode(normalizeText(text));
+  const trace = forward(getModel(), ids);
+  return {
+    tokens: toDisplay(ids),
+    weights: trace.layers.map((layer) =>
+      layer.heads.map((head) =>
+        ids.map((_, row) => Array.from(rowView(head.weights, row), (w) => round(w, 2))),
+      ),
+    ),
+  };
+}
