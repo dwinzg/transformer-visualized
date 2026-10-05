@@ -1,5 +1,16 @@
 import { describe, expect, it } from 'vitest';
-import { GUESS_DEPTH, GUESS_WIDTH, guessDisplayToken, guessTree, tokenize } from './demo-data';
+import {
+  embeddedTokens,
+  GUESS_DEPTH,
+  GUESS_WIDTH,
+  guessDisplayToken,
+  guessTree,
+  nearestTokens,
+  NEIGHBOR_COUNT,
+  positionSimilarity,
+  tokenize,
+} from './demo-data';
+import { dot } from './embeddings';
 import type { Guess } from './guess-tree';
 
 const PROMPTS = [
@@ -116,5 +127,47 @@ describe('tokenize, as the Tokens chapter quotes it', () => {
   });
   it('refuses text the model was never trained on', () => {
     expect(() => tokenize('café')).toThrow(/never trained on/);
+  });
+});
+
+// The Embeddings chapter quotes these numbers, so a retrained model has to update the text too.
+describe('embeddings, as the Embeddings chapter quotes them', () => {
+  const sentence = embeddedTokens('Lily wanted to play with her');
+  it('gives each token a token row, a position row and their sum, 128 numbers each', () => {
+    expect(sentence).toHaveLength(6);
+    for (const t of sentence) {
+      expect(t.tokenRow).toHaveLength(128);
+      expect(t.positionRow).toHaveLength(128);
+      t.sum.forEach((v, i) => expect(v).toBeCloseTo(t.tokenRow[i] + t.positionRow[i], 2));
+    }
+    expect(sentence[0].tokenRow.slice(0, 5)).toEqual([0.008, 0.006, -0.046, 0.001, -0.209]);
+  });
+  it('lists the nearest tokens, most similar first', () => {
+    const near = nearestTokens([' girl', ' happy', ' three', ' Lily']);
+    for (const { neighbors } of near) {
+      expect(neighbors).toHaveLength(NEIGHBOR_COUNT);
+      const scores = neighbors.map((n) => n.score);
+      expect(scores).toEqual([...scores].sort((a, b) => b - a));
+    }
+    const score = (word: number, text: string) =>
+      near[word].neighbors.find((n) => n.token.text === text)?.score;
+    expect(score(0, ' boy')).toBe(0.74);
+    expect(near[1].neighbors[0].token.text).toBe(' glad');
+    expect(score(1, ' glad')).toBe(0.61);
+    expect(score(1, ' sad')).toBe(0.49);
+    expect(near[1].neighbors.some((n) => n.token.text === ' tree')).toBe(false);
+    expect(score(2, ' 3')).toBe(0.88);
+    expect(score(3, 'Lily')).toBe(0.76);
+  });
+  it('refuses a word that is more than one token', () => {
+    expect(() => nearestTokens(['Tokenization'])).toThrow(/not one/);
+  });
+  it('makes nearby places alike and far places not', () => {
+    expect(positionSimilarity(1, 2)).toBe(0.98);
+    expect(positionSimilarity(1, 50)).toBe(-0.22);
+  });
+  it('matches the worked dot products', () => {
+    expect(dot([1, 2, 3], [4, 0, -1])).toBe(1);
+    expect(dot([2, -1, 3], [1, 4, 2])).toBe(4);
   });
 });
