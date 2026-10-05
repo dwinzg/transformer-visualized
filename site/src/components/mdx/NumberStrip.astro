@@ -1,0 +1,22 @@
+---
+import Figure from '../Figure.astro';
+import Island from '../figures/NumberStripFigure.tsx';
+import type { StripView } from '../figures/NumberStripFigure.tsx';
+import { embeddedTokens } from '../../lib/demo-data';
+
+interface Props {
+  text: string;
+  view?: StripView;
+  /** Which token starts picked, counting from 0. */
+  token?: number;
+  caption?: string;
+}
+const { text, view, token, caption = 'Pick a token to see its 128 numbers.' } = Astro.props;
+---
+
+<Figure
+  caption={caption}
+  description="A grid of 128 colored cells, one per number in the picked token's list. Arrow keys move between cells and the value is shown below."
+>
+  <Island client:visible tokens={embeddedTokens(text)} view={view} token={token} />
+</Figure>
