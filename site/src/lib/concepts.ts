@@ -133,7 +133,7 @@ export const PARTS: Record<PartId, Part> = {
       original: String.raw`\mathrm{LayerNorm}\big(x + \mathrm{Sublayer}(x)\big)`,
       gpt2: String.raw`x + \mathrm{Sublayer}\big(\mathrm{LayerNorm}(x)\big)`,
     },
-    code: 'trace.layers[0].residAfterAttn // input + attnOut',
+    code: 'trace.layers[0].ln1.out // 6 × 128, normed before attention',
   },
   'cross-attn': {
     id: 'cross-attn',
@@ -175,7 +175,7 @@ export const PARTS: Record<PartId, Part> = {
     color: 'residual',
     story: 'GPT-2 adds one more norm after the last block, before the scores are made.',
     numbers: 'The 6 rows of 128 numbers, rescaled.',
-    formula: String.raw`\mathrm{LayerNorm}\big(h^{(L)}\big)`,
+    formula: String.raw`\mathbf{u} = \mathrm{LayerNorm}\big(h^{(L)}\big)`,
     code: 'trace.lnFinal.out // 6 × 128',
   },
   linear: {
@@ -185,7 +185,7 @@ export const PARTS: Record<PartId, Part> = {
     story:
       "Turns each token's numbers into one score for every token in the vocabulary. It reuses the embedding table.",
     numbers: '4,096 scores per position. Only the last position is used to guess the next token.',
-    formula: String.raw`z = u\,W_E^\top`,
+    formula: String.raw`\mathbf{z} = \mathbf{u}\,W_E^\top`,
     code: 'trace.logits // 6 × 4,096',
     glossary: 'logit',
     chapter: 'prediction',
@@ -197,7 +197,7 @@ export const PARTS: Record<PartId, Part> = {
     color: 'output',
     story: 'Turns the scores into chances between 0 and 1 that add up to 1.',
     numbers: '4,096 chances, one for each possible next token.',
-    formula: String.raw`p_i = \frac{e^{z_i}}{\sum_j e^{z_j}}`,
+    formula: String.raw`p_t = \frac{e^{z_t}}{\sum_s e^{z_s}}`,
     code: 'probabilities(rowView(trace.logits, ids.length - 1), 1)',
     glossary: 'softmax',
     chapter: 'prediction',
@@ -211,6 +211,7 @@ export const PARTS: Record<PartId, Part> = {
       "The model's guess, a chance for every possible next token. Pick one, add it to the text, and run again.",
     numbers: 'One chance for each of the 4,096 tokens.',
     formula: String.raw`P(t_{T+1} \mid t_1, \dots, t_T)`,
+    code: 'sample(probs, createRng(1)) // the next token id',
     glossary: 'sampling',
     chapter: 'prediction',
     step: 'step-greedy-top-k-and-top-p',
