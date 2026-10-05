@@ -1,14 +1,6 @@
-import { useEffect, useId, useMemo, useRef, useState } from 'react';
-import {
-  forward,
-  normalizeText,
-  rowView,
-  unsupportedCharacters,
-  type Tokenizer,
-} from '@transformer-visualized/engine';
-import { displayToken, loadTinyModel, loadTokenizer, type Model } from '../../lib/model-loader';
-import { attentionView, embeddingView, scoresView } from '../../lib/model-views';
-import { round } from '../../lib/embeddings';
+import { useEffect, useId, useRef, useState } from 'react';
+import { unsupportedCharacters } from '@transformer-visualized/engine';
+import { GRID_TOKENS, type PlaygroundRun, type WorkerMessage } from '../../lib/playground-run';
 import { shownToken, spokenToken } from '../../lib/token-text';
 import AttentionGridFigure from './AttentionGridFigure';
 import FeedForwardFigure from './FeedForwardFigure';
@@ -20,8 +12,6 @@ const START = 'Lily wanted to play with her';
 const MAX_LENGTH = 400;
 /** How long typing must pause before the model runs again. */
 const WAIT_MS = 250;
-/** A grid for every token would be huge, so attention shows the last few. */
-const GRID_TOKENS = 24;
 
 type Stage = 'embeddings' | 'attention' | 'ffn' | 'output';
 const STAGES: Record<Stage, string> = {
@@ -36,7 +26,10 @@ export default function Playground() {
   const [text, setText] = useState(START);
   const [stage, setStage] = useState<Stage>('output');
   const [mounted, setMounted] = useState(false);
-  const [loaded, setLoaded] = useState<{ model: Model; tokenizer: Tokenizer } | null>(null);
+  const [ready, setReady] = useState(false);
+  const [run, setRun] = useState<PlaygroundRun | null>(null);
+  const worker = useRef<Worker | null>(null);
+  const seq = useRef(0);
   const [failed, setFailed] = useState(false);
   const [attempt, setAttempt] = useState(0);
   const status = useRef<HTMLDivElement>(null);
@@ -68,55 +61,32 @@ export default function Playground() {
     history.replaceState(history.state, '', url);
     setCopied(false);
   }, [mounted, input]);
+  // The model loads and runs in a worker. Try again starts a fresh one.
   useEffect(() => {
-    let live = true;
     setFailed(false);
-    Promise.all([loadTinyModel(), loadTokenizer()]).then(
-      ([model, tokenizer]) => live && setLoaded({ model, tokenizer }),
-      () => live && setFailed(true),
-    );
+    const w = new Worker(new URL('../../lib/playground.worker.ts', import.meta.url), {
+      type: 'module',
+    });
+    w.onmessage = (event: MessageEvent<WorkerMessage>) => {
+      const message = event.data;
+      if (message.type === 'ready') setReady(true);
+      else if (message.type === 'failed') setFailed(true);
+      // Only the newest text counts. An older run that finishes late is dropped.
+      else if (message.seq === seq.current) setRun(message.run);
+    };
+    w.onerror = () => setFailed(true);
+    worker.current = w;
     return () => {
-      live = false;
+      w.terminate();
+      worker.current = null;
+      setReady(false);
     };
   }, [attempt]);
-
-  const run = useMemo(() => {
-    if (!loaded) return null;
-    const { model, tokenizer } = loaded;
-    const all = tokenizer.encode(normalizeText(input));
-    // The model reads at most contextLength tokens, so a long text keeps its end.
-    const ids = all.slice(-model.config.contextLength);
-    const tokens = ids.map((n) => displayToken(tokenizer, n));
-    const limit = model.config.contextLength;
-    if (ids.length === 0) return { tokens, cut: 0, limit, views: null };
-    const trace = forward(model, ids);
-    const attention = attentionView(tokens, trace);
-    const from = Math.max(tokens.length - GRID_TOKENS, 0);
-    return {
-      tokens,
-      cut: all.length - ids.length,
-      limit,
-      views: {
-        embeddings: embeddingView(tokens, trace),
-        attention: {
-          from,
-          tokens: attention.tokens.slice(from),
-          weights: attention.weights.map((heads) =>
-            heads.map((grid) => grid.slice(from).map((row) => row.slice(from))),
-          ),
-        },
-        scores: scoresView(
-          tokens,
-          trace,
-          (n) => displayToken(tokenizer, n),
-          model.config.vocabSize,
-        ),
-        activations: trace.layers.map((layer) =>
-          tokens.map((_, i) => Array.from(rowView(layer.mlpAct, i), (v) => round(v, 2))),
-        ),
-      },
-    };
-  }, [loaded, input]);
+  useEffect(() => {
+    if (!ready) return;
+    seq.current += 1;
+    worker.current?.postMessage({ seq: seq.current, text: input });
+  }, [ready, input]);
 
   const unseen = unsupportedCharacters(text);
 
@@ -253,7 +223,7 @@ export default function Playground() {
                 data={run.views.scores}
                 // No Add while the model catches up with the text, or once the box is full.
                 onAdd={
-                  text === input && text.length < MAX_LENGTH
+                  text === run.text && text.length < MAX_LENGTH
                     ? (token) => setText((t) => (t + token.text).slice(0, MAX_LENGTH))
                     : undefined
                 }
