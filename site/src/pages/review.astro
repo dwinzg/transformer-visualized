@@ -101,7 +101,7 @@ const probs = probabilities(rowView(trace.logits, ids.length - 1), 1);`;
   }
   .sizes {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(12rem, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(15rem, 1fr));
     gap: var(--space-2) var(--space-6);
     margin: var(--space-6) 0;
   }
@@ -119,6 +119,8 @@ const probs = probabilities(rowView(trace.logits, ids.length - 1), 1);`;
     margin: 0;
     font-variant-numeric: tabular-nums;
     text-align: right;
+    /* "T = 6" reads as one value, so it never splits across lines. */
+    white-space: nowrap;
   }
   .cards {
     display: grid;
