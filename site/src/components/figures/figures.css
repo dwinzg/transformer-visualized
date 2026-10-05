@@ -796,6 +796,7 @@ td.is-hidden {
   border-radius: var(--radius-sm);
   box-shadow: inset 0 0 0 2px var(--color-accent);
 }
+.attn-scores summary,
 .attn-text summary {
   min-height: var(--touch-target);
   display: flex;
@@ -804,6 +805,17 @@ td.is-hidden {
 }
 .attn-grid thead td {
   background: transparent;
+}
+.attn-score-scroll {
+  overflow-x: auto;
+}
+.attn-score-scroll:focus-visible {
+  outline: var(--focus-width) solid var(--color-focus);
+  outline-offset: var(--focus-offset);
+}
+.attn-score-table td {
+  font-family: var(--font-mono);
+  text-align: right;
 }
 /* Six columns fit a phone when the cells and labels shrink. */
 @media (max-width: 30rem) {

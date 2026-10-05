@@ -19,6 +19,18 @@ describe('runPlayground', () => {
     expect(run.views!.attention.from).toBe(0);
   });
 
+  it('gives the scores that softmax turns into the weights', () => {
+    const { attention } = runPlayground(model, tokenizer, 'Lily wanted to play with her').views!;
+    // Layer 3, head 3, the row for "her", which sees all 6 tokens.
+    const scores = attention.scores![2][2][5];
+    expect(scores).toHaveLength(6);
+    expect(attention.scores![2][2][0]).toHaveLength(1);
+    const exp = scores.map((s) => Math.exp(s));
+    const total = exp.reduce((a, b) => a + b, 0);
+    exp.forEach((e, j) => expect(e / total).toBeCloseTo(attention.weights[2][2][5][j], 1));
+    expect(attention.weights[2][2][5][0]).toBe(0.66);
+  });
+
   it('has no views for empty text', () => {
     expect(runPlayground(model, tokenizer, '').views).toBeNull();
   });
@@ -31,6 +43,9 @@ describe('runPlayground', () => {
     expect(attention.tokens).toHaveLength(GRID_TOKENS);
     expect(attention.weights[0][0]).toHaveLength(GRID_TOKENS);
     expect(attention.weights[0][0][0]).toHaveLength(GRID_TOKENS);
+    // Each kept row still holds only the tokens it can see.
+    expect(attention.scores![0][0][0]).toHaveLength(1);
+    expect(attention.scores![0][0][GRID_TOKENS - 1]).toHaveLength(GRID_TOKENS);
   });
 
   it('is plain data, so a worker can send it', () => {

@@ -29,9 +29,18 @@ export function embeddingView(tokens: DisplayToken[], trace: Trace): EmbeddedTok
 export interface AttentionData {
   tokens: DisplayToken[];
   weights: number[][][][];
+  /**
+   * The scores softmax turns into weights, q · k / √d_k, as [layer][head][row][column]. Row i
+   * keeps only columns 0 to i, the tokens it can see. Only the playground asks for these.
+   */
+  scores?: number[][][][];
 }
 
-export function attentionView(tokens: DisplayToken[], trace: Trace): AttentionData {
+export function attentionView(
+  tokens: DisplayToken[],
+  trace: Trace,
+  withScores = false,
+): AttentionData {
   return {
     tokens,
     weights: trace.layers.map((layer) =>
@@ -39,6 +48,15 @@ export function attentionView(tokens: DisplayToken[], trace: Trace): AttentionDa
         tokens.map((_, row) => Array.from(rowView(head.weights, row), (w) => round(w, 2))),
       ),
     ),
+    ...(withScores && {
+      scores: trace.layers.map((layer) =>
+        layer.heads.map((head) =>
+          tokens.map((_, row) =>
+            Array.from(rowView(head.scaledMasked, row).subarray(0, row + 1), (v) => round(v, 2)),
+          ),
+        ),
+      ),
+    }),
   };
 }
 
