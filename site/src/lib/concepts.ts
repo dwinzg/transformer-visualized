@@ -106,6 +106,7 @@ export const PARTS: Record<PartId, Part> = {
     code: 'trace.layers[0].heads[0].weights // 6 × 6, each row sums to 1',
     glossary: 'attention',
     chapter: 'attention',
+    step: 'step-words-need-context',
   },
   'enc-attn': {
     id: 'enc-attn',

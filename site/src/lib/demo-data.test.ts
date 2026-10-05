@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import {
+  attentionWeights,
   embeddedTokens,
   GUESS_DEPTH,
   GUESS_WIDTH,
@@ -10,6 +11,7 @@ import {
   positionSimilarity,
   tokenize,
 } from './demo-data';
+import { softmax } from '@transformer-visualized/engine';
 import { dot } from './embeddings';
 import type { Guess } from './guess-tree';
 
@@ -176,5 +178,41 @@ describe('embeddings, as the Embeddings chapter quotes them', () => {
   it('matches the worked dot products', () => {
     expect(dot([1, 2, 3], [4, 0, -1])).toBe(1);
     expect(dot([2, -1, 3], [1, 4, 2])).toBe(4);
+  });
+});
+
+// The Attention chapter quotes these numbers, so a retrained model has to update the text too.
+describe('attention weights, as the Attention chapter quotes them', () => {
+  const { tokens, weights } = attentionWeights('Lily wanted to play with her');
+  it('has 4 layers of 4 heads, each a 6 by 6 grid whose rows add up to 1 with no look ahead', () => {
+    expect(tokens).toHaveLength(6);
+    expect(weights).toHaveLength(4);
+    for (const layer of weights) {
+      expect(layer).toHaveLength(4);
+      for (const head of layer)
+        head.forEach((row, i) => {
+          expect(Math.abs(row.reduce((a, b) => a + b) - 1)).toBeLessThan(0.03);
+          row.forEach((w, j) => j > i && expect(w).toBe(0));
+        });
+    }
+  });
+  it('has the patterns the chapter points at', () => {
+    const [her, lily] = [5, 0];
+    expect(weights[2][2][her][lily]).toBe(0.66);
+    for (const row of [1, 2, 3, 4, 5]) {
+      const r = weights[2][2][row];
+      expect(r.indexOf(Math.max(...r)), `row ${row}`).toBe(lily);
+    }
+    const previous = [2, 3, 5].filter((row) => {
+      const r = weights[1][0][row];
+      return r.indexOf(Math.max(...r)) === row - 1;
+    });
+    expect(previous).toHaveLength(3);
+  });
+  it('matches the softmax example', () => {
+    expect(Array.from(softmax([1, 0, 0]), (p) => Number(p.toFixed(3)))).toEqual([
+      0.576, 0.212, 0.212,
+    ]);
+    expect(Math.exp(2) / (Math.exp(2) + 2)).toBeCloseTo(0.79, 2);
   });
 });
