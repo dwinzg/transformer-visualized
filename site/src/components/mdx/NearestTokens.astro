@@ -1,0 +1,16 @@
+---
+import Figure from '../Figure.astro';
+import Island from '../figures/NearestTokensFigure.tsx';
+import { nearestTokens } from '../../lib/demo-data';
+
+interface Props {
+  words: string[];
+}
+---
+
+<Figure
+  caption="Pick a word to see the tokens with the most similar numbers."
+  description="Word chips to pick from, and a list of the five tokens whose numbers are most like the picked word's, each with a similarity score from -1 to 1."
+>
+  <Island client:visible words={nearestTokens(Astro.props.words)} />
+</Figure>
