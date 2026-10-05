@@ -2,13 +2,14 @@
 import 'katex/dist/katex.min.css';
 import { getCollection } from 'astro:content';
 import katex from 'katex';
-import DepthDial from '../../components/DepthDial.astro';
 import Figure from '../../components/Figure.astro';
-import ArchitectureMap from '../../components/figures/ArchitectureMap.tsx';
+import ArchitectureMap, { type Article } from '../../components/figures/ArchitectureMap.tsx';
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import { TOUR, BLOCKS } from '../../lib/architecture-layout';
 import { formulaFor, PARTS, VIEWS, type PartId, type View } from '../../lib/concepts';
+import { traceOf } from '../../lib/demo-data';
 import { withBase } from '../../lib/paths';
+import { PYTORCH, SETUP } from '../../lib/pytorch';
 
 // Draft chapters get no page, so they count as missing.
 const chapters = new Set(
@@ -42,6 +43,19 @@ for (const part of Object.values(PARTS)) {
   };
 }
 
+// What each snippet prints comes from one run of our engine, so the page and PyTorch agree.
+const trace = traceOf('Lily wanted to play with her');
+const articles: Partial<Record<PartId, Article>> = {};
+for (const [id, snippet] of Object.entries(PYTORCH) as [PartId, (typeof PYTORCH)[PartId]][]) {
+  if (!snippet) continue;
+  articles[id] = {
+    shape: snippet.shape,
+    code: snippet.code,
+    prints: snippet.prints?.(trace),
+    paper: snippet.paper,
+  };
+}
+
 // The text version follows the paper's tour, then adds the part only GPT-2 has.
 const outline = [
   ...new Set([...TOUR.original, ...TOUR.gpt2].map((id) => BLOCKS.find((b) => b.id === id)!.part)),
@@ -54,18 +68,29 @@ const outline = [
 >
   <section class="prose page">
     <h1>The transformer at a glance</h1>
-    <p class="lede">Tap any part to see what it does. Or press Next for a guided tour.</p>
-    <DepthDial />
+    <p class="lede">
+      Tap any part to see what it does, then read more about it below the map. Or press Next for a
+      guided tour.
+    </p>
     <Figure
       caption="Redrawn from Figure 1 of Vaswani et al. 2017."
       description="The transformer drawn as stacked blocks, from the inputs at the bottom to the output probabilities at the top. Each block is a button that explains that part."
     >
-      <ArchitectureMap client:visible formulas={formulas} links={links} />
+      <ArchitectureMap
+        client:visible
+        formulas={formulas}
+        links={links}
+        articles={articles}
+        setup={SETUP}
+      />
     </Figure>
     <p class="credit">
       The paper is listed on the <a href={withBase('references/#vaswani2017')}>references page</a>.
       GPT-2 keeps only the right-hand side, because it continues text instead of translating it.
     </p>
+    <div id="part-article" class="part-article">
+      <p>Pick a part on the map to read about it here.</p>
+    </div>
     <details class="outline">
       <summary>Text version</summary>
       <ol>
@@ -78,12 +103,6 @@ const outline = [
     </details>
   </section>
 </BaseLayout>
-
-<script>
-  import { applyDepthFromQuery } from '../../lib/depth';
-
-  applyDepthFromQuery();
-</script>
 
 <style>
   .page {
