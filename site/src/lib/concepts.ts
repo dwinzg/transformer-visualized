@@ -69,7 +69,9 @@ export const PARTS: Record<PartId, Part> = {
     numbers: 'The table has 4,096 rows of 128 numbers. The sentence becomes 6 rows of 128.',
     formula: String.raw`\mathbf{x}_i = W_E[t_i] \in \mathbb{R}^{128}`,
     code: 'trace.tokenEmbeddings // 6 × 128',
+    glossary: 'embedding',
     chapter: 'embeddings',
+    step: 'step-each-token-becomes-a-list-of-numbers',
   },
   position: {
     id: 'position',
@@ -88,7 +90,9 @@ export const PARTS: Record<PartId, Part> = {
       gpt2: String.raw`\mathbf{h}_i = W_E[t_i] + W_P[i]`,
     },
     code: 'trace.embeddings // tokenEmbeddings + positionEmbeddings',
+    glossary: 'position-embedding',
     chapter: 'embeddings',
+    step: 'step-each-place-gets-numbers-too',
   },
   'masked-attn': {
     id: 'masked-attn',

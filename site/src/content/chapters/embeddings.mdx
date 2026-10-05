@@ -1,0 +1,202 @@
+---
+title: Embeddings and position
+order: 2
+summary: Each token becomes a list of 128 numbers, plus a second list for where it sits in the text.
+goals:
+  - Say what an embedding is and where its numbers come from
+  - Explain why similar words end up with similar numbers
+  - Work out a dot product by hand
+  - Say how the model knows the order of the tokens
+minutes: 12
+recap:
+  - Each token id picks a row of 128 numbers from a table. That row is its embedding.
+  - Training tunes the rows, so words used in similar ways get similar numbers.
+  - The dot product compares two lists by multiplying matching numbers and adding them up.
+  - Each place in the text has its own list too, added to the token's list.
+references:
+  - mikolov2013
+  - radford2018
+  - vaswani2017
+---
+
+<Step title="Each token becomes a list of numbers" map="embedding">
+
+<NumberStrip text="Lily wanted to play with her" />
+
+<Level of="story">
+
+The model cannot do math with an id like 665. So each token id picks one row from a big table, a list of 128 numbers called an <Term id="embedding">embedding</Term>. A token gets the same list every time it appears.
+
+These numbers start out random. Training nudges them, bit by bit, until they help the model guess well. Tap a cell to see one number.
+
+</Level>
+
+<Level of="numbers">
+
+The table has 4,096 rows, one for each token, and 128 numbers in each row. That is 524,288 numbers, about 2 in every 5 numbers the model learned.
+
+The first five numbers for "Lily" are 0.008, 0.006, -0.046, 0.001 and -0.209. A list of numbers like this is called a <Term id="vector">vector</Term>.
+
+</Level>
+
+<Level of="formula">
+
+Looking up a row of the embedding table <Tex tex="W_E" /> gives the token's vector.
+
+<Tex display tex="\mathbf{x}_i = W_E[t_i], \qquad W_E \in \mathbb{R}^{4096 \times 128}" />
+
+The lookup is the same as multiplying a one-hot vector, all zeros except a 1 at <Tex tex="t_i" />, by <Tex tex="W_E" />.
+
+</Level>
+
+<Level of="code">
+
+```ts
+const lily = rowView(model.wte, 665); // 128 numbers
+trace.tokenEmbeddings; // one row per token, 6 × 128
+```
+
+</Level>
+
+</Step>
+
+<PredictReveal question="Which word has numbers most like &quot;happy&quot;?" options={['glad', 'sad', 'tree']} answer={0}>
+
+"Glad", with a score of 0.61. But "sad" is close behind at 0.49. Words that show up in the same kinds of sentences get similar numbers, even when they mean opposite things.
+
+</PredictReveal>
+
+<Step title="Similar words get similar numbers">
+
+<NearestTokens words={[' girl', ' ran', ' red', ' happy', ' dog', ' mom', ' Lily', ' three']} />
+
+<Level of="story">
+
+Nobody tells the model what words mean. Still, after training, words used in similar ways end up with similar lists (<Ref id="mikolov2013" />). "Girl" lands near "boy", "red" near the other colors, and "ran" near "run" and "walked".
+
+The model found this on its own, because it helps to guess the next word. Pick a word to see its closest tokens.
+
+</Level>
+
+<Level of="numbers">
+
+The score is the cosine similarity. 1 means the two lists point the same way, 0 means they are unrelated and -1 means they point opposite ways.
+
+"·girl" and "·boy" score 0.74. "·three" and "·3" score 0.88, so the model learned that a digit and its word mean the same. "·Lily" and "Lily" at the start of a text score 0.76, even though the Tokens chapter showed they are two different tokens.
+
+</Level>
+
+<Level of="formula">
+
+Cosine similarity divides the dot product of two vectors by their lengths, so only their direction counts.
+
+<Tex
+  display
+  tex="\cos(\mathbf{a}, \mathbf{b}) = \frac{\mathbf{a} \cdot \mathbf{b}}{\lVert \mathbf{a} \rVert \, \lVert \mathbf{b} \rVert}"
+/>
+
+</Level>
+
+<Level of="code">
+
+```ts
+const dot = (a, b) => a.reduce((sum, x, k) => sum + x * b[k], 0);
+const cosine = (a, b) => dot(a, b) / Math.sqrt(dot(a, a) * dot(b, b));
+cosine(rowView(model.wte, girl), rowView(model.wte, boy)); // 0.74
+```
+
+</Level>
+
+</Step>
+
+<Callout kind="analogy" title="Like places on a map">
+
+Think of each word as a town on a map, with towns that are used alike sitting close together. **Where this breaks.** A map has 2 directions. These lists have 128, and most single numbers do not mean anything simple on their own, like size or color.
+
+</Callout>
+
+<Step title="Comparing two lists">
+
+<Level of="story">
+
+To compare two lists, multiply the numbers in matching places and add up the results. This is the <Term id="dot-product">dot product</Term>.
+
+It is big when both lists have large numbers in the same places with the same signs. It is near zero when they have nothing in common. The dot product comes back in the attention chapter, where it decides which words look at which.
+
+</Level>
+
+<Level of="numbers">
+
+Take (1, 2, 3) and (4, 0, -1). Multiply place by place to get 4, 0 and -3. Add them up to get 1.
+
+</Level>
+
+<Level of="formula">
+
+<Tex display tex="\mathbf{a} \cdot \mathbf{b} = \sum_{k=1}^{d} a_k \, b_k" />
+
+For our embeddings <Tex tex="d = 128" />.
+
+</Level>
+
+<Level of="code">
+
+```ts
+const dot = (a, b) => a.reduce((sum, x, k) => sum + x * b[k], 0);
+dot([1, 2, 3], [4, 0, -1]); // 1
+```
+
+</Level>
+
+<Exercise prompt="What is the dot product of (2, -1, 3) and (1, 4, 2)?" answer={4} tolerance={0}>
+
+Multiply place by place to get 2, -4 and 6. Add them up to get 4.
+
+</Exercise>
+
+</Step>
+
+<Step title="Each place gets numbers too" map="position">
+
+<NumberStrip
+  text="Lily wanted to play with her"
+  view="position"
+  token={3}
+  caption="Switch between the token, its place and the two added together."
+/>
+
+<Level of="story">
+
+So far, "play" gets the same list wherever it appears. But order matters. "Lily saw Max" and "Max saw Lily" use the same words.
+
+So the model also learns one list of 128 numbers for each place in the text, called a <Term id="position-embedding">position embedding</Term>. It adds the place's list to the token's list, number by number. That sum is what the first layer reads.
+
+</Level>
+
+<Level of="numbers">
+
+Our model has 128 position lists, one for each place, so it reads at most 128 tokens at a time. Nearby places get similar lists. Places 2 and 3 score 0.98, while places 2 and 51 score -0.22.
+
+GPT-2 learns these lists, like the first GPT did (<Ref id="radford2018" />). The original transformer used fixed sine and cosine waves instead (<Ref id="vaswani2017" />).
+
+</Level>
+
+<Level of="formula">
+
+<Tex
+  display
+  tex="\mathbf{h}_i^{(0)} = W_E[t_i] + W_P[i], \qquad W_P \in \mathbb{R}^{128 \times 128}"
+/>
+
+</Level>
+
+<Level of="code">
+
+```ts
+trace.positionEmbeddings; // one row per place, 6 × 128
+trace.embeddings; // tokenEmbeddings + positionEmbeddings
+```
+
+</Level>
+
+</Step>
