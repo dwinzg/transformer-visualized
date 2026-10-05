@@ -2,6 +2,8 @@ import { expect, test, type Page } from '@playwright/test';
 import { expectNoA11yViolations, expectNoHorizontalScroll } from './a11y';
 
 const PAGE = 'playground/';
+const LONG =
+  'Once upon a time, there was a little girl named Lily. She loved to play outside with her dog. One day, they found a big red ball in the park.';
 
 async function ready(page: Page) {
   await page.goto(PAGE);
@@ -48,6 +50,25 @@ test('a sampled token can be added to the text', async ({ page }) => {
     'Lily wanted to play with her ball',
   );
   await expect(page.getByRole('list', { name: 'Tokens' }).getByRole('listitem')).toHaveCount(7);
+  // The Add button goes away, so the focus moves to Sample instead of getting lost.
+  await expect(page.getByRole('button', { name: 'Sample' })).toBeFocused();
+});
+
+test('the picked layer and head stay while the text changes', async ({ page }) => {
+  await ready(page);
+  await page.getByRole('radio', { name: 'Attention' }).check();
+  await page.getByRole('group', { name: 'Layer' }).getByRole('radio', { name: '3' }).check();
+  await page.getByRole('textbox', { name: 'Your text' }).fill('Ben wanted to play with her');
+  await expect(page.locator('.attn-summary')).toContainText('In layer 3, head 1');
+  await expect(page.locator('.attn-summary')).toContainText('her');
+});
+
+test('long text shows the last 24 tokens in the grid', async ({ page }) => {
+  await ready(page);
+  await page.getByRole('textbox', { name: 'Your text' }).fill(LONG);
+  await page.getByRole('radio', { name: 'Attention' }).check();
+  await expect(page.locator('.playground-note')).toContainText('last 24 tokens');
+  await expect(page.locator('.attn-grid tbody tr')).toHaveCount(24);
 });
 
 test('every stage shows the real numbers', async ({ page }) => {
@@ -91,8 +112,10 @@ test('the page is accessible in both themes', async ({ page }) => {
 test.describe('at 320px wide', () => {
   test.use({ viewport: { width: 320, height: 640 } });
 
-  test('the page never scrolls sideways', async ({ page }) => {
+  test('the page never scrolls sideways, even with long text', async ({ page }) => {
     await ready(page);
+    await page.getByRole('textbox', { name: 'Your text' }).fill(LONG);
+    await expect(page.locator('.tokenizer-count')).toContainText('35 tokens');
     for (const stage of ['Embeddings', 'Attention', 'Feed forward', 'Next token']) {
       await page.getByRole('radio', { name: stage }).check();
       await expectNoHorizontalScroll(page);
