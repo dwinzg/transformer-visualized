@@ -185,7 +185,7 @@ export const PARTS: Record<PartId, Part> = {
     story:
       "Turns each token's numbers into one score for every token in the vocabulary. It reuses the embedding table.",
     numbers: '4,096 scores per position. Only the last position is used to guess the next token.',
-    formula: String.raw`z = h\,W_E^\top`,
+    formula: String.raw`z = u\,W_E^\top`,
     code: 'trace.logits // 6 × 4,096',
     glossary: 'logit',
     chapter: 'prediction',
@@ -213,7 +213,7 @@ export const PARTS: Record<PartId, Part> = {
     formula: String.raw`P(t_{T+1} \mid t_1, \dots, t_T)`,
     glossary: 'sampling',
     chapter: 'prediction',
-    step: 'step-turning-the-temperature-up-or-down',
+    step: 'step-greedy-top-k-and-top-p',
   },
 };
 
