@@ -48,7 +48,26 @@ export default function Playground() {
     return () => clearTimeout(timer);
   }, [text]);
 
-  useEffect(() => setMounted(true), []);
+  const [copied, setCopied] = useState(false);
+
+  // A link like playground/?text=Once%20upon opens with that text.
+  useEffect(() => {
+    const shared = new URLSearchParams(location.search).get('text');
+    if (shared !== null) {
+      setText(shared.slice(0, MAX_LENGTH));
+      setInput(shared.slice(0, MAX_LENGTH));
+    }
+    setMounted(true);
+  }, []);
+  // The address keeps up with the text, so it can be shared or bookmarked.
+  useEffect(() => {
+    if (!mounted) return;
+    const url = new URL(location.href);
+    if (input === START) url.searchParams.delete('text');
+    else url.searchParams.set('text', input);
+    history.replaceState(history.state, '', url);
+    setCopied(false);
+  }, [mounted, input]);
   useEffect(() => {
     let live = true;
     setFailed(false);
@@ -113,6 +132,20 @@ export default function Playground() {
         >
           Start over
         </button>
+        {mounted && navigator.clipboard && (
+          <button
+            type="button"
+            className="figure-button press"
+            onClick={() =>
+              navigator.clipboard.writeText(location.href).then(
+                () => setCopied(true),
+                () => setCopied(false),
+              )
+            }
+          >
+            {copied ? 'Link copied' : 'Copy link'}
+          </button>
+        )}
       </div>
       <textarea
         id={`${id}-text`}
