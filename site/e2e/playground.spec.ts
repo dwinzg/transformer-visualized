@@ -69,6 +69,14 @@ test('long text shows the last 24 tokens in the grid', async ({ page }) => {
   await page.getByRole('radio', { name: 'Attention' }).check();
   await expect(page.locator('.playground-note')).toContainText('last 24 tokens');
   await expect(page.locator('.attn-grid tbody tr')).toHaveCount(24);
+  // The cut moves as the text grows, and the picked token stays the same.
+  const dog = page
+    .getByRole('radiogroup', { name: 'Pick the token that looks' })
+    .getByRole('radio', { name: 'space dog', exact: true });
+  await dog.click();
+  await page.getByRole('textbox', { name: 'Your text' }).fill(`${LONG} It`);
+  await expect(page.locator('.tokenizer-count')).toContainText('36 tokens');
+  await expect(dog).toHaveAttribute('aria-checked', 'true');
 });
 
 test('every stage shows the real numbers', async ({ page }) => {

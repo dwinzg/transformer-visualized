@@ -208,6 +208,7 @@ export default function Playground() {
                 <AttentionGridFigure
                   tokens={run.views.attention.tokens}
                   weights={run.views.attention.weights}
+                  from={run.views.attention.from}
                 />
               </>
             )}
@@ -217,8 +218,11 @@ export default function Playground() {
             {stage === 'output' && (
               <SamplingFigure
                 data={run.views.scores}
-                onAdd={(token) =>
-                  setText((t) => (t.length + token.text.length > MAX_LENGTH ? t : t + token.text))
+                // No Add while the model catches up with the text, or once the box is full.
+                onAdd={
+                  text === input && text.length < MAX_LENGTH
+                    ? (token) => setText((t) => (t + token.text).slice(0, MAX_LENGTH))
+                    : undefined
                 }
               />
             )}
