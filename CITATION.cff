@@ -1,0 +1,19 @@
+cff-version: 1.2.0
+message: 'If you use this site or its code, please cite it as below.'
+title: 'Transformer Visualized'
+abstract: 'An interactive, visual guide to how transformer language models work, from a simple story to the exact math. Runs in the browser.'
+type: software
+authors:
+  - alias: dwinzg
+repository-code: 'https://github.com/dwinzg/transformer-visualized'
+url: 'https://dwinzg.github.io/transformer-visualized/'
+license:
+  - MIT
+  - CC-BY-4.0
+keywords:
+  - transformer
+  - attention
+  - gpt-2
+  - language models
+  - explorable explanations
+  - education
