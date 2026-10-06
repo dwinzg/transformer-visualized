@@ -18,6 +18,10 @@ interface Props {
   scores?: number[][][][];
   /** When given, each token in the scores table is a button that asks how its weight is made. */
   onInspect?: (ask: { layer: number; head: number; row: number; column: number }) => void;
+  /** What the open inspector explains, counting from the first token shown. */
+  inspected?: { layer: number; head: number; row: number } | null;
+  /** The open inspector. It shows only while the grid still shows its layer, head and token. */
+  children?: React.ReactNode;
 }
 
 /** A token drawn with its space marks, and spoken with them too. */
@@ -59,6 +63,8 @@ export default function AttentionGridFigure({
   from = 0,
   scores,
   onInspect,
+  inspected,
+  children,
 }: Props) {
   const [layer, setLayer] = useState(startLayer);
   const [head, setHead] = useState(startHead);
@@ -207,6 +213,7 @@ export default function AttentionGridFigure({
                           type="button"
                           className="attn-inspect press"
                           aria-label={`${spokenToken(tokens[j])}, show the math`}
+                          data-inspect-column={j}
                           onClick={() => onInspect({ layer, head, row, column: j })}
                         >
                           {shownToken(tokens[j])}
@@ -224,6 +231,11 @@ export default function AttentionGridFigure({
           </div>
         </details>
       )}
+      {inspected &&
+        inspected.layer === layer &&
+        inspected.head === head &&
+        inspected.row === row &&
+        children}
       <details className="attn-text">
         <summary>Top three for every token</summary>
         <ul>

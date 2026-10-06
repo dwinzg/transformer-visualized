@@ -53,17 +53,27 @@ const fullTitle = title === 'Transformer Visualized' ? title : `${title} · Tran
       // note, it would wait until every tab of the site was closed, which is easy to miss.
       if ('serviceWorker' in navigator) {
         let asked = false;
+        const note = () => document.querySelector('[data-update-note]');
+        // The status region is always on the page. Adding text to it is what gets announced.
         const offer = (worker) => {
-          const note = document.querySelector('[data-update-note]');
-          if (!note) return;
-          note.hidden = false;
-          note.querySelector('button').onclick = () => {
+          const region = note();
+          if (!region || region.childElementCount > 0) return;
+          const text = document.createElement('span');
+          text.textContent = 'A new version of this site is ready.';
+          const button = document.createElement('button');
+          button.type = 'button';
+          button.className = 'press';
+          button.textContent = 'Reload';
+          button.onclick = () => {
             asked = true;
             worker.postMessage({ type: 'SKIP_WAITING' });
           };
+          region.append(text, button);
         };
         navigator.serviceWorker.addEventListener('controllerchange', () => {
           if (asked) location.reload();
+          // Another tab switched to the new version. Its note is done here too.
+          else note()?.replaceChildren();
         });
         navigator.serviceWorker
           .register(sw)
@@ -91,12 +101,7 @@ const fullTitle = title === 'Transformer Visualized' ? title : `${title} · Tran
       <slot />
     </main>
     <SiteFooter />
-    <div class="update-note" data-update-note role="status" hidden>
-      <span>A new version of this site is ready.</span>
-      <button type="button" class="press">
-        Reload
-      </button>
-    </div>
+    <div class="update-note" data-update-note role="status"></div>
   </body>
 </html>
 
