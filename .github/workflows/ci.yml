@@ -51,7 +51,9 @@ jobs:
       - run: npm ci
       - run: npx playwright install --with-deps ${{ matrix.browser }}
         working-directory: site
-      - run: npm run e2e -- --project=${{ matrix.project }}
+      # Straight to Playwright, since npm would keep --project for itself.
+      - run: npx playwright test --project=${{ matrix.project }}
+        working-directory: site
       - uses: actions/upload-artifact@v4
         if: failure()
         with:
