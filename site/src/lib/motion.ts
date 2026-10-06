@@ -56,10 +56,12 @@ export function travel(
  * scrolls into view. CSS does the fade and rise. Returns a cleanup function.
  */
 export function enterOnView(root: ParentNode): () => void {
+  const targets = Array.from(root.querySelectorAll<HTMLElement>('[data-enter]'));
+  // Past the CSS fallback's 2.5 seconds, figures are already showing, so they stay shown.
+  const late = typeof performance !== 'undefined' && performance.now() > 2000;
   // Tells the CSS fallback in global.css that this script is in charge of revealing figures.
   document.documentElement.dataset.enterReady = '';
-  const targets = Array.from(root.querySelectorAll<HTMLElement>('[data-enter]'));
-  if (prefersReducedMotion() || typeof IntersectionObserver !== 'function') {
+  if (late || prefersReducedMotion() || typeof IntersectionObserver !== 'function') {
     for (const el of targets) el.classList.add('is-visible');
     return () => {};
   }

@@ -24,7 +24,10 @@ async function work() {
     const { seq, text } = latest;
     latest = null;
     try {
-      const run = runPlayground(model, tokenizer, text, (trace) => (kept = { seq, trace }));
+      let trace: Trace | undefined;
+      const run = runPlayground(model, tokenizer, text, (t) => (trace = t));
+      // Kept only once the whole run worked, so it always matches the run on screen.
+      if (trace) kept = { seq, trace };
       send({ type: 'run', seq, run });
     } catch {
       // Say so, or the page would wait for this run forever.

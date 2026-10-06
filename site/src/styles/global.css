@@ -341,7 +341,7 @@ textarea {
   background: var(--color-bg);
   box-shadow: var(--shadow-card);
 }
-.update-note[hidden] {
+.update-note:empty {
   display: none;
 }
 .update-note button {
