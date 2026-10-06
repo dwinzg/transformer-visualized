@@ -6,10 +6,16 @@ export interface TokenizerJson {
   specialTokens: Record<string, number>;
 }
 
-// GPT-2's pre-tokenization pattern: contractions, letters, numbers, other symbols, whitespace.
-const PRETOKENIZE = /'s|'t|'re|'ve|'m|'ll|'d| ?\p{L}+| ?\p{N}+| ?[^\s\p{L}\p{N}]+|\s+(?!\S)|\s+/gu;
+// GPT-2's pre-tokenization pattern: contractions, letters, numbers, other symbols, whitespace. Python's tokenizers library reads \s as Unicode White_Space, which
+// counts U+0085 but not U+FEFF. JavaScript's \s is the other way round, so the pattern names the
+// property instead, and the two split every text the same way.
+const PRETOKENIZE =
+  /'s|'t|'re|'ve|'m|'ll|'d| ?\p{L}+| ?\p{N}+| ?[^\p{White_Space}\p{L}\p{N}]+|\p{White_Space}+(?!\P{White_Space})|\p{White_Space}+/gu;
 
 let byteTable: readonly string[] | undefined;
+
+/** Pieces kept in the encode cache. Typing in the playground keeps adding new ones. */
+export const ENCODE_CACHE_LIMIT = 10_000;
 
 /**
  * GPT-2's map from each byte to a printable character, so every byte sequence can be written as
@@ -56,8 +62,9 @@ export class Tokenizer {
   private readonly byteToChar: readonly string[];
   private readonly charToByte: Map<string, number>;
   private readonly cache = new Map<string, number[]>();
-  private readonly decoder = new TextDecoder('utf-8', { fatal: false });
-  private readonly strictDecoder = new TextDecoder('utf-8', { fatal: true });
+  // ignoreBOM keeps a leading U+FEFF, which is text here. By default TextDecoder drops it.
+  private readonly decoder = new TextDecoder('utf-8', { fatal: false, ignoreBOM: true });
+  private readonly strictDecoder = new TextDecoder('utf-8', { fatal: true, ignoreBOM: true });
 
   private constructor(json: TokenizerJson) {
     this.byteToChar = bytesToUnicode();
@@ -188,6 +195,8 @@ export class Tokenizer {
       if (id === undefined) throw new Error(`BPE produced "${symbol}", which is not in the vocab`);
       return id;
     });
+    // ponytail: clears everything at the limit, an LRU if a long session ever needs it.
+    if (this.cache.size >= ENCODE_CACHE_LIMIT) this.cache.clear();
     this.cache.set(piece, ids);
     return ids;
   }
