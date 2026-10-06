@@ -282,6 +282,16 @@ textarea {
   opacity: 1;
   transform: none;
 }
+/* If the script that reveals figures never runs, they still appear after a moment. */
+:root.js:not([data-enter-ready]) [data-enter]:not(.is-visible) {
+  animation: enter-fallback 0s 2.5s forwards;
+}
+@keyframes enter-fallback {
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
 
 /* The surface every figure sits on, with a faint dot grid. */
 .stage {
