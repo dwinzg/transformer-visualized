@@ -316,6 +316,7 @@ export default function Playground() {
             {stage === 'output' && (
               <SamplingFigure
                 data={run.views.scores}
+                inspect
                 // No Add while the model catches up with the text, or once the box is full.
                 onAdd={
                   text === run.text && text.length < MAX_LENGTH
