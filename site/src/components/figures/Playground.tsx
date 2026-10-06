@@ -212,9 +212,9 @@ export default function Playground() {
                 key={`${i}-${token.id}`}
                 className={`token-chip${token.special ? ' is-special' : ''}`}
               >
-                <span className="visually-hidden">{`${spokenToken(token.text)}, id ${token.id}`}</span>
+                <span className="visually-hidden">{`${spokenToken(token)}, id ${token.id}`}</span>
                 <span className="token-text" aria-hidden="true">
-                  {token.special ? token.text : shownToken(token.text)}
+                  {shownToken(token)}
                 </span>
                 <span className="token-id" aria-hidden="true">
                   {token.id}

@@ -23,8 +23,8 @@ interface Props {
 /** A token drawn with its space marks, and spoken with them too. */
 const Shown = ({ token }: { token: DisplayToken }) => (
   <>
-    <span aria-hidden="true">{shownToken(token.text)}</span>
-    <span className="visually-hidden">{spokenToken(token.text)}</span>
+    <span aria-hidden="true">{shownToken(token)}</span>
+    <span className="visually-hidden">{spokenToken(token)}</span>
   </>
 );
 
@@ -188,7 +188,7 @@ export default function AttentionGridFigure({
           <div className="attn-score-scroll" tabIndex={0} role="group" aria-label="Scores">
             <table className="attn-score-table">
               <caption className="visually-hidden">
-                Scores and weights for {spokenToken(tokens[row].text)} in layer {layer + 1}, head{' '}
+                Scores and weights for {spokenToken(tokens[row])} in layer {layer + 1}, head{' '}
                 {head + 1}.
               </caption>
               <thead>
@@ -206,10 +206,10 @@ export default function AttentionGridFigure({
                         <button
                           type="button"
                           className="attn-inspect press"
-                          aria-label={`${spokenToken(tokens[j].text)}, show the math`}
+                          aria-label={`${spokenToken(tokens[j])}, show the math`}
                           onClick={() => onInspect({ layer, head, row, column: j })}
                         >
-                          {shownToken(tokens[j].text)}
+                          {shownToken(tokens[j])}
                         </button>
                       ) : (
                         <Shown token={tokens[j]} />

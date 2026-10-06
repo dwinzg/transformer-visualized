@@ -43,12 +43,12 @@ export function ChipPicker({ label, tokens, selected, onSelect }: Props) {
           type="button"
           role="radio"
           aria-checked={i === selected}
-          aria-label={spokenToken(token.text)}
+          aria-label={spokenToken(token)}
           tabIndex={i === selected ? 0 : -1}
           className="token-chip chip-option press"
           onClick={() => onSelect(i)}
         >
-          {shownToken(token.text)}
+          {shownToken(token)}
         </button>
       ))}
     </div>
