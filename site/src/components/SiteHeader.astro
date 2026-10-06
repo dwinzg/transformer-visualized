@@ -1,16 +1,31 @@
 ---
+import { getCollection } from 'astro:content';
 import { withBase } from '../lib/paths';
 import ThemeToggle from './ThemeToggle.astro';
 
+const chapters = (await getCollection('chapters', ({ data }) => !data.draft)).sort(
+  (a, b) => a.data.order - b.data.order,
+);
+// The Learn menu holds every way to study, the same four the home page offers.
+const learnMenu = [
+  { href: withBase('learn/'), label: 'All chapters' },
+  ...chapters.map((c) => ({
+    href: withBase(`learn/${c.id}/`),
+    label: `${c.data.order}. ${c.data.title}`,
+  })),
+  { href: withBase('learn/architecture/'), label: 'The whole model', gap: true },
+  { href: withBase('review/'), label: 'Quick review' },
+];
 const links = [
-  { href: withBase('learn/'), label: 'Learn' },
+  { href: withBase('playground/'), label: 'Playground' },
   { href: withBase('glossary/'), label: 'Glossary' },
   { href: withBase('references/'), label: 'References' },
 ];
 const current = Astro.url.pathname;
+const inLearn = current.startsWith(withBase('learn/')) || current.startsWith(withBase('review/'));
 ---
 
-<header class="site-header">
+<header class="site-header" data-site-header>
   <nav class="container nav" aria-label="Main">
     <a class="wordmark" href={withBase('')}>
       <span class="mark" aria-hidden="true">
@@ -18,7 +33,44 @@ const current = Astro.url.pathname;
       </span>
       <span class="name">Transformer Visualized</span>
     </a>
-    <ul class="links">
+    <button
+      type="button"
+      class="menu-button"
+      data-menu-button
+      aria-expanded="false"
+      aria-controls="site-links"
+      hidden
+    >
+      Menu
+    </button>
+    <ul class="links" id="site-links" data-links>
+      <li class="has-menu" data-has-menu>
+        <a href={withBase('learn/')} aria-current={inLearn ? 'page' : undefined}>
+          Learn
+        </a>
+        <button
+          type="button"
+          class="submenu-button"
+          data-submenu-button
+          aria-expanded="false"
+          aria-controls="learn-menu"
+          aria-label="More in Learn"
+          hidden
+        >
+          <svg viewBox="0 0 12 12" aria-hidden="true">
+            <path d="M2.5 4.5 6 8l3.5-3.5"></path>
+          </svg>
+        </button>
+        <ul class="submenu" id="learn-menu" data-submenu>
+          {learnMenu.map((item) => (
+            <li class:list={{ gap: item.gap }}>
+              <a href={item.href} aria-current={current === item.href ? 'page' : undefined}>
+                {item.label}
+              </a>
+            </li>
+          ))}
+        </ul>
+      </li>
       {links.map((link) => (
         <li>
           <a href={link.href} aria-current={current.startsWith(link.href) ? 'page' : undefined}>
@@ -32,6 +84,71 @@ const current = Astro.url.pathname;
 </header>
 
 <script>
+  // Disclosure menus, as in the WAI-ARIA navigation pattern. A button opens each one, so they work
+  // with a tap, a click or the keyboard. On a pointer that can hover, hovering Learn opens it too.
+  // Escape and a click outside close them. Without JavaScript the links simply all show.
+  const root = document.querySelector<HTMLElement>('[data-site-header]');
+  if (root) {
+    const menuButton = root.querySelector<HTMLButtonElement>('[data-menu-button]')!;
+    const learn = root.querySelector<HTMLElement>('[data-has-menu]')!;
+    const subButton = root.querySelector<HTMLButtonElement>('[data-submenu-button]')!;
+    root.dataset.menuReady = '';
+    menuButton.hidden = false;
+    subButton.hidden = false;
+
+    const setOpen = (button: HTMLButtonElement, open: boolean) =>
+      button.setAttribute('aria-expanded', String(open));
+    const isOpen = (button: HTMLButtonElement) => button.getAttribute('aria-expanded') === 'true';
+    const closeAll = () => {
+      byHover = false;
+      setOpen(menuButton, false);
+      setOpen(subButton, false);
+    };
+
+    menuButton.addEventListener('click', () => setOpen(menuButton, !isOpen(menuButton)));
+    // A menu opened by hovering stays open when its button is then clicked, instead of closing.
+    let byHover = false;
+    subButton.addEventListener('click', () => {
+      const open = byHover || !isOpen(subButton);
+      byHover = false;
+      setOpen(subButton, open);
+    });
+
+    let leaving: number | undefined;
+    const hover = matchMedia('(hover: hover) and (pointer: fine)');
+    learn.addEventListener('mouseenter', () => {
+      if (!hover.matches || getComputedStyle(subButton).display === 'none') return;
+      clearTimeout(leaving);
+      if (!isOpen(subButton)) byHover = true;
+      setOpen(subButton, true);
+    });
+    learn.addEventListener('mouseleave', () => {
+      if (!hover.matches || !byHover || learn.contains(document.activeElement)) return;
+      // A short wait, so a pointer cutting a corner on its way into the menu does not close it.
+      leaving = window.setTimeout(() => setOpen(subButton, false), 250);
+    });
+
+    // On the whole page, since Safari does not focus a button when it is clicked.
+    document.addEventListener('keydown', (event) => {
+      if (event.key !== 'Escape') return;
+      if (isOpen(subButton)) {
+        setOpen(subButton, false);
+        if (getComputedStyle(subButton).display !== 'none') subButton.focus();
+      } else if (isOpen(menuButton)) {
+        setOpen(menuButton, false);
+        menuButton.focus();
+      }
+    });
+    document.addEventListener('click', (event) => {
+      if (!root.contains(event.target as Node)) closeAll();
+    });
+    root.addEventListener('focusout', (event) => {
+      if (!root.contains(event.relatedTarget as Node | null)) closeAll();
+    });
+    // Opening a page from the menu, or going back to this one, starts with it closed.
+    addEventListener('pageshow', closeAll);
+  }
+
   // The nav can wrap to two or three rows on narrow screens, so its height is not one of the
   // fixed breakpoints in tokens.css. Measuring it keeps anchored links (glossary terms,
   // citations, "Go deeper") from landing underneath the sticky header at any width.
@@ -119,6 +236,125 @@ const current = Astro.url.pathname;
     text-decoration: none;
     background: var(--color-surface-2);
   }
+
+  /* Learn with its menu. Without JavaScript the menu stays shut and Learn is a plain link. */
+  .has-menu {
+    position: relative;
+    display: flex;
+    align-items: center;
+  }
+  .submenu {
+    display: none;
+    list-style: none;
+    margin: 0;
+    padding: var(--space-2);
+  }
+  .submenu-button,
+  .menu-button {
+    display: inline-grid;
+    place-items: center;
+    min-width: var(--touch-target);
+    min-height: var(--touch-target);
+    padding: 0 var(--space-2);
+    border: 0;
+    border-radius: var(--radius-pill);
+    background: transparent;
+    color: var(--color-text);
+    font: inherit;
+    font-size: var(--text-subheadline);
+    cursor: pointer;
+  }
+  /* The buttons only work with JavaScript, which unhides them. */
+  .submenu-button[hidden],
+  .menu-button[hidden] {
+    display: none;
+  }
+  .submenu-button {
+    min-width: 2rem;
+    margin-left: calc(-1 * var(--space-2));
+  }
+  .submenu-button:hover,
+  .menu-button:hover,
+  .submenu-button[aria-expanded='true'],
+  .menu-button[aria-expanded='true'] {
+    background: var(--color-surface-2);
+  }
+  .submenu-button svg {
+    width: 0.75rem;
+    height: 0.75rem;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 1.5;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    transition: transform var(--duration-fast) ease;
+  }
+  .submenu-button[aria-expanded='true'] svg {
+    transform: rotate(180deg);
+  }
+  .submenu-button[aria-expanded='true'] + .submenu {
+    position: absolute;
+    top: calc(100% + var(--space-1));
+    left: 0;
+    display: grid;
+    min-width: 17rem;
+    border: 1px solid var(--color-separator);
+    border-radius: var(--radius-md);
+    background: var(--color-bg);
+    box-shadow: var(--shadow-card);
+  }
+  .submenu a {
+    display: flex;
+    width: 100%;
+    border-radius: var(--radius-sm);
+  }
+  .submenu .gap {
+    margin-top: var(--space-2);
+    padding-top: var(--space-2);
+    border-top: 1px solid var(--color-separator);
+  }
+
+  /* On narrow screens, with JavaScript, every link goes behind one Menu button. */
+  .menu-button {
+    padding: 0 var(--space-3);
+  }
+  @media (min-width: 48rem) {
+    .menu-button {
+      display: none;
+    }
+  }
+  @media (max-width: 47.99rem) {
+    [data-menu-ready] .links {
+      display: none;
+    }
+    [data-menu-ready] .menu-button[aria-expanded='true'] + .links {
+      position: absolute;
+      top: 100%;
+      right: 0;
+      left: 0;
+      display: grid;
+      gap: 0;
+      max-height: calc(100dvh - 100%);
+      overflow-y: auto;
+      padding: var(--space-2) var(--space-4) var(--space-4);
+      border-bottom: 1px solid var(--color-separator);
+      background: var(--color-bg);
+    }
+    [data-menu-ready] .links a {
+      width: 100%;
+    }
+    /* Inside the Menu panel, Learn's pages are listed under it, with no second button. */
+    [data-menu-ready] .has-menu {
+      display: grid;
+    }
+    [data-menu-ready] .submenu-button {
+      display: none;
+    }
+    [data-menu-ready] .submenu {
+      display: grid;
+      padding: 0 0 0 var(--space-4);
+    }
+  }
   @media (max-width: 30rem) {
     /* The name would push the links onto a second row. The mark keeps the home link, and the
        name stays as its accessible name. */
@@ -130,8 +366,7 @@ const current = Astro.url.pathname;
       clip-path: inset(50%);
       white-space: nowrap;
     }
-    /* The mark already pushes the links to the right, so the gaps can be small. Wider fallback
-       fonts, like Linux's, still fit on one row. */
+    /* Without JavaScript the links wrap here. Small gaps keep as many as possible on one row. */
     .nav {
       column-gap: var(--space-1);
     }
