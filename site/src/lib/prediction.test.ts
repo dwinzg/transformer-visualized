@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { nextTokenDistribution, softmax } from '@transformer-visualized/engine';
 import { nextScores, tiedScores } from './demo-data';
-import { chances, draw, TOP_K, TOP_P, type Keep } from './prediction';
+import { chances, draw, explainChance, TOP_K, TOP_P, type Keep } from './prediction';
 
 const SENTENCE = 'Lily wanted to play with her';
 const data = nextScores(SENTENCE);
@@ -100,5 +100,21 @@ describe('tiedScores', () => {
     expect(tied.rows[1].score).toBe(2.48);
     expect(tied.hidden.slice(0, 3).map((v) => v.toFixed(2))).toEqual(['0.82', '2.46', '-3.15']);
     expect(tied.last.text).toBe(' her');
+  });
+});
+
+describe('explainChance', () => {
+  const data = nextScores('Lily wanted to play with her');
+
+  it.each([0.5, 1, 2])('gives the same chance as the bars at temperature %s', (t) => {
+    const all = chances(data, t, 'all');
+    for (const i of [0, 1, 4]) expect(explainChance(data, i, t).chance).toBeCloseTo(all.top[i], 10);
+  });
+
+  it('counts every token in the vocabulary, and gives the top one e to the 0', () => {
+    const math = explainChance(data, 0, 1);
+    expect(math.count).toBe(4096);
+    expect(math.exp).toBe(1);
+    expect(math.scaled - math.max).toBe(0);
   });
 });

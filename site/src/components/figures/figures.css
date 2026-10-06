@@ -1028,3 +1028,7 @@ td.is-hidden {
   font-size: var(--text-footnote);
   word-spacing: 0.25em;
 }
+/* On a bar's tinted fill, accent text is too faint, so the button keeps the bar's text color. */
+.prob-word .attn-inspect {
+  color: inherit;
+}

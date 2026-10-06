@@ -75,3 +75,46 @@ export function draw({ top, other }: Chances, random: number): number {
   }
   return other > 0 ? -1 : top.findLastIndex((x) => x > 0);
 }
+
+/** How one top token's chance comes out of the scores, before any keep rule. */
+export interface ChanceMath {
+  logit: number;
+  temperature: number;
+  /** logit / temperature. */
+  scaled: number;
+  /** The largest scaled score, taken away from every one so the biggest becomes 0. */
+  max: number;
+  /** e to the power of (scaled - max). */
+  exp: number;
+  /** The same for every token in the vocabulary, added up. */
+  sum: number;
+  /** exp / sum. */
+  chance: number;
+  /** How many tokens the sum covers. */
+  count: number;
+}
+
+/** The softmax for one top token, step by step, as `chances` works it out with keep 'all'. */
+export function explainChance(
+  { top, rest }: NextScores,
+  index: number,
+  temperature: number,
+): ChanceMath {
+  const max = top[0].logit / temperature;
+  const term = (logit: number) => Math.exp(logit / temperature - max);
+  const sum =
+    top.reduce((s, t) => s + term(t.logit), 0) +
+    rest.reduce((s, [logit, n]) => s + n * term(logit), 0);
+  const logit = top[index].logit;
+  const exp = term(logit);
+  return {
+    logit,
+    temperature,
+    scaled: logit / temperature,
+    max,
+    exp,
+    sum,
+    chance: exp / sum,
+    count: top.length + rest.reduce((s, [, n]) => s + n, 0),
+  };
+}
