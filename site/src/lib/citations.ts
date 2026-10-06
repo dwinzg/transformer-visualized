@@ -56,10 +56,16 @@ export function citationLabel(ref: Pick<ReferenceData, 'authors' | 'year'>): str
 }
 
 /** Full author list such as "Vaswani, A., Shazeer, N., and Parmar, N.". */
+/** Past this many authors, the list names the first few and counts the rest. */
+export const AUTHORS_SHOWN = 6;
+
 export function formatAuthors(authors: readonly Author[]): string {
   const names = authors.map((author) =>
     'literal' in author ? author.literal : `${author.family}, ${initials(author.given)}`,
   );
+  if (names.length > AUTHORS_SHOWN + 1) {
+    return `${names.slice(0, AUTHORS_SHOWN).join(', ')}, and ${names.length - AUTHORS_SHOWN} others`;
+  }
   if (names.length <= 1) return names.join('');
   if (names.length === 2) return `${names[0]} and ${names[1]}`;
   return `${names.slice(0, -1).join(', ')}, and ${names[names.length - 1]}`;
