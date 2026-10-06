@@ -153,3 +153,13 @@ test.describe('at 320px wide', () => {
     await expectNoA11yViolations(page);
   });
 });
+
+test("a step about one part of the model wears that part's color", async ({ page }) => {
+  await page.goto('learn/attention/');
+  const step = page.locator('[data-step]').first();
+  await expect(step).toHaveAttribute('data-color', 'attention');
+  const bar = await step
+    .locator('h2')
+    .evaluate((h) => getComputedStyle(h, '::before').backgroundImage);
+  expect(bar).toContain('linear-gradient');
+});

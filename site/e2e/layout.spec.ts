@@ -24,6 +24,17 @@ test.describe('home page', () => {
     );
   });
 
+  test('the Learn way shows the chapters as colored chips', async ({ page }) => {
+    await page.goto('./');
+    const chips = page.locator('.way-chip');
+    await expect(chips).toHaveText([
+      'Tokens',
+      'Embeddings and position',
+      'Attention',
+      'Prediction',
+    ]);
+  });
+
   test('has no accessibility violations in either theme', async ({ page }) => {
     await page.goto('./');
     await expectNoA11yViolations(page);
