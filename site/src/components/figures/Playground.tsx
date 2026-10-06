@@ -1,6 +1,13 @@
 import { useEffect, useId, useRef, useState } from 'react';
 import { unsupportedCharacters } from '@transformer-visualized/engine';
-import { GRID_TOKENS, type PlaygroundRun, type WorkerMessage } from '../../lib/playground-run';
+import {
+  GRID_TOKENS,
+  type Ask,
+  type AttentionMath,
+  type PlaygroundRun,
+  type WorkerMessage,
+} from '../../lib/playground-run';
+import AttentionInspector from './AttentionInspector';
 import { shownToken, spokenToken } from '../../lib/token-text';
 import AttentionGridFigure from './AttentionGridFigure';
 import FeedForwardFigure from './FeedForwardFigure';
@@ -49,6 +56,9 @@ export default function Playground() {
   const [run, setRun] = useState<PlaygroundRun | null>(null);
   const worker = useRef<Worker | null>(null);
   const seq = useRef(0);
+  // The run on screen, so the worker can explain its numbers, and the explanation open now.
+  const shownSeq = useRef(0);
+  const [inspected, setInspected] = useState<{ ask: Ask; math: AttentionMath } | null>(null);
   /** Why the model is not showing anything new, if something went wrong. */
   const [failed, setFailed] = useState<'load' | 'run' | null>(null);
   const [attempt, setAttempt] = useState(0);
@@ -89,6 +99,12 @@ export default function Playground() {
     });
     w.onmessage = (event: MessageEvent<WorkerMessage>) => {
       const message = event.data;
+      if (message.type === 'explained') {
+        if (message.seq === shownSeq.current && message.math) {
+          setInspected({ ask: message.ask, math: message.math });
+        }
+        return;
+      }
       if (message.type === 'ready') setReady(true);
       else if (message.type === 'failed') setFailed('load');
       // Only the newest text counts. An older run that finishes late is dropped.
@@ -97,6 +113,9 @@ export default function Playground() {
       else {
         setFailed(null);
         setRun(message.run);
+        shownSeq.current = message.seq;
+        // New text means new numbers, so an open explanation would no longer match.
+        setInspected(null);
       }
     };
     w.onerror = () => setFailed('load');
@@ -266,7 +285,26 @@ export default function Playground() {
                   weights={run.views.attention.weights}
                   from={run.views.attention.from}
                   scores={run.views.attention.scores}
+                  onInspect={(ask) =>
+                    worker.current?.postMessage({
+                      seq: shownSeq.current,
+                      // The grid shows the last tokens only, so count from the start of the text.
+                      ask: {
+                        ...ask,
+                        row: ask.row + run.views!.attention.from,
+                        column: ask.column + run.views!.attention.from,
+                      },
+                    })
+                  }
                 />
+                {inspected && (
+                  <AttentionInspector
+                    math={inspected.math}
+                    from={run.tokens[inspected.ask.row]}
+                    to={run.tokens[inspected.ask.column]}
+                    onClose={() => setInspected(null)}
+                  />
+                )}
               </>
             )}
             {stage === 'ffn' && (

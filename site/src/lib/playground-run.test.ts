@@ -2,7 +2,8 @@ import { readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { describe, expect, it } from 'vitest';
 import { loadModel, Tokenizer } from '@transformer-visualized/engine';
-import { GRID_TOKENS, runPlayground } from './playground-run';
+import { forward, normalizeText } from '@transformer-visualized/engine';
+import { attentionMath, GRID_TOKENS, runPlayground } from './playground-run';
 
 const dir = resolve(process.cwd(), '../models/tiny');
 const bytes = readFileSync(resolve(dir, 'model.safetensors'));
@@ -56,6 +57,21 @@ describe('runPlayground', () => {
         steps[k].added + 0.02,
       );
     }
+  });
+
+  it('explains a weight from the query and key, and agrees with the grid', () => {
+    const text = 'Lily wanted to play with her';
+    const trace = forward(model, tokenizer.encode(normalizeText(text)));
+    const math = attentionMath(trace, { layer: 2, head: 2, row: 5, column: 0 });
+    expect(math.query).toHaveLength(32);
+    expect(math.key).toHaveLength(32);
+    expect(math.value).toHaveLength(32);
+    // Each product is rounded to 4 decimals, so 32 of them can drift by up to 0.0016.
+    expect(Math.abs(math.products.reduce((a, b) => a + b, 0) - math.dot)).toBeLessThan(0.002);
+    // The scale 1 / √32 is rounded too.
+    expect(Math.abs(math.dot * math.scale - math.score)).toBeLessThan(0.002);
+    expect(math.exp / math.expSum).toBeCloseTo(math.weight, 3);
+    expect(math.weight.toFixed(2)).toBe('0.66');
   });
 
   it('has no views for empty text', () => {
