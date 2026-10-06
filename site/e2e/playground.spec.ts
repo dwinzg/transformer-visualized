@@ -120,6 +120,15 @@ test('every stage shows the real numbers', async ({ page }) => {
   const lily = page.locator('.attn-score-table tbody tr').first();
   await expect(lily.locator('th')).toContainText('Lily');
   await expect(lily.locator('td').last()).toHaveText('0.66');
+  // Picking a token in the table shows how its weight is worked out.
+  await lily.getByRole('button', { name: /Lily, show the math/ }).click();
+  const inspector = page.getByRole('region', { name: 'How this weight is worked out' });
+  await expect(inspector).toBeFocused();
+  await expect(inspector).toContainText('a weight of 0.66');
+  await expect(inspector).toContainText('add up the 32 products');
+  await expectNoA11yViolations(page);
+  await inspector.getByRole('button', { name: 'Close' }).click();
+  await expect(inspector).toHaveCount(0);
   await page.getByRole('radio', { name: 'Feed forward' }).check();
   await expect(page.locator('.ffn-summary')).toContainText('of 512 neurons');
   await expect(page.locator('.ffn-figure .prob-bar')).toHaveCount(8);
