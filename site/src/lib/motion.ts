@@ -56,6 +56,8 @@ export function travel(
  * scrolls into view. CSS does the fade and rise. Returns a cleanup function.
  */
 export function enterOnView(root: ParentNode): () => void {
+  // Tells the CSS fallback in global.css that this script is in charge of revealing figures.
+  document.documentElement.dataset.enterReady = '';
   const targets = Array.from(root.querySelectorAll<HTMLElement>('[data-enter]'));
   if (prefersReducedMotion() || typeof IntersectionObserver !== 'function') {
     for (const el of targets) el.classList.add('is-visible');
