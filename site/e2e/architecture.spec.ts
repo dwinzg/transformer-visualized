@@ -220,3 +220,9 @@ test('the list of every part says what it is for', async ({ page }) => {
   await page.getByText('Every part as a list').click();
   await expect(page.getByText('The same parts as the map, in order')).toBeVisible();
 });
+
+test('the caption credits the paper with a link', async ({ page }) => {
+  await page.goto(MAP);
+  await page.locator('figcaption').getByRole('link', { name: 'Vaswani et al. 2017' }).click();
+  await expect(page).toHaveURL(/references\/#vaswani2017$/);
+});
