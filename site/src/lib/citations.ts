@@ -20,6 +20,7 @@ export const TOPIC_LABELS: Record<string, string> = {
   attention: 'Attention',
   prediction: 'Prediction and sampling',
   training: 'Training and data',
+  today: "Today's language models",
   interpretability: 'Looking inside models',
   learning: 'How people learn',
   tools: 'Other explainers and tools',

@@ -3,31 +3,67 @@
     "id": "vaswani2017",
     "type": "paper",
     "authors": [
-      { "family": "Vaswani", "given": "Ashish" },
-      { "family": "Shazeer", "given": "Noam" },
-      { "family": "Parmar", "given": "Niki" },
-      { "family": "Uszkoreit", "given": "Jakob" },
-      { "family": "Jones", "given": "Llion" },
-      { "family": "Gomez", "given": "Aidan N." },
-      { "family": "Kaiser", "given": "Łukasz" },
-      { "family": "Polosukhin", "given": "Illia" }
+      {
+        "family": "Vaswani",
+        "given": "Ashish"
+      },
+      {
+        "family": "Shazeer",
+        "given": "Noam"
+      },
+      {
+        "family": "Parmar",
+        "given": "Niki"
+      },
+      {
+        "family": "Uszkoreit",
+        "given": "Jakob"
+      },
+      {
+        "family": "Jones",
+        "given": "Llion"
+      },
+      {
+        "family": "Gomez",
+        "given": "Aidan N."
+      },
+      {
+        "family": "Kaiser",
+        "given": "Łukasz"
+      },
+      {
+        "family": "Polosukhin",
+        "given": "Illia"
+      }
     ],
     "title": "Attention Is All You Need",
     "year": 2017,
     "venue": "Advances in Neural Information Processing Systems 30 (NIPS 2017)",
     "url": "https://arxiv.org/abs/1706.03762v7",
     "arxiv": "1706.03762v7",
-    "note": "The paper that introduced the transformer.",
+    "note": "Introduced the transformer, built on attention alone, for translation. Its Figure 1 is the diagram our map redraws.",
     "topics": ["architecture", "attention"]
   },
   {
     "id": "radford2018",
     "type": "report",
     "authors": [
-      { "family": "Radford", "given": "Alec" },
-      { "family": "Narasimhan", "given": "Karthik" },
-      { "family": "Salimans", "given": "Tim" },
-      { "family": "Sutskever", "given": "Ilya" }
+      {
+        "family": "Radford",
+        "given": "Alec"
+      },
+      {
+        "family": "Narasimhan",
+        "given": "Karthik"
+      },
+      {
+        "family": "Salimans",
+        "given": "Tim"
+      },
+      {
+        "family": "Sutskever",
+        "given": "Ilya"
+      }
     ],
     "title": "Improving Language Understanding by Generative Pre-Training",
     "year": 2018,
@@ -40,24 +76,47 @@
     "id": "radford2019",
     "type": "report",
     "authors": [
-      { "family": "Radford", "given": "Alec" },
-      { "family": "Wu", "given": "Jeffrey" },
-      { "family": "Child", "given": "Rewon" },
-      { "family": "Luan", "given": "David" },
-      { "family": "Amodei", "given": "Dario" },
-      { "family": "Sutskever", "given": "Ilya" }
+      {
+        "family": "Radford",
+        "given": "Alec"
+      },
+      {
+        "family": "Wu",
+        "given": "Jeffrey"
+      },
+      {
+        "family": "Child",
+        "given": "Rewon"
+      },
+      {
+        "family": "Luan",
+        "given": "David"
+      },
+      {
+        "family": "Amodei",
+        "given": "Dario"
+      },
+      {
+        "family": "Sutskever",
+        "given": "Ilya"
+      }
     ],
     "title": "Language Models are Unsupervised Multitask Learners",
     "year": 2019,
     "venue": "OpenAI",
     "url": "https://cdn.openai.com/better-language-models/language_models_are_unsupervised_multitask_learners.pdf",
-    "note": "GPT-2, the architecture our tiny model follows.",
+    "note": "GPT-2. A bigger GPT trained on web pages, with the norm moved to the start of each step. Our tiny model follows its design.",
     "topics": ["architecture", "training"]
   },
   {
     "id": "shannon1951",
     "type": "paper",
-    "authors": [{ "family": "Shannon", "given": "Claude E." }],
+    "authors": [
+      {
+        "family": "Shannon",
+        "given": "Claude E."
+      }
+    ],
     "title": "Prediction and Entropy of Printed English",
     "year": 1951,
     "venue": "Bell System Technical Journal 30(1), 50 to 64",
@@ -70,10 +129,22 @@
     "id": "bengio2003",
     "type": "paper",
     "authors": [
-      { "family": "Bengio", "given": "Yoshua" },
-      { "family": "Ducharme", "given": "Réjean" },
-      { "family": "Vincent", "given": "Pascal" },
-      { "family": "Jauvin", "given": "Christian" }
+      {
+        "family": "Bengio",
+        "given": "Yoshua"
+      },
+      {
+        "family": "Ducharme",
+        "given": "Réjean"
+      },
+      {
+        "family": "Vincent",
+        "given": "Pascal"
+      },
+      {
+        "family": "Jauvin",
+        "given": "Christian"
+      }
     ],
     "title": "A Neural Probabilistic Language Model",
     "year": 2003,
@@ -86,45 +157,84 @@
     "id": "eldan2023",
     "type": "paper",
     "authors": [
-      { "family": "Eldan", "given": "Ronen" },
-      { "family": "Li", "given": "Yuanzhi" }
+      {
+        "family": "Eldan",
+        "given": "Ronen"
+      },
+      {
+        "family": "Li",
+        "given": "Yuanzhi"
+      }
     ],
     "title": "TinyStories: How Small Can Language Models Be and Still Speak Coherent English?",
     "year": 2023,
     "venue": "arXiv preprint",
     "url": "https://arxiv.org/abs/2305.07759v2",
     "arxiv": "2305.07759v2",
-    "note": "The dataset of simple stories our tiny model learns from.",
+    "note": "Short, simple stories written by GPT-3.5 and GPT-4, small enough for a tiny model to learn from. Our model trains on them.",
     "topics": ["training"]
   },
   {
     "id": "cho2025",
     "type": "paper",
     "authors": [
-      { "family": "Cho", "given": "Aeree" },
-      { "family": "Kim", "given": "Grace C." },
-      { "family": "Karpekov", "given": "Alexander" },
-      { "family": "Helbling", "given": "Alec" },
-      { "family": "Wang", "given": "Zijie J." },
-      { "family": "Lee", "given": "Seongmin" },
-      { "family": "Hoover", "given": "Benjamin" },
-      { "family": "Chau", "given": "Duen Horng" }
+      {
+        "family": "Cho",
+        "given": "Aeree"
+      },
+      {
+        "family": "Kim",
+        "given": "Grace C."
+      },
+      {
+        "family": "Karpekov",
+        "given": "Alexander"
+      },
+      {
+        "family": "Helbling",
+        "given": "Alec"
+      },
+      {
+        "family": "Wang",
+        "given": "Zijie J."
+      },
+      {
+        "family": "Lee",
+        "given": "Seongmin"
+      },
+      {
+        "family": "Hoover",
+        "given": "Benjamin"
+      },
+      {
+        "family": "Chau",
+        "given": "Duen Horng"
+      }
     ],
     "title": "Transformer Explainer: Interactive Learning of Text-Generative Models",
     "year": 2025,
     "venue": "Proceedings of the AAAI Conference on Artificial Intelligence 39(28), 29625 to 29627",
     "url": "https://doi.org/10.1609/aaai.v39i28.35347",
     "doi": "10.1609/aaai.v39i28.35347",
-    "note": "An interactive visualization that runs GPT-2 in the browser.",
+    "note": "An interactive tool that runs GPT-2 in the browser and shows each step of a forward pass.",
     "topics": ["tools"]
   },
   {
     "id": "sennrich2016",
     "type": "paper",
     "authors": [
-      { "family": "Sennrich", "given": "Rico" },
-      { "family": "Haddow", "given": "Barry" },
-      { "family": "Birch", "given": "Alexandra" }
+      {
+        "family": "Sennrich",
+        "given": "Rico"
+      },
+      {
+        "family": "Haddow",
+        "given": "Barry"
+      },
+      {
+        "family": "Birch",
+        "given": "Alexandra"
+      }
     ],
     "title": "Neural Machine Translation of Rare Words with Subword Units",
     "year": 2016,
@@ -139,10 +249,22 @@
     "id": "mikolov2013",
     "type": "paper",
     "authors": [
-      { "family": "Mikolov", "given": "Tomas" },
-      { "family": "Chen", "given": "Kai" },
-      { "family": "Corrado", "given": "Greg" },
-      { "family": "Dean", "given": "Jeffrey" }
+      {
+        "family": "Mikolov",
+        "given": "Tomas"
+      },
+      {
+        "family": "Chen",
+        "given": "Kai"
+      },
+      {
+        "family": "Corrado",
+        "given": "Greg"
+      },
+      {
+        "family": "Dean",
+        "given": "Jeffrey"
+      }
     ],
     "title": "Efficient Estimation of Word Representations in Vector Space",
     "year": 2013,
@@ -156,8 +278,14 @@
     "id": "jain2019",
     "type": "paper",
     "authors": [
-      { "family": "Jain", "given": "Sarthak" },
-      { "family": "Wallace", "given": "Byron C." }
+      {
+        "family": "Jain",
+        "given": "Sarthak"
+      },
+      {
+        "family": "Wallace",
+        "given": "Byron C."
+      }
     ],
     "title": "Attention is not Explanation",
     "year": 2019,
@@ -171,8 +299,14 @@
     "id": "wiegreffe2019",
     "type": "paper",
     "authors": [
-      { "family": "Wiegreffe", "given": "Sarah" },
-      { "family": "Pinter", "given": "Yuval" }
+      {
+        "family": "Wiegreffe",
+        "given": "Sarah"
+      },
+      {
+        "family": "Pinter",
+        "given": "Yuval"
+      }
     ],
     "title": "Attention is not not Explanation",
     "year": 2019,
@@ -186,8 +320,14 @@
     "id": "press2017",
     "type": "paper",
     "authors": [
-      { "family": "Press", "given": "Ofir" },
-      { "family": "Wolf", "given": "Lior" }
+      {
+        "family": "Press",
+        "given": "Ofir"
+      },
+      {
+        "family": "Wolf",
+        "given": "Lior"
+      }
     ],
     "title": "Using the Output Embedding to Improve Language Models",
     "year": 2017,
@@ -201,11 +341,26 @@
     "id": "holtzman2020",
     "type": "paper",
     "authors": [
-      { "family": "Holtzman", "given": "Ari" },
-      { "family": "Buys", "given": "Jan" },
-      { "family": "Du", "given": "Li" },
-      { "family": "Forbes", "given": "Maxwell" },
-      { "family": "Choi", "given": "Yejin" }
+      {
+        "family": "Holtzman",
+        "given": "Ari"
+      },
+      {
+        "family": "Buys",
+        "given": "Jan"
+      },
+      {
+        "family": "Du",
+        "given": "Li"
+      },
+      {
+        "family": "Forbes",
+        "given": "Maxwell"
+      },
+      {
+        "family": "Choi",
+        "given": "Yejin"
+      }
     ],
     "title": "The Curious Case of Neural Text Degeneration",
     "year": 2020,
@@ -214,5 +369,1025 @@
     "arxiv": "1904.09751v2",
     "note": "Introduced top-p (nucleus) sampling, and showed that always taking the likeliest token gives dull, repetitive text.",
     "topics": ["prediction"]
+  },
+  {
+    "id": "he2016",
+    "type": "paper",
+    "authors": [
+      {
+        "family": "He",
+        "given": "Kaiming"
+      },
+      {
+        "family": "Zhang",
+        "given": "Xiangyu"
+      },
+      {
+        "family": "Ren",
+        "given": "Shaoqing"
+      },
+      {
+        "family": "Sun",
+        "given": "Jian"
+      }
+    ],
+    "title": "Deep Residual Learning for Image Recognition",
+    "year": 2016,
+    "venue": "Proceedings of CVPR 2016",
+    "url": "https://arxiv.org/abs/1512.03385v1",
+    "arxiv": "1512.03385v1",
+    "note": "Residual connections. Each layer adds its result to what came in, which lets very deep networks train. Every transformer block uses them.",
+    "topics": ["architecture"]
+  },
+  {
+    "id": "ba2016",
+    "type": "paper",
+    "authors": [
+      {
+        "family": "Ba",
+        "given": "Jimmy Lei"
+      },
+      {
+        "family": "Kiros",
+        "given": "Jamie Ryan"
+      },
+      {
+        "family": "Hinton",
+        "given": "Geoffrey E."
+      }
+    ],
+    "title": "Layer Normalization",
+    "year": 2016,
+    "venue": "arXiv preprint",
+    "url": "https://arxiv.org/abs/1607.06450v1",
+    "arxiv": "1607.06450v1",
+    "note": "Layer normalization, which rescales each token's numbers to a steady range. Every transformer block uses it.",
+    "topics": ["architecture"]
+  },
+  {
+    "id": "hendrycks2016",
+    "type": "paper",
+    "authors": [
+      {
+        "family": "Hendrycks",
+        "given": "Dan"
+      },
+      {
+        "family": "Gimpel",
+        "given": "Kevin"
+      }
+    ],
+    "title": "Gaussian Error Linear Units (GELUs)",
+    "year": 2016,
+    "venue": "arXiv preprint",
+    "url": "https://arxiv.org/abs/1606.08415v5",
+    "arxiv": "1606.08415v5",
+    "note": "GELU, the smooth activation that GPT-2 and our model use in the feed-forward layer.",
+    "topics": ["architecture"]
+  },
+  {
+    "id": "xiong2020",
+    "type": "paper",
+    "authors": [
+      {
+        "family": "Xiong",
+        "given": "Ruibin"
+      },
+      {
+        "family": "Yang",
+        "given": "Yunchang"
+      },
+      {
+        "family": "He",
+        "given": "Di"
+      },
+      {
+        "family": "Zheng",
+        "given": "Kai"
+      },
+      {
+        "family": "Zheng",
+        "given": "Shuxin"
+      },
+      {
+        "family": "Xing",
+        "given": "Chen"
+      },
+      {
+        "family": "Zhang",
+        "given": "Huishuai"
+      },
+      {
+        "family": "Lan",
+        "given": "Yanyan"
+      },
+      {
+        "family": "Wang",
+        "given": "Liwei"
+      },
+      {
+        "family": "Liu",
+        "given": "Tie-Yan"
+      }
+    ],
+    "title": "On Layer Normalization in the Transformer Architecture",
+    "year": 2020,
+    "venue": "Proceedings of ICML 2020",
+    "url": "https://arxiv.org/abs/2002.04745v2",
+    "arxiv": "2002.04745v2",
+    "note": "Shows why putting the norm before each step, as GPT-2 does, trains more smoothly than the original order.",
+    "topics": ["architecture"]
+  },
+  {
+    "id": "brown2020",
+    "type": "paper",
+    "authors": [
+      {
+        "family": "Brown",
+        "given": "Tom B."
+      },
+      {
+        "family": "Mann",
+        "given": "Benjamin"
+      },
+      {
+        "family": "Ryder",
+        "given": "Nick"
+      },
+      {
+        "family": "Subbiah",
+        "given": "Melanie"
+      },
+      {
+        "family": "Kaplan",
+        "given": "Jared"
+      },
+      {
+        "family": "Dhariwal",
+        "given": "Prafulla"
+      },
+      {
+        "family": "Neelakantan",
+        "given": "Arvind"
+      },
+      {
+        "family": "Shyam",
+        "given": "Pranav"
+      },
+      {
+        "family": "Sastry",
+        "given": "Girish"
+      },
+      {
+        "family": "Askell",
+        "given": "Amanda"
+      },
+      {
+        "family": "Agarwal",
+        "given": "Sandhini"
+      },
+      {
+        "family": "Herbert-Voss",
+        "given": "Ariel"
+      },
+      {
+        "family": "Krueger",
+        "given": "Gretchen"
+      },
+      {
+        "family": "Henighan",
+        "given": "Tom"
+      },
+      {
+        "family": "Child",
+        "given": "Rewon"
+      },
+      {
+        "family": "Ramesh",
+        "given": "Aditya"
+      },
+      {
+        "family": "Ziegler",
+        "given": "Daniel M."
+      },
+      {
+        "family": "Wu",
+        "given": "Jeffrey"
+      },
+      {
+        "family": "Winter",
+        "given": "Clemens"
+      },
+      {
+        "family": "Hesse",
+        "given": "Christopher"
+      },
+      {
+        "family": "Chen",
+        "given": "Mark"
+      },
+      {
+        "family": "Sigler",
+        "given": "Eric"
+      },
+      {
+        "family": "Litwin",
+        "given": "Mateusz"
+      },
+      {
+        "family": "Gray",
+        "given": "Scott"
+      },
+      {
+        "family": "Chess",
+        "given": "Benjamin"
+      },
+      {
+        "family": "Clark",
+        "given": "Jack"
+      },
+      {
+        "family": "Berner",
+        "given": "Christopher"
+      },
+      {
+        "family": "McCandlish",
+        "given": "Sam"
+      },
+      {
+        "family": "Radford",
+        "given": "Alec"
+      },
+      {
+        "family": "Sutskever",
+        "given": "Ilya"
+      },
+      {
+        "family": "Amodei",
+        "given": "Dario"
+      }
+    ],
+    "title": "Language Models are Few-Shot Learners",
+    "year": 2020,
+    "venue": "Advances in Neural Information Processing Systems 33 (NeurIPS 2020)",
+    "url": "https://arxiv.org/abs/2005.14165v4",
+    "arxiv": "2005.14165v4",
+    "note": "GPT-3. The same design as GPT-2, grown to 175 billion parameters, and able to do new tasks from a few examples in the prompt.",
+    "topics": ["today"]
+  },
+  {
+    "id": "kaplan2020",
+    "type": "paper",
+    "authors": [
+      {
+        "family": "Kaplan",
+        "given": "Jared"
+      },
+      {
+        "family": "McCandlish",
+        "given": "Sam"
+      },
+      {
+        "family": "Henighan",
+        "given": "Tom"
+      },
+      {
+        "family": "Brown",
+        "given": "Tom B."
+      },
+      {
+        "family": "Chess",
+        "given": "Benjamin"
+      },
+      {
+        "family": "Child",
+        "given": "Rewon"
+      },
+      {
+        "family": "Gray",
+        "given": "Scott"
+      },
+      {
+        "family": "Radford",
+        "given": "Alec"
+      },
+      {
+        "family": "Wu",
+        "given": "Jeffrey"
+      },
+      {
+        "family": "Amodei",
+        "given": "Dario"
+      }
+    ],
+    "title": "Scaling Laws for Neural Language Models",
+    "year": 2020,
+    "venue": "arXiv preprint",
+    "url": "https://arxiv.org/abs/2001.08361v1",
+    "arxiv": "2001.08361v1",
+    "note": "Found that a language model's loss falls smoothly and predictably as the model, its data and its compute grow.",
+    "topics": ["today"]
+  },
+  {
+    "id": "hoffmann2022",
+    "type": "paper",
+    "authors": [
+      {
+        "family": "Hoffmann",
+        "given": "Jordan"
+      },
+      {
+        "family": "Borgeaud",
+        "given": "Sebastian"
+      },
+      {
+        "family": "Mensch",
+        "given": "Arthur"
+      },
+      {
+        "family": "Buchatskaya",
+        "given": "Elena"
+      },
+      {
+        "family": "Cai",
+        "given": "Trevor"
+      },
+      {
+        "family": "Rutherford",
+        "given": "Eliza"
+      },
+      {
+        "family": "de Las Casas",
+        "given": "Diego"
+      },
+      {
+        "family": "Hendricks",
+        "given": "Lisa Anne"
+      },
+      {
+        "family": "Welbl",
+        "given": "Johannes"
+      },
+      {
+        "family": "Clark",
+        "given": "Aidan"
+      },
+      {
+        "family": "Hennigan",
+        "given": "Tom"
+      },
+      {
+        "family": "Noland",
+        "given": "Eric"
+      },
+      {
+        "family": "Millican",
+        "given": "Katie"
+      },
+      {
+        "family": "van den Driessche",
+        "given": "George"
+      },
+      {
+        "family": "Damoc",
+        "given": "Bogdan"
+      },
+      {
+        "family": "Guy",
+        "given": "Aurelia"
+      },
+      {
+        "family": "Osindero",
+        "given": "Simon"
+      },
+      {
+        "family": "Simonyan",
+        "given": "Karen"
+      },
+      {
+        "family": "Elsen",
+        "given": "Erich"
+      },
+      {
+        "family": "Rae",
+        "given": "Jack W."
+      },
+      {
+        "family": "Vinyals",
+        "given": "Oriol"
+      },
+      {
+        "family": "Sifre",
+        "given": "Laurent"
+      }
+    ],
+    "title": "Training Compute-Optimal Large Language Models",
+    "year": 2022,
+    "venue": "Advances in Neural Information Processing Systems 35 (NeurIPS 2022)",
+    "url": "https://arxiv.org/abs/2203.15556v1",
+    "arxiv": "2203.15556v1",
+    "note": "Chinchilla. For a fixed budget, model size and training text should grow together, so many models had been too big for their data.",
+    "topics": ["today"]
+  },
+  {
+    "id": "ouyang2022",
+    "type": "paper",
+    "authors": [
+      {
+        "family": "Ouyang",
+        "given": "Long"
+      },
+      {
+        "family": "Wu",
+        "given": "Jeff"
+      },
+      {
+        "family": "Jiang",
+        "given": "Xu"
+      },
+      {
+        "family": "Almeida",
+        "given": "Diogo"
+      },
+      {
+        "family": "Wainwright",
+        "given": "Carroll L."
+      },
+      {
+        "family": "Mishkin",
+        "given": "Pamela"
+      },
+      {
+        "family": "Zhang",
+        "given": "Chong"
+      },
+      {
+        "family": "Agarwal",
+        "given": "Sandhini"
+      },
+      {
+        "family": "Slama",
+        "given": "Katarina"
+      },
+      {
+        "family": "Ray",
+        "given": "Alex"
+      },
+      {
+        "family": "Schulman",
+        "given": "John"
+      },
+      {
+        "family": "Hilton",
+        "given": "Jacob"
+      },
+      {
+        "family": "Kelton",
+        "given": "Fraser"
+      },
+      {
+        "family": "Miller",
+        "given": "Luke"
+      },
+      {
+        "family": "Simens",
+        "given": "Maddie"
+      },
+      {
+        "family": "Askell",
+        "given": "Amanda"
+      },
+      {
+        "family": "Welinder",
+        "given": "Peter"
+      },
+      {
+        "family": "Christiano",
+        "given": "Paul"
+      },
+      {
+        "family": "Leike",
+        "given": "Jan"
+      },
+      {
+        "family": "Lowe",
+        "given": "Ryan"
+      }
+    ],
+    "title": "Training language models to follow instructions with human feedback",
+    "year": 2022,
+    "venue": "Advances in Neural Information Processing Systems 35 (NeurIPS 2022)",
+    "url": "https://arxiv.org/abs/2203.02155v1",
+    "arxiv": "2203.02155v1",
+    "note": "InstructGPT. How a next-token predictor is tuned with human feedback to follow instructions, the recipe behind chat assistants.",
+    "topics": ["today"]
+  },
+  {
+    "id": "touvron2023",
+    "type": "paper",
+    "authors": [
+      {
+        "family": "Touvron",
+        "given": "Hugo"
+      },
+      {
+        "family": "Lavril",
+        "given": "Thibaut"
+      },
+      {
+        "family": "Izacard",
+        "given": "Gautier"
+      },
+      {
+        "family": "Martinet",
+        "given": "Xavier"
+      },
+      {
+        "family": "Lachaux",
+        "given": "Marie-Anne"
+      },
+      {
+        "family": "Lacroix",
+        "given": "Timothée"
+      },
+      {
+        "family": "Rozière",
+        "given": "Baptiste"
+      },
+      {
+        "family": "Goyal",
+        "given": "Naman"
+      },
+      {
+        "family": "Hambro",
+        "given": "Eric"
+      },
+      {
+        "family": "Azhar",
+        "given": "Faisal"
+      },
+      {
+        "family": "Rodriguez",
+        "given": "Aurelien"
+      },
+      {
+        "family": "Joulin",
+        "given": "Armand"
+      },
+      {
+        "family": "Grave",
+        "given": "Edouard"
+      },
+      {
+        "family": "Lample",
+        "given": "Guillaume"
+      }
+    ],
+    "title": "LLaMA: Open and Efficient Foundation Language Models",
+    "year": 2023,
+    "venue": "arXiv preprint",
+    "url": "https://arxiv.org/abs/2302.13971v1",
+    "arxiv": "2302.13971v1",
+    "note": "LLaMA. Open models whose recipe many others follow, with RMSNorm before each step, SwiGLU feed-forward layers and rotary positions.",
+    "topics": ["today"]
+  },
+  {
+    "id": "su2024",
+    "type": "paper",
+    "authors": [
+      {
+        "family": "Su",
+        "given": "Jianlin"
+      },
+      {
+        "family": "Lu",
+        "given": "Yu"
+      },
+      {
+        "family": "Pan",
+        "given": "Shengfeng"
+      },
+      {
+        "family": "Murtadha",
+        "given": "Ahmed"
+      },
+      {
+        "family": "Wen",
+        "given": "Bo"
+      },
+      {
+        "family": "Liu",
+        "given": "Yunfeng"
+      }
+    ],
+    "title": "RoFormer: Enhanced Transformer with Rotary Position Embedding",
+    "year": 2024,
+    "venue": "Neurocomputing 568, 127063",
+    "url": "https://arxiv.org/abs/2104.09864v5",
+    "arxiv": "2104.09864v5",
+    "note": "Rotary position embeddings. Each position turns the queries and keys by an angle, so attention sees how far apart two tokens are. Most models today use them.",
+    "topics": ["today", "attention"],
+    "doi": "10.1016/j.neucom.2023.127063"
+  },
+  {
+    "id": "dao2022",
+    "type": "paper",
+    "authors": [
+      {
+        "family": "Dao",
+        "given": "Tri"
+      },
+      {
+        "family": "Fu",
+        "given": "Daniel Y."
+      },
+      {
+        "family": "Ermon",
+        "given": "Stefano"
+      },
+      {
+        "family": "Rudra",
+        "given": "Atri"
+      },
+      {
+        "family": "Ré",
+        "given": "Christopher"
+      }
+    ],
+    "title": "FlashAttention: Fast and Memory-Efficient Exact Attention with IO-Awareness",
+    "year": 2022,
+    "venue": "Advances in Neural Information Processing Systems 35 (NeurIPS 2022)",
+    "url": "https://arxiv.org/abs/2205.14135v2",
+    "arxiv": "2205.14135v2",
+    "note": "FlashAttention. Computes exactly the same attention, much faster, by working in small tiles that fit in fast GPU memory.",
+    "topics": ["today", "attention"]
+  },
+  {
+    "id": "wei2022",
+    "type": "paper",
+    "authors": [
+      {
+        "family": "Wei",
+        "given": "Jason"
+      },
+      {
+        "family": "Wang",
+        "given": "Xuezhi"
+      },
+      {
+        "family": "Schuurmans",
+        "given": "Dale"
+      },
+      {
+        "family": "Bosma",
+        "given": "Maarten"
+      },
+      {
+        "family": "Ichter",
+        "given": "Brian"
+      },
+      {
+        "family": "Xia",
+        "given": "Fei"
+      },
+      {
+        "family": "Chi",
+        "given": "Ed"
+      },
+      {
+        "family": "Le",
+        "given": "Quoc"
+      },
+      {
+        "family": "Zhou",
+        "given": "Denny"
+      }
+    ],
+    "title": "Chain-of-Thought Prompting Elicits Reasoning in Large Language Models",
+    "year": 2022,
+    "venue": "Advances in Neural Information Processing Systems 35 (NeurIPS 2022)",
+    "url": "https://arxiv.org/abs/2201.11903v6",
+    "arxiv": "2201.11903v6",
+    "note": "Chain-of-thought prompting. Asking a model to write out its steps before the answer makes it better at problems with many steps.",
+    "topics": ["today"]
+  },
+  {
+    "id": "lewis2020",
+    "type": "paper",
+    "authors": [
+      {
+        "family": "Lewis",
+        "given": "Patrick"
+      },
+      {
+        "family": "Perez",
+        "given": "Ethan"
+      },
+      {
+        "family": "Piktus",
+        "given": "Aleksandra"
+      },
+      {
+        "family": "Petroni",
+        "given": "Fabio"
+      },
+      {
+        "family": "Karpukhin",
+        "given": "Vladimir"
+      },
+      {
+        "family": "Goyal",
+        "given": "Naman"
+      },
+      {
+        "family": "Küttler",
+        "given": "Heinrich"
+      },
+      {
+        "family": "Lewis",
+        "given": "Mike"
+      },
+      {
+        "family": "Yih",
+        "given": "Wen-tau"
+      },
+      {
+        "family": "Rocktäschel",
+        "given": "Tim"
+      },
+      {
+        "family": "Riedel",
+        "given": "Sebastian"
+      },
+      {
+        "family": "Kiela",
+        "given": "Douwe"
+      }
+    ],
+    "title": "Retrieval-Augmented Generation for Knowledge-Intensive NLP Tasks",
+    "year": 2020,
+    "venue": "Advances in Neural Information Processing Systems 33 (NeurIPS 2020)",
+    "url": "https://arxiv.org/abs/2005.11401v4",
+    "arxiv": "2005.11401v4",
+    "note": "Retrieval-augmented generation. The model looks up passages in a collection of documents and uses them to write its answer.",
+    "topics": ["today"]
+  },
+  {
+    "id": "geva2021",
+    "type": "paper",
+    "authors": [
+      {
+        "family": "Geva",
+        "given": "Mor"
+      },
+      {
+        "family": "Schuster",
+        "given": "Roei"
+      },
+      {
+        "family": "Berant",
+        "given": "Jonathan"
+      },
+      {
+        "family": "Levy",
+        "given": "Omer"
+      }
+    ],
+    "title": "Transformer Feed-Forward Layers Are Key-Value Memories",
+    "year": 2021,
+    "venue": "Proceedings of EMNLP 2021",
+    "url": "https://arxiv.org/abs/2012.14913v2",
+    "arxiv": "2012.14913v2",
+    "note": "Feed-forward layers act like memories. Neurons respond to patterns in the text and push up likely next tokens.",
+    "topics": ["interpretability"]
+  },
+  {
+    "id": "elhage2021",
+    "type": "article",
+    "authors": [
+      {
+        "family": "Elhage",
+        "given": "Nelson"
+      },
+      {
+        "family": "Nanda",
+        "given": "Neel"
+      },
+      {
+        "family": "Olsson",
+        "given": "Catherine"
+      },
+      {
+        "family": "Henighan",
+        "given": "Tom"
+      },
+      {
+        "family": "Joseph",
+        "given": "Nicholas"
+      },
+      {
+        "family": "Mann",
+        "given": "Ben"
+      },
+      {
+        "family": "Askell",
+        "given": "Amanda"
+      },
+      {
+        "family": "Bai",
+        "given": "Yuntao"
+      },
+      {
+        "family": "Chen",
+        "given": "Anna"
+      },
+      {
+        "family": "Conerly",
+        "given": "Tom"
+      },
+      {
+        "family": "DasSarma",
+        "given": "Nova"
+      },
+      {
+        "family": "Drain",
+        "given": "Dawn"
+      },
+      {
+        "family": "Ganguli",
+        "given": "Deep"
+      },
+      {
+        "family": "Hatfield-Dodds",
+        "given": "Zac"
+      },
+      {
+        "family": "Hernandez",
+        "given": "Danny"
+      },
+      {
+        "family": "Jones",
+        "given": "Andy"
+      },
+      {
+        "family": "Kernion",
+        "given": "Jackson"
+      },
+      {
+        "family": "Lovitt",
+        "given": "Liane"
+      },
+      {
+        "family": "Ndousse",
+        "given": "Kamal"
+      },
+      {
+        "family": "Amodei",
+        "given": "Dario"
+      },
+      {
+        "family": "Brown",
+        "given": "Tom"
+      },
+      {
+        "family": "Clark",
+        "given": "Jack"
+      },
+      {
+        "family": "Kaplan",
+        "given": "Jared"
+      },
+      {
+        "family": "McCandlish",
+        "given": "Sam"
+      },
+      {
+        "family": "Olah",
+        "given": "Chris"
+      }
+    ],
+    "title": "A Mathematical Framework for Transformer Circuits",
+    "year": 2021,
+    "venue": "Transformer Circuits Thread",
+    "url": "https://transformer-circuits.pub/2021/framework/index.html",
+    "note": "Reads a transformer as a residual stream that every layer reads from and writes to, and works out what small attention-only models compute.",
+    "topics": ["interpretability"]
+  },
+  {
+    "id": "olsson2022",
+    "type": "paper",
+    "authors": [
+      {
+        "family": "Olsson",
+        "given": "Catherine"
+      },
+      {
+        "family": "Elhage",
+        "given": "Nelson"
+      },
+      {
+        "family": "Nanda",
+        "given": "Neel"
+      },
+      {
+        "family": "Joseph",
+        "given": "Nicholas"
+      },
+      {
+        "family": "DasSarma",
+        "given": "Nova"
+      },
+      {
+        "family": "Henighan",
+        "given": "Tom"
+      },
+      {
+        "family": "Mann",
+        "given": "Ben"
+      },
+      {
+        "family": "Askell",
+        "given": "Amanda"
+      },
+      {
+        "family": "Bai",
+        "given": "Yuntao"
+      },
+      {
+        "family": "Chen",
+        "given": "Anna"
+      },
+      {
+        "family": "Conerly",
+        "given": "Tom"
+      },
+      {
+        "family": "Drain",
+        "given": "Dawn"
+      },
+      {
+        "family": "Ganguli",
+        "given": "Deep"
+      },
+      {
+        "family": "Hatfield-Dodds",
+        "given": "Zac"
+      },
+      {
+        "family": "Hernandez",
+        "given": "Danny"
+      },
+      {
+        "family": "Johnston",
+        "given": "Scott"
+      },
+      {
+        "family": "Jones",
+        "given": "Andy"
+      },
+      {
+        "family": "Kernion",
+        "given": "Jackson"
+      },
+      {
+        "family": "Lovitt",
+        "given": "Liane"
+      },
+      {
+        "family": "Ndousse",
+        "given": "Kamal"
+      },
+      {
+        "family": "Amodei",
+        "given": "Dario"
+      },
+      {
+        "family": "Brown",
+        "given": "Tom"
+      },
+      {
+        "family": "Clark",
+        "given": "Jack"
+      },
+      {
+        "family": "Kaplan",
+        "given": "Jared"
+      },
+      {
+        "family": "McCandlish",
+        "given": "Sam"
+      },
+      {
+        "family": "Olah",
+        "given": "Chris"
+      }
+    ],
+    "title": "In-context Learning and Induction Heads",
+    "year": 2022,
+    "venue": "Transformer Circuits Thread",
+    "url": "https://arxiv.org/abs/2209.11895v1",
+    "arxiv": "2209.11895v1",
+    "note": "Induction heads. Attention heads that find an earlier copy of the current token and predict what came after it, a likely source of learning from the prompt.",
+    "topics": ["interpretability"]
   }
 ]
