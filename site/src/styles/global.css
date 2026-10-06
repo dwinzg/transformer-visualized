@@ -310,3 +310,37 @@ textarea {
   background: var(--color-surface);
   white-space: pre;
 }
+
+/* Offered when a new version of the site is ready, see BaseLayout. */
+.update-note {
+  position: fixed;
+  right: var(--space-4);
+  bottom: var(--space-4);
+  left: var(--space-4);
+  z-index: 20;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  max-width: 28rem;
+  margin-left: auto;
+  padding: var(--space-3) var(--space-4);
+  border: 1px solid var(--color-separator);
+  border-radius: var(--radius-md);
+  background: var(--color-bg);
+  box-shadow: var(--shadow-card);
+}
+.update-note[hidden] {
+  display: none;
+}
+.update-note button {
+  min-height: var(--touch-target);
+  padding: 0 var(--space-4);
+  border: 1px solid var(--color-control-border);
+  border-radius: var(--radius-sm);
+  background: var(--color-surface);
+  color: var(--color-text);
+  font: inherit;
+  cursor: pointer;
+}
