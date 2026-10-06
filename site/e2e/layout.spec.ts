@@ -86,6 +86,17 @@ test.describe('navigation', () => {
   });
 });
 
+test('figures still appear if the script that reveals them never runs', async ({ page }) => {
+  await page.goto('learn/introduction/');
+  const figure = page.locator('figure[data-enter]').first();
+  // Undo what the script did, as if it had never loaded.
+  await figure.evaluate((el) => {
+    document.documentElement.removeAttribute('data-enter-ready');
+    el.classList.remove('is-visible');
+  });
+  await expect(figure).toHaveCSS('opacity', '1', { timeout: 5000 });
+});
+
 test.describe('the Learn menu', () => {
   test.use({ viewport: { width: 1100, height: 800 } });
 

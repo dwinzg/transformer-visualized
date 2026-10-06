@@ -158,3 +158,23 @@ test('the home page ships at most 80 KB of gzipped JavaScript', () => {
   // About 66 KB of this is the React runtime that every island page loads.
   expect(bytes).toBeLessThanOrEqual(80 * 1024);
 });
+
+test('autoplay holds while the demo is scrolled out of view', async ({ page }) => {
+  await page.setViewportSize({ width: 1000, height: 500 });
+  await page.goto('./');
+  const demo = page.locator('[data-home-demo]');
+  await demo.locator('.token-chip').first().waitFor();
+  await page.evaluate(() => window.scrollTo(0, document.body.scrollHeight));
+  const count = await demo.locator('.token-chip').count();
+  await page.waitForTimeout(4000);
+  await expect(demo.locator('.token-chip')).toHaveCount(count);
+});
+
+test('with reduced motion, every figure shows at once', async ({ page }) => {
+  await page.emulateMedia({ reducedMotion: 'reduce' });
+  await page.goto('learn/introduction/');
+  const figures = page.locator('figure[data-enter]');
+  const total = await figures.count();
+  expect(total).toBeGreaterThan(1);
+  await expect(page.locator('figure[data-enter].is-visible')).toHaveCount(total);
+});
