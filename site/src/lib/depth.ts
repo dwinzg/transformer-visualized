@@ -9,6 +9,14 @@ export const DEPTH_LABELS: Record<Depth, string> = {
   code: 'Code',
 };
 
+/** What each level adds, said where a reader picks one. */
+export const DEPTH_NOTES: Record<Depth, string> = {
+  story: 'Plain words and pictures. No math needed.',
+  numbers: 'Adds the real numbers from our model, worked out step by step.',
+  formula: 'Adds the math, with every symbol explained.',
+  code: 'Adds the code that runs each step, line by line.',
+};
+
 export const DEPTH_STORAGE_KEY = 'tv-depth';
 /** Fired on `document` with the new level as `detail` whenever the reader changes level. */
 export const DEPTH_EVENT = 'tv:depthchange';
