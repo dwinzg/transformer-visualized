@@ -1,5 +1,5 @@
 ---
-import { isPartId, mapPath, type PartId } from '../../lib/concepts';
+import { isPartId, mapPath, PARTS, type PartId } from '../../lib/concepts';
 import { withBase } from '../../lib/paths';
 import { stepId } from '../../lib/stepId';
 
@@ -15,12 +15,14 @@ interface Props {
 // its popovers.
 const { title, map } = Astro.props;
 const mapHref = map ? withBase(mapPath(isPartId(map) ? map : undefined)) : undefined;
+// A step about one part of the model wears that part's color, the same as on the map.
+const color = isPartId(map) ? PARTS[map].color : undefined;
 const taken = ((Astro.locals as { stepIds?: Set<string> }).stepIds ??= new Set());
 const id = stepId(title, taken);
 taken.add(id);
 ---
 
-<section class="step" id={id} data-step aria-labelledby={`${id}-title`}>
+<section class="step" id={id} data-step data-color={color} aria-labelledby={`${id}-title`}>
   <div class="step-head">
     <h2 id={`${id}-title`}>{title}</h2>
   </div>
@@ -130,7 +132,41 @@ taken.add(id);
     margin-bottom: var(--space-6);
   }
   .step-head h2 {
+    position: relative;
     margin: 0;
+  }
+  /* A thin bar in the part's color, beside the step's title. It only decorates, the title says it. */
+  .step[data-color] .step-head h2 {
+    padding-left: var(--space-4);
+  }
+  .step[data-color] .step-head h2::before {
+    content: '';
+    position: absolute;
+    top: 0.2em;
+    bottom: 0.2em;
+    left: 0;
+    width: 4px;
+    border-radius: 2px;
+    background: var(--step-color);
+  }
+  .step[data-color='neutral'] {
+    --step-color: var(--color-text-secondary);
+  }
+  .step[data-color='position'] {
+    --step-color: var(--concept-position);
+  }
+  .step[data-color='residual'] {
+    --step-color: var(--concept-residual);
+  }
+  .step[data-color='output'] {
+    --step-color: var(--concept-output);
+  }
+  .step[data-color='attention'] {
+    --step-color: linear-gradient(
+      var(--concept-query) 0 33%,
+      var(--concept-key) 33% 66%,
+      var(--concept-value) 66%
+    );
   }
   .map-link {
     margin: calc(-1 * var(--space-4)) 0 var(--space-4);

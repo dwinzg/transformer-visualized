@@ -2,6 +2,7 @@
 import Figure from '../components/Figure.astro';
 import HomeDemo from '../components/figures/HomeDemo.tsx';
 import BaseLayout from '../layouts/BaseLayout.astro';
+import { getCollection } from 'astro:content';
 import { guessTree } from '../lib/demo-data';
 import { withBase } from '../lib/paths';
 
@@ -10,6 +11,17 @@ const trees = [
   'The cat sat on the',
   'Lily wanted to play with her',
 ].map((prompt) => guessTree(prompt, { finish: true }));
+
+// Small chips for the chapters, each underlined in the color of the part it teaches.
+const CHAPTER_COLORS: Record<string, string> = {
+  tokens: 'var(--color-text-secondary)',
+  embeddings: 'var(--concept-position)',
+  attention: 'var(--concept-query)',
+  prediction: 'var(--concept-output)',
+};
+const chapters = (await getCollection('chapters', ({ data }) => !data.draft))
+  .filter((c) => c.id in CHAPTER_COLORS)
+  .sort((a, b) => a.data.order - b.data.order);
 ---
 
 <BaseLayout
@@ -33,7 +45,16 @@ const trees = [
   <section class="ways container" aria-label="Ways to start">
     <a class="way press" href={withBase('learn/')}>
       <span class="way-title">Learn from scratch</span>
-      <span class="way-text">No math needed. Start with a story and go deeper when you like.</span>
+      <span class="way-text">
+        No math needed. Start with a story and go deeper when you like.
+        <span class="way-chips" aria-hidden="true">
+          {chapters.map((c) => (
+            <span class="way-chip" style={`--chip-color: ${CHAPTER_COLORS[c.id]}`}>
+              {c.data.title}
+            </span>
+          ))}
+        </span>
+      </span>
     </a>
     <a class="way press" href={withBase('learn/architecture/')}>
       <span class="way-title">The whole model</span>
@@ -95,6 +116,22 @@ const trees = [
   }
   .way-text {
     color: var(--color-text-secondary);
+  }
+  .way-chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-2);
+    margin-top: var(--space-3);
+  }
+  /* The same chip as the site's mark, with the chapter's color underneath. */
+  .way-chip {
+    padding: var(--space-1) var(--space-2);
+    border: 1px solid var(--color-control-border);
+    border-radius: var(--radius-sm);
+    background: var(--color-surface);
+    box-shadow: inset 0 -3px 0 var(--chip-color);
+    color: var(--color-text);
+    font-size: var(--text-footnote);
   }
   @media (max-width: 52rem) {
     .hero {
