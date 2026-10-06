@@ -49,7 +49,37 @@ const fullTitle = title === 'Transformer Visualized' ? title : `${title} · Tran
     <slot name="head" />
     <script is:inline define:vars={{ sw: withBase('sw.js') }}>
       // Keeps the site for offline use. Only the built site has sw.js, so the dev server's 404 is ignored.
-      if ('serviceWorker' in navigator) navigator.serviceWorker.register(sw).catch(() => {});
+      // A new version waits until the reader says so, then the page reloads into it. Without the
+      // note, it would wait until every tab of the site was closed, which is easy to miss.
+      if ('serviceWorker' in navigator) {
+        let asked = false;
+        const offer = (worker) => {
+          const note = document.querySelector('[data-update-note]');
+          if (!note) return;
+          note.hidden = false;
+          note.querySelector('button').onclick = () => {
+            asked = true;
+            worker.postMessage({ type: 'SKIP_WAITING' });
+          };
+        };
+        navigator.serviceWorker.addEventListener('controllerchange', () => {
+          if (asked) location.reload();
+        });
+        navigator.serviceWorker
+          .register(sw)
+          .then((registration) => {
+            // Only offer an update when an older version controls this page.
+            if (!navigator.serviceWorker.controller) return;
+            if (registration.waiting) offer(registration.waiting);
+            registration.addEventListener('updatefound', () => {
+              const worker = registration.installing;
+              worker?.addEventListener('statechange', () => {
+                if (worker.state === 'installed') offer(worker);
+              });
+            });
+          })
+          .catch(() => {});
+      }
     </script>
   </head>
   <body>
@@ -61,6 +91,12 @@ const fullTitle = title === 'Transformer Visualized' ? title : `${title} · Tran
       <slot />
     </main>
     <SiteFooter />
+    <div class="update-note" data-update-note role="status" hidden>
+      <span>A new version of this site is ready.</span>
+      <button type="button" class="press">
+        Reload
+      </button>
+    </div>
   </body>
 </html>
 
