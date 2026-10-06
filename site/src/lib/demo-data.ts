@@ -14,7 +14,13 @@ import {
 import { cosine, dot, round, type EmbeddedToken, type NearestTokens } from './embeddings';
 import { attentionView, embeddingView, scoresView, type AttentionData } from './model-views';
 import type { NextScores } from './prediction';
-import type { DisplayToken, Guess, GuessTree } from './guess-tree';
+import {
+  MAX_NEW_TOKENS,
+  sentenceDone,
+  type DisplayToken,
+  type Guess,
+  type GuessTree,
+} from './guess-tree';
 
 /**
  * Build-time only. Runs the real tiny model in Node so pages can show its numbers without
@@ -104,13 +110,35 @@ function topGuesses(ids: readonly number[], depth: number): Guess[] {
 
 const cache = new Map<string, GuessTree>();
 
-export function guessTree(prompt: string): GuessTree {
-  const cached = cache.get(prompt);
+/**
+ * The model's top guesses, GUESS_DEPTH tokens deep. With finish, the path that always takes the
+ * first guess goes on until the sentence ends, so the home demo's autoplay completes a sentence
+ * without downloading the model.
+ */
+export function guessTree(prompt: string, { finish = false } = {}): GuessTree {
+  const key = `${finish}:${prompt}`;
+  const cached = cache.get(key);
   if (cached) return cached;
   assertSupported(prompt);
   const ids = getTokenizer().encode(normalizeText(prompt));
   const tree = { prompt, tokens: toDisplay(ids), guesses: topGuesses(ids, GUESS_DEPTH) };
-  cache.set(prompt, tree);
+  if (finish) {
+    const chosen = [...ids];
+    const tokens = toDisplay(ids);
+    let level = tree.guesses;
+    for (let n = 0; n < MAX_NEW_TOKENS && level.length > 0; n++) {
+      const first = level[0];
+      chosen.push(first.token.id);
+      tokens.push(first.token);
+      if (sentenceDone(tokens)) {
+        first.next = [];
+        break;
+      }
+      if (first.next.length === 0) first.next = topGuesses(chosen, 1);
+      level = first.next;
+    }
+  }
+  cache.set(key, tree);
   return tree;
 }
 

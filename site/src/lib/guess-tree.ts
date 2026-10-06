@@ -42,6 +42,24 @@ export function chosenTokens(tree: GuessTree, path: readonly number[]): DisplayT
   return tokens;
 }
 
+/** The most tokens the home demo adds before it stops, in case a sentence never ends. */
+export const MAX_NEW_TOKENS = 30;
+
+/** True once the last token ends a sentence, or the story is over. */
+export function sentenceDone(tokens: readonly DisplayToken[]): boolean {
+  const last = tokens.at(-1);
+  return !!last && (last.special === true || /[.!?]["']?$/.test(last.text.trim()));
+}
+
+/** A copy of the tree with new guesses after a path of choices. The tree itself is unchanged. */
+export function graft(tree: GuessTree, path: readonly number[], guesses: Guess[]): GuessTree {
+  const along = (level: Guess[], rest: readonly number[]): Guess[] => {
+    if (rest.length === 0) return guesses;
+    return level.map((g, i) => (i === rest[0] ? { ...g, next: along(g.next, rest.slice(1)) } : g));
+  };
+  return { ...tree, guesses: along(tree.guesses, path) };
+}
+
 export function percent(p: number): string {
   return p < 0.005 ? '<1%' : `${Math.round(p * 100)}%`;
 }

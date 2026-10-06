@@ -9,7 +9,7 @@ const trees = [
   'Once upon a time, there was a',
   'The cat sat on the',
   'Lily wanted to play with her',
-].map(guessTree);
+].map((prompt) => guessTree(prompt, { finish: true }));
 ---
 
 <BaseLayout
