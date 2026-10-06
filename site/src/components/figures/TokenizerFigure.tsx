@@ -6,7 +6,7 @@ import {
 } from '@transformer-visualized/engine';
 import { loadTokenizer, toTokens } from '../../lib/model-loader';
 import type { DisplayToken } from '../../lib/guess-tree';
-import { shownToken, spokenToken } from '../../lib/token-text';
+import { TokenList } from './TokenRow';
 import './figures.css';
 
 const MAX_LENGTH = 200;
@@ -105,24 +105,7 @@ export default function TokenizerFigure({
       <p className="visually-hidden" aria-live="polite">
         {announcement}
       </p>
-      {tokens && tokens.length > 0 && (
-        <ol className="token-row tokenizer-tokens" aria-label="Tokens">
-          {tokens.map((token, i) => (
-            <li
-              key={`${i}-${token.id}`}
-              className={`token-chip${token.special ? ' is-special' : ''}`}
-            >
-              <span className="visually-hidden">{`${spokenToken(token)}, id ${token.id}`}</span>
-              <span className="token-text" aria-hidden="true">
-                {shownToken(token)}
-              </span>
-              <span className="token-id" aria-hidden="true">
-                {token.id}
-              </span>
-            </li>
-          ))}
-        </ol>
-      )}
+      {tokens && tokens.length > 0 && <TokenList tokens={tokens} />}
       <div id={noteId} className="tokenizer-notes">
         <p>A dot marks a space. The small number is the token id.</p>
         {cleaned && (

@@ -8,12 +8,12 @@ import {
   type WorkerMessage,
 } from '../../lib/playground-run';
 import AttentionInspector from './AttentionInspector';
-import { shownToken, spokenToken } from '../../lib/token-text';
 import AttentionGridFigure from './AttentionGridFigure';
 import FeedForwardFigure from './FeedForwardFigure';
 import NumberStripFigure from './NumberStripFigure';
 import ResidualFigure from './ResidualFigure';
 import SamplingFigure from './SamplingFigure';
+import { TokenList } from './TokenRow';
 import './figures.css';
 
 const START = 'Lily wanted to play with her';
@@ -206,22 +206,7 @@ export default function Playground() {
         <p className="playground-status">Type something to see what the model does with it.</p>
       ) : (
         <>
-          <ol className="token-row tokenizer-tokens" aria-label="Tokens">
-            {run.tokens.map((token, i) => (
-              <li
-                key={`${i}-${token.id}`}
-                className={`token-chip${token.special ? ' is-special' : ''}`}
-              >
-                <span className="visually-hidden">{`${spokenToken(token)}, id ${token.id}`}</span>
-                <span className="token-text" aria-hidden="true">
-                  {shownToken(token)}
-                </span>
-                <span className="token-id" aria-hidden="true">
-                  {token.id}
-                </span>
-              </li>
-            ))}
-          </ol>
+          <TokenList tokens={run.tokens} />
           <p className="tokenizer-count">
             {run.tokens.length} {run.tokens.length === 1 ? 'token' : 'tokens'}.
             {run.cut > 0 &&
