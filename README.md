@@ -2,9 +2,7 @@
 
 A friendly, visual guide to how language models like GPT work.
 
-You type a sentence and follow it through a real transformer, one step at a time, until it guesses the next word. Every number on screen comes from a real model, and you can always see the math behind it.
-
-![The home page, where a real model guesses the next word of a sentence](docs/images/home-desktop-light.png)
+You follow a sentence through a real transformer, one step at a time, until it guesses the next word. Every number on screen comes from a real model, and you can always see the math behind it.
 
 ## Who it's for
 
@@ -16,77 +14,63 @@ This is a learning resource. It is the guide we wish we had when we were first l
 
 ## How to use it
 
-**1. Watch it guess.** The home page shows a real model guessing the next word. Tap any guess to pick it yourself, and the model guesses again from there.
+### Watch it guess
 
-<img src="docs/images/use-1-pick.png" alt="The home demo after picking 'big'. New guesses appear below the sentence." width="480">
+The home page shows a real model writing a sentence, one guess at a time. Tap any guess to pick it yourself. The model keeps going until the sentence ends.
 
-**2. Pick how deep to go.** Each chapter starts as a story. Switch to Numbers, Formula or Code at any time.
+<img src="docs/images/use-1-pick.png" alt="The home demo after finishing the sentence 'Once upon a time, there was a little boy named Tim.'" width="480">
+
+### Learn from scratch
+
+Five short chapters follow one sentence through the model. Each step starts as a story. Switch to Numbers, Formula or Code at any time.
 
 <img src="docs/images/use-2-depth.png" alt="A chapter with the Story, Numbers, Formula and Code switch" width="600">
 
-**3. Play with the figures.** Every step has something to touch. Pick a guess and see the exact chances.
+Every step has a figure to touch. Pick a guess and see the exact chances, or add one guess at a time and watch a sentence grow.
 
 <img src="docs/images/use-3-next-word.png" alt="A figure showing the top five next guesses with exact percentages" width="600">
 
-**4. See a sentence grow.** Add one guess at a time. A long answer is just many single guesses.
-
 <img src="docs/images/use-4-loop.png" alt="A sentence that grew by three guesses, with a count of guesses made" width="600">
 
-**5. Look inside.** Tap each part of the model to see what it does.
+### See the whole model
 
-<img src="docs/images/use-5-pipeline.png" alt="The model's stages from tokens to output, with Block 1 explained" width="600">
-
-**6. Try your own text.** The playground runs the model on anything you type. Sample the next token and add it to your text.
-
-<img src="docs/images/use-6-playground.png" alt="The playground with a typed sentence, its tokens, and the next token chances with top-k on" width="480">
-
-**7. See what each token looks at.** Pick a layer and a head to see the attention weights.
-
-<img src="docs/images/use-7-attention.png" alt="An attention grid where 'her' looks most at 'Lily'" width="600">
-
-**8. Review it all on one page.** The quick review has the shapes, formula and code for every part.
-
-<img src="docs/images/use-8-review.png" alt="The quick review page with the model's sizes and the first card" width="600">
-
-**9. Read about each part.** The map from the paper links every box to a short article with its sizes, formula and a few lines of PyTorch. The code runs on our real model and prints the same numbers you see on the page.
+The diagram from the paper, Figure 1 of "Attention Is All You Need", redrawn so you can tap every box. Each part has a short article with its sizes, the formula and a few lines of PyTorch. The code runs on our real model and prints the same numbers you see on the page.
 
 <img src="docs/images/use-9-article.png" alt="The article for masked attention, with sizes, the formula, PyTorch code and what it prints" width="600">
 
+### Review it all on one page
+
+The quick review has the shapes, formula and code for every part, in the order a sentence passes through them.
+
+<img src="docs/images/use-8-review.png" alt="The quick review page with the model's sizes and the first card" width="600">
+
+### Try your own text
+
+The playground runs the model on anything you type. Look at each stage, sample the next token and add it to your text. Copy link shares what you typed.
+
+<img src="docs/images/use-6-playground.png" alt="The playground with a typed sentence, its tokens, and the next token chances with top-k on" width="480">
+
+Pick a layer and a head to see what each token looks at, and the scores behind those weights.
+
+<img src="docs/images/use-7-attention.png" alt="An attention grid where 'her' looks most at 'Lily'" width="600">
+
+### Find your way
+
+Every page is one step away. The Learn menu in the header lists the chapters, the whole model and the quick review. On a phone, it all sits behind one Menu button.
+
+<img src="docs/images/use-10-menu.png" alt="The Learn menu open in the header, listing the chapters, the whole model and the quick review" width="480">
+
 Every figure has a Start over button, and everything works with a keyboard and a screen reader.
 
-## What you can do
+## What's inside
 
-- **Pick your depth.** Every step can be read four ways, as a story, as worked numbers, as the formula or as code. Switch at any time.
-- **Look inside a real model.** A tiny GPT-2 style model, trained on short children's stories, runs right in your browser. You can inspect every number it produces.
-- **Start small.** A toy example is small enough to work out by hand before you meet the real thing.
-- **Check the sources.** The references page lists every paper with a pinned link, and simplifications are labeled as ours.
-- **Use it anywhere.** It runs in the browser with no account, no server and no tracking. Install it and it works offline too.
+- **Five chapters.** What a language model does, tokens, embeddings and position, attention, and prediction.
+- **A tiny real model.** A GPT-2 style model, trained on short children's stories, runs right in your browser. You can inspect every number it produces.
+- **Toy examples.** Small enough to work out by hand before you meet the real thing.
+- **Sources you can check.** The references page lists every paper with a pinned link, and points to what to read next about today's models. Simplifications are labeled as ours.
+- **Works anywhere.** It runs in the browser with no account, no server and no tracking. Install it and it works offline too.
 
-## What's ready and what's next
-
-**Ready now**
-
-- Five chapters, from what a language model does to how it picks the next word. They cover tokens, embeddings and position, attention, and prediction.
-- A map of the whole model, with a short article for each part. Each article has sizes, the formula and PyTorch code you can run.
-- The playground, where you type your own text and look inside the model.
-- A quick review page with every formula in one place.
-- The glossary and the references page.
-- Light and dark mode, phone and desktop layouts, and offline use.
-- The tiny trained model and the engine that runs it.
-
-**Later**
-
-- A chapter on the full transformer block.
-- How training works.
-- A bigger GPT-2 sized model.
-
-## Screenshots
-
-![A chapter page in the Story view](docs/images/chapter-story-desktop-light.png)
-
-![The same chapter in dark mode, switched to the Formula view](docs/images/chapter-formula-desktop-dark.png)
-
-<img src="docs/images/chapter-story-phone-light.png" alt="A chapter page on a phone" width="300">
+Coming later: a chapter on the full transformer block, how training works, and a bigger GPT-2 sized model.
 
 ## How to run
 
