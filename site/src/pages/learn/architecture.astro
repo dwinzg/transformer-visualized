@@ -63,11 +63,11 @@ const outline = [
 ---
 
 <BaseLayout
-  title="The transformer at a glance"
+  title="The whole model"
   description="A clickable map of the transformer, from the input text to the next-token guess."
 >
   <section class="prose page">
-    <h1>The transformer at a glance</h1>
+    <h1>The whole model</h1>
     <p class="lede">
       Tap any part to see what it does, then read more about it below the map. Or press Next for a
       guided tour.
@@ -90,10 +90,11 @@ const outline = [
       GPT-2 keeps only the right-hand side, because it continues text instead of translating it.
     </p>
     <div id="part-article" class="part-article">
-      <p>The text version below describes every part.</p>
+      <p>The list below describes every part.</p>
     </div>
     <details class="outline">
-      <summary>Text version</summary>
+      <summary>Every part as a list</summary>
+      <p>The same parts as the map, in order, for reading without it.</p>
       <ol>
         {outline.map((part) => (
           <li>

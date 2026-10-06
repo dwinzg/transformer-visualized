@@ -1,5 +1,11 @@
 ---
-import { DEPTH_LABELS, DEPTHS } from '../lib/depth';
+import { DEPTH_LABELS, DEPTH_NOTES, DEPTHS } from '../lib/depth';
+
+interface Props {
+  /** Say under the dial what each level adds, for pages where picking one changes nothing else. */
+  explain?: boolean;
+}
+const { explain = false } = Astro.props;
 ---
 
 <fieldset class="depth-dial" data-depth-dial hidden>
@@ -12,6 +18,11 @@ import { DEPTH_LABELS, DEPTHS } from '../lib/depth';
       </label>
     ))}
   </div>
+  {explain && (
+    <p class="depth-note" data-depth-note aria-live="polite">
+      {DEPTH_NOTES.story}
+    </p>
+  )}
 </fieldset>
 
 <script>
@@ -19,6 +30,7 @@ import { DEPTH_LABELS, DEPTHS } from '../lib/depth';
     browserStorage,
     chooseDepth,
     DEPTH_EVENT,
+    DEPTH_NOTES,
     isDepth,
     readStoredDepth,
     type Depth,
@@ -27,13 +39,31 @@ import { DEPTH_LABELS, DEPTHS } from '../lib/depth';
   for (const dial of document.querySelectorAll<HTMLElement>('[data-depth-dial]')) {
     dial.hidden = false;
     const inputs = Array.from(dial.querySelectorAll<HTMLInputElement>('input[name="depth"]'));
+    const note = dial.querySelector<HTMLElement>('[data-depth-note]');
+    const show = (depth: Depth) => {
+      if (note) note.textContent = DEPTH_NOTES[depth];
+    };
+    const picked = () => inputs.find((input) => input.checked)?.value;
     const select = (depth: Depth) => {
       for (const input of inputs) input.checked = input.value === depth;
+      show(depth);
     };
+    // Pointing at a level previews what it adds. Moving away shows the picked one again.
+    for (const input of inputs) {
+      const label = input.closest('label')!;
+      label.addEventListener('mouseenter', () => isDepth(input.value) && show(input.value));
+      label.addEventListener('mouseleave', () => {
+        const depth = picked();
+        if (isDepth(depth)) show(depth);
+      });
+    }
     select(readStoredDepth(browserStorage()));
     for (const input of inputs) {
       input.addEventListener('change', () => {
-        if (isDepth(input.value)) chooseDepth(input.value);
+        if (isDepth(input.value)) {
+          chooseDepth(input.value);
+          show(input.value);
+        }
       });
     }
     document.addEventListener(DEPTH_EVENT, (event) => {
@@ -82,6 +112,11 @@ import { DEPTH_LABELS, DEPTHS } from '../lib/depth';
   }
   /* The selected segment's fill, border and shadow come from global.css's shared rule for the
      dial. The level tabs look different on purpose, see global.css for why. */
+  .depth-note {
+    margin: var(--space-2) 0 0;
+    color: var(--color-text-secondary);
+    font-size: var(--text-subheadline);
+  }
   input:focus-visible + span {
     outline: var(--focus-width) solid var(--color-focus);
     outline-offset: var(--focus-offset);
