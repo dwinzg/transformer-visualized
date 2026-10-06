@@ -28,17 +28,17 @@ export default function NearestTokensFigure({ words }: { words: NearestTokens[] 
         </button>
       </div>
       <p className="nearest-title" aria-live="polite">
-        Closest to <strong aria-hidden="true">{shownToken(word.text)}</strong>
+        Closest to <strong aria-hidden="true">{shownToken(word)}</strong>
         <span className="visually-hidden">
-          {`${spokenToken(word.text)}. ${neighbors.map((n) => `${spokenToken(n.token.text)} ${n.score.toFixed(2)}`).join(', ')}`}
+          {`${spokenToken(word)}. ${neighbors.map((n) => `${spokenToken(n.token)} ${n.score.toFixed(2)}`).join(', ')}`}
         </span>
       </p>
-      <ol className="nearest-list" aria-label={`Tokens closest to ${spokenToken(word.text)}`}>
+      <ol className="nearest-list" aria-label={`Tokens closest to ${spokenToken(word)}`}>
         {neighbors.map((n) => (
           <li key={n.token.id} className="nearest-row">
             <span className="token-chip">
-              <span aria-hidden="true">{shownToken(n.token.text)}</span>
-              <span className="visually-hidden">{spokenToken(n.token.text)}</span>
+              <span aria-hidden="true">{shownToken(n.token)}</span>
+              <span className="visually-hidden">{spokenToken(n.token)}</span>
             </span>
             <span className="nearest-bar" aria-hidden="true">
               <span style={{ width: `${Math.max(n.score, 0) * 100}%` }} />

@@ -47,8 +47,8 @@ export default function FeedForwardFigure({
       </fieldset>
       <ChipPicker label="Pick a token" tokens={tokens} selected={row} onSelect={setRow} />
       <p className="ffn-summary" aria-live="polite">
-        In layer {layer + 1}, <span aria-hidden="true">{shownToken(tokens[row].text)}</span>
-        <span className="visually-hidden">{spokenToken(tokens[row].text)}</span> turns on {on} of{' '}
+        In layer {layer + 1}, <span aria-hidden="true">{shownToken(tokens[row])}</span>
+        <span className="visually-hidden">{spokenToken(tokens[row])}</span> turns on {on} of{' '}
         {values.length} neurons. A neuron is on when its number is above zero. The strongest are
         below.
       </p>

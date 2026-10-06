@@ -27,9 +27,8 @@ const pct = (p: number) => (p > 0 && p < 0.001 ? '<0.1%' : `${(p * 100).toFixed(
 const OTHER = 'a rarer token';
 
 type Token = NextScores['top'][number]['token'];
-/** Special tokens like "[end of story]" are shown as they are, not with space marks. */
-const show = (t: Token) => (t.special ? t.text : shownToken(t.text));
-const speak = (t: Token) => (t.special ? t.text.slice(1, -1) : spokenToken(t.text));
+const show = shownToken;
+const speak = spokenToken;
 
 /** Byte pieces and the end-of-story marker have no plain text to add back to a sentence. */
 const addable = (t: Token) => !t.special && !t.text.startsWith('<0x');
