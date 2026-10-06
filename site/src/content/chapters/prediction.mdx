@@ -106,11 +106,7 @@ const next = sample(probs, createRng(1)); // one token id, picked at random
 
 <Step title="Turning the temperature up or down">
 
-<Sampling
-  text="Lily wanted to play with her"
-  temperature={0.5}
-  caption="Try 0.1, then 2."
-/>
+<Sampling text="Lily wanted to play with her" temperature={0.5} caption="Try 0.1, then 2." />
 
 <Level of="story">
 
@@ -163,9 +159,13 @@ Dividing by 0.5 gives 4 and 0. e to the power of 4 is 54.6, and e to the power o
 
 <Level of="story">
 
-<Term id="greedy">Greedy</Term> decoding skips the draw and always takes the top guess. It gives the same text every time, which often ends up dull and repeats itself (<Ref id="holtzman2020" />).
+<Term id="greedy">Greedy</Term> decoding skips the draw and always takes the top guess. It gives the
+same text every time, which often ends up dull and repeats itself (<Ref id="holtzman2020" />
+).
 
-<Term id="top-k">Top-k</Term> picks only from the k likeliest tokens. <Term id="top-p">Top-p</Term> picks from the fewest likeliest tokens whose chances add up to p. Both stop very rare words from sneaking in.
+<Term id="top-k">Top-k</Term> picks only from the k likeliest tokens. <Term id="top-p">Top-p</Term>
+picks from the fewest likeliest tokens whose chances add up to p. Both stop very rare words from
+sneaking in.
 
 </Level>
 
@@ -181,7 +181,10 @@ With top-p and p = 0.9, the number kept depends on how sure the model is. At tem
 
 Top-p keeps the smallest set <Tex tex="V_p" /> of likeliest tokens with <Tex tex="\sum_{t \in V_p} P(t) \ge p" />, then rescales.
 
-<Tex display tex="P'(t) = \frac{P(t)}{\sum_{s \in V_p} P(s)} \text{ for } t \in V_p, \text{ and } 0 \text{ otherwise}" />
+<Tex
+  display
+  tex="P'(t) = \frac{P(t)}{\sum_{s \in V_p} P(s)} \text{ for } t \in V_p, \text{ and } 0 \text{ otherwise}"
+/>
 
 </Level>
 

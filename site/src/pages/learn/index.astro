@@ -19,11 +19,11 @@ const chapters = (await getCollection('chapters', ({ data }) => !data.draft)).so
       Each chapter follows the same sentence through one part of the model. Pick how you want things
       explained. You can change it at any step.
     </p>
-    <DepthDial />
+    <DepthDial explain />
     <a class="map-row press" href={withBase('learn/architecture/')}>
-      <span class="title">The transformer at a glance</span>
+      <span class="title">The whole model</span>
       <span class="summary">
-        A clickable map of the whole model, with sizes, formulas and PyTorch for every part.
+        A clickable map of every part, with sizes, formulas and PyTorch code.
       </span>
     </a>
     <ol class="chapters">
