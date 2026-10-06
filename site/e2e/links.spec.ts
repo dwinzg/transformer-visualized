@@ -37,6 +37,6 @@ test('a glossary term opens the map at its part', async ({ page }) => {
 
 test('the learn page links to the map', async ({ page }) => {
   await page.goto('learn/');
-  await page.getByRole('link', { name: /The transformer at a glance/ }).click();
+  await page.getByRole('link', { name: /The whole model/ }).click();
   await expectMapAt(page, null);
 });

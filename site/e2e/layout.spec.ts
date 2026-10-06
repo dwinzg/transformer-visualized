@@ -5,19 +5,20 @@ test.describe('home page', () => {
   test('offers ways to start', async ({ page }) => {
     await page.goto('./');
     await expect(page.getByRole('heading', { level: 1 })).toHaveText('See inside a language model');
-    await expect(page.getByRole('link', { name: /Learn from scratch/ })).toHaveAttribute(
+    const ways = page.getByRole('region', { name: 'Ways to start' });
+    await expect(ways.getByRole('link', { name: /Learn from scratch/ })).toHaveAttribute(
       'href',
       '/transformer-visualized/learn/',
     );
-    await expect(page.getByRole('link', { name: /The whole model/ })).toHaveAttribute(
+    await expect(ways.getByRole('link', { name: /The whole model/ })).toHaveAttribute(
       'href',
       '/transformer-visualized/learn/architecture/',
     );
-    await expect(page.getByRole('link', { name: /Quick review/ })).toHaveAttribute(
+    await expect(ways.getByRole('link', { name: /Quick review/ })).toHaveAttribute(
       'href',
       '/transformer-visualized/review/',
     );
-    await expect(page.getByRole('link', { name: /Playground/ })).toHaveAttribute(
+    await expect(ways.getByRole('link', { name: /Playground/ })).toHaveAttribute(
       'href',
       '/transformer-visualized/playground/',
     );
@@ -85,8 +86,73 @@ test.describe('navigation', () => {
   });
 });
 
+test.describe('the Learn menu', () => {
+  test.use({ viewport: { width: 1100, height: 800 } });
+
+  test('opens from its button, lists every way to learn, and closes with Escape', async ({
+    page,
+  }) => {
+    await page.goto('./');
+    const button = page.getByRole('button', { name: 'More in Learn' });
+    await expect(button).toHaveAttribute('aria-expanded', 'false');
+    await button.click();
+    await expect(button).toHaveAttribute('aria-expanded', 'true');
+    const menu = page.locator('#learn-menu');
+    for (const name of ['All chapters', '1. Tokens', 'The whole model', 'Quick review']) {
+      await expect(menu.getByRole('link', { name })).toBeVisible();
+    }
+    await page.keyboard.press('Escape');
+    await expect(menu).toBeHidden();
+    await expect(button).toBeFocused();
+  });
+
+  test('opens on hover with a mouse, and its links go to the page', async ({ page, isMobile }) => {
+    test.skip(isMobile, 'A touch screen has no hover. The button opens the menu there.');
+    await page.goto('./');
+    await page.getByRole('link', { name: 'Learn', exact: true }).hover();
+    const menu = page.locator('#learn-menu');
+    await menu.getByRole('link', { name: '3. Attention' }).click();
+    await expect(page).toHaveURL(/learn\/attention\/$/);
+    await expect(menu).toBeHidden();
+  });
+
+  test('closes when a click lands outside it', async ({ page }) => {
+    await page.goto('./');
+    await page.getByRole('button', { name: 'More in Learn' }).click();
+    await page.locator('h1').click();
+    await expect(page.locator('#learn-menu')).toBeHidden();
+  });
+
+  test('without JavaScript, Learn is a plain link and no menu buttons show', async ({
+    browser,
+  }) => {
+    const context = await browser.newContext({ javaScriptEnabled: false });
+    const page = await context.newPage();
+    await page.goto('./');
+    await expect(page.getByRole('button', { name: 'More in Learn' })).toBeHidden();
+    await expect(page.locator('#learn-menu')).toBeHidden();
+    await page.getByRole('link', { name: 'Learn', exact: true }).click();
+    await expect(page).toHaveURL(/learn\/$/);
+    await context.close();
+  });
+});
+
 test.describe('on a phone', () => {
   test.use({ viewport: { width: 390, height: 844 } });
+
+  test('one Menu button opens every link, and Escape closes it', async ({ page }) => {
+    await page.goto('./');
+    const menu = page.getByRole('button', { name: 'Menu' });
+    await expect(page.getByRole('link', { name: 'Glossary' })).toBeHidden();
+    await menu.click();
+    for (const name of ['Learn', '2. Embeddings and position', 'The whole model', 'Playground']) {
+      await expect(page.getByRole('link', { name, exact: true })).toBeVisible();
+    }
+    await expectNoA11yViolations(page);
+    await page.keyboard.press('Escape');
+    await expect(page.getByRole('link', { name: 'Glossary' })).toBeHidden();
+    await expect(menu).toBeFocused();
+  });
 
   test('the header fits on one row and still links home by name', async ({ page }) => {
     await page.goto('learn/');

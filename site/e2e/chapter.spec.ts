@@ -20,6 +20,18 @@ test('the learn page lists the introduction', async ({ page }) => {
   await expectNoA11yViolations(page);
 });
 
+test('the learn page says what each level adds, and previews it on hover', async ({ page }) => {
+  await page.goto('learn/');
+  const note = page.locator('[data-depth-note]');
+  await expect(note).toHaveText('Plain words and pictures. No math needed.');
+  await page.getByRole('radio', { name: 'Formula' }).check();
+  await expect(note).toHaveText('Adds the math, with every symbol explained.');
+  await page.locator('[data-depth-dial] label', { hasText: 'Code' }).hover();
+  await expect(note).toContainText('code that runs each step');
+  await page.locator('h1').hover();
+  await expect(note).toHaveText('Adds the math, with every symbol explained.');
+});
+
 test('each step starts at the story level with tabs for the others', async ({ page }) => {
   await page.goto(CHAPTER);
   const step = page.locator('#step-it-guesses-the-next-piece-of-text');
