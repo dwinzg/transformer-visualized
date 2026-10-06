@@ -1,6 +1,14 @@
 import { useId, useRef, useState } from 'react';
 import type { DisplayToken } from '../../lib/guess-tree';
-import { chances, draw, TOP_K, TOP_P, type Keep, type NextScores } from '../../lib/prediction';
+import {
+  chances,
+  draw,
+  explainChance,
+  TOP_K,
+  TOP_P,
+  type Keep,
+  type NextScores,
+} from '../../lib/prediction';
 import { shownToken, spokenToken } from '../../lib/token-text';
 import './figures.css';
 
@@ -26,27 +34,94 @@ const speak = (t: Token) => (t.special ? t.text.slice(1, -1) : spokenToken(t.tex
 /** Byte pieces and the end-of-story marker have no plain text to add back to a sentence. */
 const addable = (t: Token) => !t.special && !t.text.startsWith('<0x');
 
+const f3 = (v: number) => v.toFixed(3);
+
+/** The softmax behind one token's chance, step by step. */
+function ChanceInspector({
+  math,
+  token,
+  keep,
+  shown,
+  onClose,
+}: {
+  math: ReturnType<typeof explainChance>;
+  token: Token;
+  keep: Keep;
+  /** The chance the bars show, after the keep rule. */
+  shown: number;
+  onClose: () => void;
+}) {
+  const Name = () => (
+    <>
+      <span aria-hidden="true">{show(token)}</span>
+      <span className="visually-hidden">{speak(token)}</span>
+    </>
+  );
+  return (
+    <section className="inspector" aria-label="How this chance is worked out">
+      <div className="inspector-head">
+        <p className="inspector-title">
+          How <Name /> gets {pct(math.chance)}
+        </p>
+        <button type="button" className="figure-button press" onClick={onClose}>
+          Close
+        </button>
+      </div>
+      <ol className="inspector-steps">
+        <li>
+          The model&apos;s score for <Name /> is <strong>{f3(math.logit)}</strong>.
+        </li>
+        <li>
+          Divide by the temperature, {math.temperature.toFixed(1)}. That gives {f3(math.scaled)}.
+        </li>
+        <li>
+          Take away the largest score after dividing, {f3(math.max)}, so the biggest becomes 0. That
+          gives {f3(math.scaled - math.max)}.
+        </li>
+        <li>
+          Raise e to that power. That gives <strong>{math.exp.toFixed(4)}</strong>.
+        </li>
+        <li>
+          Do the same for all {math.count.toLocaleString('en')} tokens and add them up. That gives{' '}
+          {math.sum.toFixed(4)}.
+        </li>
+        <li>
+          Divide, {math.exp.toFixed(4)} ÷ {math.sum.toFixed(4)}, for a chance of{' '}
+          <strong>{pct(math.chance)}</strong>.
+          {keep !== 'all' &&
+            ` Then the keep rule leaves only some tokens and scales their chances to add up to 1, which gives the ${shown > 0 ? pct(shown) : 'out'} in the bars.`}
+        </li>
+      </ol>
+    </section>
+  );
+}
+
 /** The real next-token chances after a sentence, reshaped by temperature and a keep rule. */
 export default function SamplingFigure({
   data,
   temperature: startTemperature = 1,
   keep: startKeep = 'all',
   onAdd,
+  inspect = false,
 }: {
   data: NextScores;
   temperature?: number;
   keep?: Keep;
   /** When set, a button adds the latest pick to the text. */
   onAdd?: (token: DisplayToken) => void;
+  /** When set, each shown token is a button that opens the math behind its chance. */
+  inspect?: boolean;
 }) {
   const [temperature, setTemperature] = useState(startTemperature);
   const [keep, setKeep] = useState<Keep>(startKeep);
   const [picks, setPicks] = useState<number[]>([]);
   // Picks point into the chances, so new chances start a new list. The settings stay.
   const [pickedFrom, setPickedFrom] = useState(data);
+  const [inspected, setInspected] = useState<number | null>(null);
   if (pickedFrom !== data) {
     setPickedFrom(data);
     setPicks([]);
+    setInspected(null);
   }
   const sample = useRef<HTMLButtonElement>(null);
   const id = useId();
@@ -106,8 +181,22 @@ export default function SamplingFigure({
           <li key={i} className={`prob-bar${c.top[i] > 0 ? '' : ' is-out'}`} style={fill(c.top[i])}>
             <span className="prob-fill" aria-hidden="true" />
             <span className="prob-word">
-              <span aria-hidden="true">{show(t.token)}</span>
-              <span className="visually-hidden">{speak(t.token)}</span>
+              {inspect ? (
+                <button
+                  type="button"
+                  className="attn-inspect press"
+                  aria-label={`${speak(t.token)}, show the math`}
+                  aria-expanded={inspected === i}
+                  onClick={() => setInspected(inspected === i ? null : i)}
+                >
+                  {show(t.token)}
+                </button>
+              ) : (
+                <>
+                  <span aria-hidden="true">{show(t.token)}</span>
+                  <span className="visually-hidden">{speak(t.token)}</span>
+                </>
+              )}
             </span>
             <span className="prob-value">{c.top[i] > 0 ? pct(c.top[i]) : 'out'}</span>
           </li>
@@ -120,6 +209,15 @@ export default function SamplingFigure({
           <span className="prob-value">{otherN > 0 ? pct(otherP) : 'out'}</span>
         </li>
       </ul>
+      {inspected !== null && (
+        <ChanceInspector
+          math={explainChance(data, inspected, temperature)}
+          token={data.top[inspected].token}
+          keep={keep}
+          shown={c.top[inspected]}
+          onClose={() => setInspected(null)}
+        />
+      )}
       <div className="loop-controls">
         <button
           ref={sample}
