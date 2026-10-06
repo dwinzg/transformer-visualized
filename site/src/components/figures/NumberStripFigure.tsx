@@ -122,7 +122,7 @@ export default function NumberStripFigure({
         className={`strip-grid strip-${view}`}
         role="listbox"
         tabIndex={0}
-        aria-label={`The ${size} ${NAMES[view]} numbers for ${spokenToken(token.token.text)}`}
+        aria-label={`The ${size} ${NAMES[view]} numbers for ${spokenToken(token.token)}`}
         aria-activedescendant={`${id}-cell-${active}`}
         onKeyDown={move}
       >

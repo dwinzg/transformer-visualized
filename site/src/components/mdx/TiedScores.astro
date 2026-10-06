@@ -25,8 +25,8 @@ const list = (values: number[]) =>
     <p class="tied-hidden">
       The final list for{' '}
       <strong>
-        <span aria-hidden="true">{shownToken(last.text)}</span>
-        <span class="visually-hidden">{spokenToken(last.text)}</span>
+        <span aria-hidden="true">{shownToken(last)}</span>
+        <span class="visually-hidden">{spokenToken(last)}</span>
       </strong>{' '}
       starts <code>{list(hidden)}, …</code> and has {hidden.length} numbers.
     </p>
@@ -47,8 +47,8 @@ const list = (values: number[]) =>
                   token.text
                 ) : (
                   <>
-                    <span aria-hidden="true">{shownToken(token.text)}</span>
-                    <span class="visually-hidden">{spokenToken(token.text)}</span>
+                    <span aria-hidden="true">{shownToken(token)}</span>
+                    <span class="visually-hidden">{spokenToken(token)}</span>
                   </>
                 )}
               </span>

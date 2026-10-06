@@ -6,8 +6,8 @@ import './figures.css';
 
 const Name = ({ token }: { token: DisplayToken }) => (
   <>
-    <span aria-hidden="true">{shownToken(token.text)}</span>
-    <span className="visually-hidden">{spokenToken(token.text)}</span>
+    <span aria-hidden="true">{shownToken(token)}</span>
+    <span className="visually-hidden">{spokenToken(token)}</span>
   </>
 );
 

@@ -27,10 +27,9 @@ export default function ResidualFigure({
     <div className="residual-figure">
       <ChipPicker label="Pick a token" tokens={tokens} selected={row} onSelect={setPicked} />
       <p className="residual-summary" aria-live="polite">
-        <span aria-hidden="true">{shownToken(token.text)}</span>
-        <span className="visually-hidden">{spokenToken(token.text)}</span> starts with numbers of
-        length {list[0].length.toFixed(2)}. {biggest.label} adds the most,{' '}
-        {biggest.added.toFixed(2)}.
+        <span aria-hidden="true">{shownToken(token)}</span>
+        <span className="visually-hidden">{spokenToken(token)}</span> starts with numbers of length{' '}
+        {list[0].length.toFixed(2)}. {biggest.label} adds the most, {biggest.added.toFixed(2)}.
       </p>
       <ul className="prob-bars" aria-label="What each step adds">
         {updates.map((step) => (
