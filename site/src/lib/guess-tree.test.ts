@@ -1,5 +1,13 @@
 import { describe, expect, it } from 'vitest';
-import { chosenTokens, describeGuesses, guessesAt, percent, type GuessTree } from './guess-tree';
+import {
+  chosenTokens,
+  describeGuesses,
+  graft,
+  guessesAt,
+  percent,
+  sentenceDone,
+  type GuessTree,
+} from './guess-tree';
 
 const leaf = (id: number, text: string, p: number) => ({ token: { id, text }, p, next: [] });
 const tree: GuessTree = {
@@ -10,6 +18,25 @@ const tree: GuessTree = {
     { token: { id: 3, text: ' c' }, p: 0.3, next: [leaf(5, ' e', 0.5)] },
   ],
 };
+
+describe('sentence ends and grafts', () => {
+  it('ends a sentence at a full stop, question or exclamation mark, or the end of the story', () => {
+    const t = (text: string, special?: boolean) => [{ id: 0, text, special }];
+    expect(sentenceDone(t(' Tim.'))).toBe(true);
+    expect(sentenceDone(t('?"'))).toBe(true);
+    expect(sentenceDone(t('[end of story]', true))).toBe(true);
+    expect(sentenceDone(t(' Tim'))).toBe(false);
+    expect(sentenceDone(t(','))).toBe(false);
+    expect(sentenceDone([])).toBe(false);
+  });
+
+  it('adds guesses after a path without changing the original tree', () => {
+    const grown = graft(tree, [0, 0], [leaf(9, ' f', 0.4)]);
+    expect(guessesAt(grown, [0, 0]).map((g) => g.token.text)).toEqual([' f']);
+    expect(guessesAt(tree, [0, 0])).toEqual([]);
+    expect(guessesAt(grown, [1])).toBe(guessesAt(tree, [1]));
+  });
+});
 
 describe('guess tree helpers', () => {
   it('finds the guesses after a path of choices', () => {
