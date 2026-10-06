@@ -44,6 +44,21 @@ test('it runs the model on the starting sentence and on new text', async ({ page
   await expect(tokens).toHaveCount(6);
 });
 
+test("a token's chance can be opened step by step", async ({ page }) => {
+  await ready(page);
+  const ball = page.getByRole('button', { name: 'space ball, show the math' });
+  await ball.click();
+  await expect(ball).toHaveAttribute('aria-expanded', 'true');
+  const inspector = page.getByRole('region', { name: 'How this chance is worked out' });
+  await expect(inspector).toContainText('gets 11.5%');
+  await expect(inspector).toContainText('all 4,096 tokens');
+  await expectNoA11yViolations(page);
+  await page.getByRole('radio', { name: 'Top-k, k = 5' }).check();
+  await expect(inspector).toContainText('Then the keep rule leaves only some tokens');
+  await inspector.getByRole('button', { name: 'Close' }).click();
+  await expect(inspector).toHaveCount(0);
+});
+
 test('a sampled token can be added to the text', async ({ page }) => {
   await ready(page);
   await page.getByRole('radio', { name: 'Greedy' }).check();
