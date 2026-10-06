@@ -13,7 +13,7 @@ import {
 } from './demo-data';
 import { softmax } from '@transformer-visualized/engine';
 import { dot } from './embeddings';
-import type { Guess } from './guess-tree';
+import { chosenTokens, sentenceDone, type Guess } from './guess-tree';
 
 const PROMPTS = [
   'Once upon a time, there was a',
@@ -24,6 +24,25 @@ const PROMPTS = [
 function allTokens(guesses: readonly Guess[]): Guess[] {
   return guesses.flatMap((g) => [g, ...allTokens(g.next)]);
 }
+
+describe('guessTree with finish', () => {
+  it('follows the first guesses to the end of a sentence, and stops there', () => {
+    for (const prompt of PROMPTS) {
+      const tree = guessTree(prompt, { finish: true });
+      const path: number[] = [];
+      for (let level = tree.guesses; level.length > 0; level = level[0].next) path.push(0);
+      const tokens = chosenTokens(tree, path);
+      expect(sentenceDone(tokens), prompt).toBe(true);
+    }
+  });
+
+  it('leaves the plain tree for chapter figures as it was', () => {
+    const tree = guessTree(PROMPTS[1]);
+    const path: number[] = [];
+    for (let level = tree.guesses; level.length > 0; level = level[0].next) path.push(0);
+    expect(path.length).toBeLessThanOrEqual(GUESS_DEPTH);
+  });
+});
 
 describe('guessTree prompt cleaning', () => {
   it('cleans phone punctuation first', () => {

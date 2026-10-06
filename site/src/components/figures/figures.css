@@ -114,6 +114,15 @@
   display: grid;
   gap: var(--space-4);
 }
+.demo-status {
+  margin: 0;
+  color: var(--color-text-secondary);
+}
+.demo-end {
+  display: grid;
+  gap: var(--space-3);
+  justify-items: start;
+}
 .demo-controls {
   display: flex;
   justify-content: flex-end;
