@@ -26,6 +26,15 @@ describe('formatAuthors', () => {
     expect(formatAuthors([a, b, c])).toBe('Vaswani, A., Shazeer, N., and Parmar, N.');
   });
 
+  it('names the first six of a long list and counts the rest', () => {
+    const many = Array.from({ length: 31 }, (_, i) => ({ family: `F${i}`, given: 'G' }));
+    expect(formatAuthors(many)).toBe(
+      'F0, G., F1, G., F2, G., F3, G., F4, G., F5, G., and 25 others',
+    );
+    // Seven is short enough to list in full, rather than say "and 1 others".
+    expect(formatAuthors(many.slice(0, 7))).toMatch(/, and F6, G\.$/);
+  });
+
   it('shortens hyphenated and multi-part given names to initials', () => {
     expect(formatAuthors([{ family: 'Kim', given: 'Grace C.' }])).toBe('Kim, G. C.');
     expect(formatAuthors([{ family: 'Chau', given: 'Duen-Horng' }])).toBe('Chau, D.-H.');
