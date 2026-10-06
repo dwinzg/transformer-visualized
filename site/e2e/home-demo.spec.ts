@@ -74,13 +74,46 @@ test('the end of the guesses offers to start over', async ({ page }) => {
   await page.goto('./');
   const demo = page.locator('[data-home-demo]');
   await demo.getByRole('button', { name: 'Pause demo' }).click();
-  for (let i = 0; i < 3; i++) await demo.getByRole('option').first().click();
-  await expect(demo.getByRole('option')).toHaveCount(0);
+  const before = await demo.locator('.token-chip').count();
+  // The first guesses lead to the end of a sentence without loading the model.
+  let picks = 0;
+  while ((await demo.getByRole('option').count()) > 0 && picks < 30) {
+    await demo.getByRole('option').first().click();
+    picks++;
+  }
+  expect(picks).toBeGreaterThan(3);
+  await expect(demo.locator('.token-chip').last()).toContainText('.');
+  await expect(demo.getByRole('button', { name: 'Next sentence' })).toBeVisible();
   const start = demo.getByRole('button', { name: 'Start over' });
-  await expect(start).toBeVisible();
-  const count = await demo.locator('.token-chip').count();
+  await expect(start).toBeFocused();
   await start.click();
-  await expect(demo.locator('.token-chip')).toHaveCount(count - 3);
+  await expect(demo.locator('.token-chip')).toHaveCount(before);
+});
+
+test('picks past the built guesses load the model once and finish the sentence', async ({
+  page,
+}) => {
+  const fetched: string[] = [];
+  page.on('request', (r) => r.url().includes('.safetensors') && fetched.push(r.url()));
+  await page.goto('./');
+  const demo = page.locator('[data-home-demo]');
+  await demo.getByRole('button', { name: 'Pause demo' }).click();
+  // The second guess each time leaves the path that was worked out ahead.
+  let picks = 0;
+  while (picks < 30) {
+    const options = demo.getByRole('option');
+    await expect(
+      options.first().or(demo.getByRole('button', { name: 'Next sentence' })),
+    ).toBeVisible({
+      timeout: 20_000,
+    });
+    if ((await options.count()) === 0) break;
+    await options.nth((await options.count()) > 1 ? 1 : 0).click();
+    picks++;
+  }
+  await expect(demo.getByRole('button', { name: 'Next sentence' })).toBeVisible();
+  expect(picks).toBeGreaterThan(3);
+  expect(fetched).toHaveLength(1);
 });
 
 test('the home page is accessible in both themes and does not scroll sideways', async ({
