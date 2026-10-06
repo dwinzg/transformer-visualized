@@ -24,7 +24,10 @@ test('only the playground downloads the model, once', async ({ page }) => {
 
 test('the home page opens the playground', async ({ page }) => {
   await page.goto('');
-  await page.getByRole('link', { name: /Playground/ }).click();
+  await page
+    .getByRole('region', { name: 'Ways to start' })
+    .getByRole('link', { name: /Playground/ })
+    .click();
   await expect(page).toHaveURL(/playground\/$/);
 });
 

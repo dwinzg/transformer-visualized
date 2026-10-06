@@ -214,3 +214,9 @@ test.describe('on a phone', () => {
     await expect(title(map)).toBeInViewport();
   });
 });
+
+test('the list of every part says what it is for', async ({ page }) => {
+  await page.goto(MAP);
+  await page.getByText('Every part as a list').click();
+  await expect(page.getByText('The same parts as the map, in order')).toBeVisible();
+});
