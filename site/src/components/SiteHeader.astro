@@ -45,7 +45,11 @@ const inLearn = current.startsWith(withBase('learn/')) || current.startsWith(wit
     </button>
     <ul class="links" id="site-links" data-links>
       <li class="has-menu" data-has-menu>
-        <a href={withBase('learn/')} aria-current={inLearn ? 'page' : undefined}>
+        {/* "page" only on the Learn page itself. Inside Learn, "true" marks the section. */}
+        <a
+          href={withBase('learn/')}
+          aria-current={current === withBase('learn/') ? 'page' : inLearn ? 'true' : undefined}
+        >
           Learn
         </a>
         <button
@@ -125,18 +129,34 @@ const inLearn = current.startsWith(withBase('learn/')) || current.startsWith(wit
     learn.addEventListener('mouseleave', () => {
       if (!hover.matches || !byHover || learn.contains(document.activeElement)) return;
       // A short wait, so a pointer cutting a corner on its way into the menu does not close it.
-      leaving = window.setTimeout(() => setOpen(subButton, false), 250);
+      leaving = window.setTimeout(() => {
+        byHover = false;
+        setOpen(subButton, false);
+      }, 250);
     });
+    // Like the WAI-ARIA example, tabbing past Learn's menu closes it.
+    learn.addEventListener('focusout', (event) => {
+      if (learn.contains(event.relatedTarget as Node | null)) return;
+      byHover = false;
+      setOpen(subButton, false);
+    });
+    // A menu left open when the screen narrows would have no button to close it with.
+    matchMedia('(max-width: 47.99rem)').addEventListener('change', closeAll);
 
     // On the whole page, since Safari does not focus a button when it is clicked.
     document.addEventListener('keydown', (event) => {
-      if (event.key !== 'Escape') return;
+      if (event.key !== 'Escape' || event.defaultPrevented) return;
+      // Focus goes back to the button only from the header, or from nowhere after a Safari click,
+      // so Escape in a text box elsewhere never moves the reader.
+      const active = document.activeElement;
+      const focusBack = root.contains(active) || active === document.body || active === null;
       if (isOpen(subButton)) {
+        byHover = false;
         setOpen(subButton, false);
-        if (getComputedStyle(subButton).display !== 'none') subButton.focus();
+        if (focusBack && getComputedStyle(subButton).display !== 'none') subButton.focus();
       } else if (isOpen(menuButton)) {
         setOpen(menuButton, false);
-        menuButton.focus();
+        if (focusBack) menuButton.focus();
       }
     });
     document.addEventListener('click', (event) => {
@@ -336,6 +356,7 @@ const inLearn = current.startsWith(withBase('learn/')) || current.startsWith(wit
       gap: 0;
       max-height: calc(100dvh - 100%);
       overflow-y: auto;
+      overscroll-behavior: contain;
       padding: var(--space-2) var(--space-4) var(--space-4);
       border-bottom: 1px solid var(--color-separator);
       background: var(--color-bg);
