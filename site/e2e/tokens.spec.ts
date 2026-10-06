@@ -41,6 +41,24 @@ test('a failed download says so, and typing again retries it', async ({ page }) 
   await expect(figure.locator('.tokenizer-count')).toHaveText('11 characters, 2 tokens');
 });
 
+test('on a slow network, typed text is kept and its tokens appear once loaded', async ({
+  page,
+}) => {
+  await page.route(TOKENIZER, async (route) => {
+    await new Promise((resolve) => setTimeout(resolve, 3000));
+    await route.continue();
+  });
+  await page.goto(CHAPTER);
+  const figure = page.locator('.tokenizer-figure').first();
+  await figure.scrollIntoViewIfNeeded();
+  const box = figure.getByRole('textbox', { name: 'Your text' });
+  await expect(box).not.toHaveAttribute('readonly');
+  await box.fill('The cat sat');
+  await expect(box).toHaveValue('The cat sat');
+  await expect(figure.locator('.tokenizer-count')).toContainText('3 tokens', { timeout: 15_000 });
+  await expect(box).toHaveValue('The cat sat');
+});
+
 test('it works from the keyboard alone', async ({ page }) => {
   await page.goto(CHAPTER);
   const figure = await firstTokenizer(page);

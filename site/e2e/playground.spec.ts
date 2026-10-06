@@ -167,6 +167,16 @@ test('the step buttons walk through the stages in order, with a line on each', a
   await expect(page.locator('.residual-summary')).toContainText('adds the most');
 });
 
+test('a typed special token shows as its name in every figure', async ({ page }) => {
+  await ready(page);
+  await page.getByRole('textbox', { name: 'Your text' }).fill('The end.<|endoftext|>Once');
+  const chips = page.getByRole('list', { name: 'Tokens' });
+  await expect(chips).toContainText('[end of story]');
+  await expect(chips).not.toContainText('\u00b7of');
+  await page.getByRole('radio', { name: 'Attention' }).check();
+  await expect(page.getByRole('radio', { name: 'end of story', exact: true })).toBeVisible();
+});
+
 test('an empty box asks for text', async ({ page }) => {
   await ready(page);
   await page.getByRole('textbox', { name: 'Your text' }).fill('');
