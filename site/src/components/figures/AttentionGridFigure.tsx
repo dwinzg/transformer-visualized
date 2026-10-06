@@ -16,6 +16,8 @@ interface Props {
   from?: number;
   /** Scores before softmax, [layer][head][row][column up to row]. Shown when given. */
   scores?: number[][][][];
+  /** When given, each token in the scores table is a button that asks how its weight is made. */
+  onInspect?: (ask: { layer: number; head: number; row: number; column: number }) => void;
 }
 
 /** A token drawn with its space marks, and spoken with them too. */
@@ -56,6 +58,7 @@ export default function AttentionGridFigure({
   row: startRow = tokens.length - 1,
   from = 0,
   scores,
+  onInspect,
 }: Props) {
   const [layer, setLayer] = useState(startLayer);
   const [head, setHead] = useState(startHead);
@@ -180,6 +183,7 @@ export default function AttentionGridFigure({
             Each score is the query of <Shown token={tokens[row]} /> times the key of another token,
             divided by √32. Softmax turns the scores into weights, so a bigger score gets a bigger
             weight.
+            {onInspect && ' Pick a token to see the math, number by number.'}
           </p>
           <div className="attn-score-scroll" tabIndex={0} role="group" aria-label="Scores">
             <table className="attn-score-table">
@@ -198,7 +202,18 @@ export default function AttentionGridFigure({
                 {scores[layer][head][row].map((score, j) => (
                   <tr key={j}>
                     <th scope="row">
-                      <Shown token={tokens[j]} />
+                      {onInspect ? (
+                        <button
+                          type="button"
+                          className="attn-inspect press"
+                          aria-label={`${spokenToken(tokens[j].text)}, show the math`}
+                          onClick={() => onInspect({ layer, head, row, column: j })}
+                        >
+                          {shownToken(tokens[j].text)}
+                        </button>
+                      ) : (
+                        <Shown token={tokens[j]} />
+                      )}
                     </th>
                     <td>{score.toFixed(2)}</td>
                     <td>{grid[row][j].toFixed(2)}</td>
