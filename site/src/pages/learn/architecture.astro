@@ -76,6 +76,10 @@ const outline = [
       caption="Redrawn from Figure 1 of Vaswani et al. 2017."
       description="The transformer drawn as stacked blocks, from the inputs at the bottom to the output probabilities at the top. Each block is a button that explains that part."
     >
+      <Fragment slot="caption">
+        Redrawn from Figure 1 of{' '}
+        <a href={withBase('references/#vaswani2017')}>Vaswani et al. 2017</a>.
+      </Fragment>
       <ArchitectureMap
         client:visible
         formulas={formulas}
