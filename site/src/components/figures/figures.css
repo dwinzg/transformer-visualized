@@ -981,6 +981,11 @@ td.is-hidden {
 
 /* The playground's number inspector. */
 .attn-inspect {
+  /* Short tokens like "to" still make a target of at least 24 by 24 pixels. */
+  display: inline-flex;
+  align-items: center;
+  min-width: 24px;
+  min-height: 32px;
   padding: 0;
   border: 0;
   background: none;

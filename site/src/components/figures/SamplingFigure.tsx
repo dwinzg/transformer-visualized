@@ -61,6 +61,7 @@ function ChanceInspector({
       <div className="inspector-head">
         <p className="inspector-title">
           How <Name /> gets {pct(math.chance)}
+          {keep !== 'all' && ' before the keep rule'}
         </p>
         <button type="button" className="figure-button press" onClick={onClose}>
           Close
@@ -88,7 +89,9 @@ function ChanceInspector({
           Divide, {math.exp.toFixed(4)} ÷ {math.sum.toFixed(4)}, for a chance of{' '}
           <strong>{pct(math.chance)}</strong>.
           {keep !== 'all' &&
-            ` Then the keep rule leaves only some tokens and scales their chances to add up to 1, which gives the ${shown > 0 ? pct(shown) : 'out'} in the bars.`}
+            (shown > 0
+              ? ` Then the keep rule leaves only some tokens and scales their chances to add up to 1, which gives the ${pct(shown)} in the bars.`
+              : ' Then the keep rule leaves this token out, so the bars show it as out.')}
         </li>
       </ol>
     </section>
@@ -123,6 +126,7 @@ export default function SamplingFigure({
     setInspected(null);
   }
   const sample = useRef<HTMLButtonElement>(null);
+  const root = useRef<HTMLDivElement>(null);
   const id = useId();
   const c = chances(data, temperature, keep);
   const changed = temperature !== startTemperature || keep !== startKeep || picks.length > 0;
@@ -137,7 +141,7 @@ export default function SamplingFigure({
     ({ '--p': `${p > 0 ? Math.max(p * 100, 0.5) : 0}%` }) as React.CSSProperties;
 
   return (
-    <div className="sampling-figure">
+    <div className="sampling-figure" ref={root}>
       <div className="sampling-controls">
         <label className="sampling-temperature" htmlFor={`${id}-t`}>
           Temperature
@@ -186,6 +190,7 @@ export default function SamplingFigure({
                   className="attn-inspect press"
                   aria-label={`${speak(t.token)}, show the math`}
                   aria-expanded={inspected === i}
+                  data-chance-index={i}
                   onClick={() => setInspected(inspected === i ? null : i)}
                 >
                   {show(t.token)}
@@ -214,7 +219,12 @@ export default function SamplingFigure({
           token={data.top[inspected].token}
           keep={keep}
           shown={c.top[inspected]}
-          onClose={() => setInspected(null)}
+          onClose={() => {
+            const index = inspected;
+            setInspected(null);
+            // Back to the token that opened it, so the reader keeps their place.
+            root.current?.querySelector<HTMLElement>(`[data-chance-index="${index}"]`)?.focus();
+          }}
         />
       )}
       <div className="loop-controls">

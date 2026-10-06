@@ -100,8 +100,8 @@ export default function Playground() {
     w.onmessage = (event: MessageEvent<WorkerMessage>) => {
       const message = event.data;
       if (message.type === 'explained') {
-        if (message.seq === shownSeq.current && message.math) {
-          setInspected({ ask: message.ask, math: message.math });
+        if (message.seq === shownSeq.current) {
+          setInspected(message.math && { ask: message.ask, math: message.math });
         }
         return;
       }
@@ -281,15 +281,31 @@ export default function Playground() {
                       },
                     })
                   }
-                />
-                {inspected && (
-                  <AttentionInspector
-                    math={inspected.math}
-                    from={run.tokens[inspected.ask.row]}
-                    to={run.tokens[inspected.ask.column]}
-                    onClose={() => setInspected(null)}
-                  />
-                )}
+                  inspected={
+                    inspected && {
+                      ...inspected.ask,
+                      row: inspected.ask.row - run.views.attention.from,
+                    }
+                  }
+                >
+                  {inspected && (
+                    <AttentionInspector
+                      math={inspected.math}
+                      from={run.tokens[inspected.ask.row]}
+                      to={run.tokens[inspected.ask.column]}
+                      onClose={() => {
+                        const column = inspected.ask.column - run.views!.attention.from;
+                        setInspected(null);
+                        // Back to the token that opened it, so the reader keeps their place.
+                        requestAnimationFrame(() =>
+                          document
+                            .querySelector<HTMLElement>(`[data-inspect-column="${column}"]`)
+                            ?.focus(),
+                        );
+                      }}
+                    />
+                  )}
+                </AttentionGridFigure>
               </>
             )}
             {stage === 'ffn' && (
