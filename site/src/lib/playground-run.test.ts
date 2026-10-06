@@ -31,6 +31,33 @@ describe('runPlayground', () => {
     expect(attention.weights[2][2][5][0]).toBe(0.66);
   });
 
+  it("follows each token's residual stream through every step", () => {
+    const { residual } = runPlayground(model, tokenizer, 'Lily wanted to play with her').views!;
+    expect(residual).toHaveLength(6);
+    const steps = residual[5];
+    expect(steps.map((s) => s.label)).toEqual([
+      'Start',
+      'Block 1 attention',
+      'Block 1 feed forward',
+      'Block 2 attention',
+      'Block 2 feed forward',
+      'Block 3 attention',
+      'Block 3 feed forward',
+      'Block 4 attention',
+      'Block 4 feed forward',
+    ]);
+    for (const step of steps) {
+      expect(step.added).toBeGreaterThan(0);
+      expect(step.length).toBeGreaterThan(0);
+    }
+    // Adding a vector changes the length by at most the length of what was added.
+    for (let k = 1; k < steps.length; k++) {
+      expect(Math.abs(steps[k].length - steps[k - 1].length)).toBeLessThanOrEqual(
+        steps[k].added + 0.02,
+      );
+    }
+  });
+
   it('has no views for empty text', () => {
     expect(runPlayground(model, tokenizer, '').views).toBeNull();
   });

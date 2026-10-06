@@ -125,6 +125,24 @@ test('every stage shows the real numbers', async ({ page }) => {
   await expect(page.locator('.ffn-figure .prob-bar')).toHaveCount(8);
 });
 
+test('the step buttons walk through the stages in order, with a line on each', async ({ page }) => {
+  await ready(page);
+  await page.getByRole('radio', { name: 'Embeddings' }).check();
+  const guide = page.locator('.playground-guide p');
+  await expect(guide).toContainText('Step 1 of 5. Each token becomes 128 numbers');
+  const next = page.getByRole('button', { name: 'Next step' });
+  for (const name of ['Attention', 'Feed forward', 'Residual stream', 'Next token']) {
+    await next.click();
+    await expect(page.getByRole('radio', { name })).toBeChecked();
+  }
+  await expect(guide).toContainText('Step 5 of 5.');
+  await expect(next).toHaveAttribute('aria-disabled', 'true');
+  await page.getByRole('button', { name: 'Previous step' }).click();
+  await expect(page.getByRole('radio', { name: 'Residual stream' })).toBeChecked();
+  await expect(page.locator('.residual-figure .prob-bar')).toHaveCount(8);
+  await expect(page.locator('.residual-summary')).toContainText('adds the most');
+});
+
 test('an empty box asks for text', async ({ page }) => {
   await ready(page);
   await page.getByRole('textbox', { name: 'Your text' }).fill('');
@@ -157,7 +175,13 @@ test.describe('at 320px wide', () => {
     await ready(page);
     await page.getByRole('textbox', { name: 'Your text' }).fill(LONG);
     await expect(page.locator('.tokenizer-count')).toContainText('35 tokens');
-    for (const stage of ['Embeddings', 'Attention', 'Feed forward', 'Next token']) {
+    for (const stage of [
+      'Embeddings',
+      'Attention',
+      'Feed forward',
+      'Residual stream',
+      'Next token',
+    ]) {
       await page.getByRole('radio', { name: stage }).check();
       if (stage === 'Attention') await page.getByText(/How .* gets its weights/).click();
       await expectNoHorizontalScroll(page);

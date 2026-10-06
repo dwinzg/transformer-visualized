@@ -5,6 +5,7 @@ import { shownToken, spokenToken } from '../../lib/token-text';
 import AttentionGridFigure from './AttentionGridFigure';
 import FeedForwardFigure from './FeedForwardFigure';
 import NumberStripFigure from './NumberStripFigure';
+import ResidualFigure from './ResidualFigure';
 import SamplingFigure from './SamplingFigure';
 import './figures.css';
 
@@ -13,13 +14,31 @@ const MAX_LENGTH = 400;
 /** How long typing must pause before the model runs again. */
 const WAIT_MS = 250;
 
-type Stage = 'embeddings' | 'attention' | 'ffn' | 'output';
-const STAGES: Record<Stage, string> = {
-  embeddings: 'Embeddings',
-  attention: 'Attention',
-  ffn: 'Feed forward',
-  output: 'Next token',
+type Stage = 'embeddings' | 'attention' | 'ffn' | 'residual' | 'output';
+/** The stages in the order a token passes through them, each with one line on what it does. */
+const STAGES: Record<Stage, { label: string; guide: string }> = {
+  embeddings: {
+    label: 'Embeddings',
+    guide: 'Each token becomes 128 numbers, its token row plus its position row.',
+  },
+  attention: {
+    label: 'Attention',
+    guide: 'Each token looks back at the tokens before it and mixes in what it needs.',
+  },
+  ffn: {
+    label: 'Feed forward',
+    guide: "Then each token's numbers go through a small network on their own.",
+  },
+  residual: {
+    label: 'Residual stream',
+    guide: "Every step adds its result to the token's numbers, so nothing is lost on the way.",
+  },
+  output: {
+    label: 'Next token',
+    guide: "The last token's numbers become a chance for every possible next token.",
+  },
 };
+const ORDER = Object.keys(STAGES) as Stage[];
 
 /** Run the real tiny model on any text, in the browser, and look at each stage. */
 export default function Playground() {
@@ -194,7 +213,7 @@ export default function Playground() {
 
           <fieldset className="segmented playground-stages">
             <legend className="visually-hidden">Stage</legend>
-            {(Object.keys(STAGES) as Stage[]).map((s) => (
+            {ORDER.map((s) => (
               <label key={s}>
                 <input
                   type="radio"
@@ -202,12 +221,35 @@ export default function Playground() {
                   checked={stage === s}
                   onChange={() => setStage(s)}
                 />
-                <span>{STAGES[s]}</span>
+                <span>{STAGES[s].label}</span>
               </label>
             ))}
           </fieldset>
+          <div className="playground-guide">
+            <p aria-live="polite">
+              Step {ORDER.indexOf(stage) + 1} of {ORDER.length}. {STAGES[stage].guide}
+            </p>
+            <div className="loop-controls">
+              <button
+                type="button"
+                className="figure-button press"
+                aria-disabled={stage === ORDER[0]}
+                onClick={() => stage !== ORDER[0] && setStage(ORDER[ORDER.indexOf(stage) - 1])}
+              >
+                Previous step
+              </button>
+              <button
+                type="button"
+                className="figure-button press"
+                aria-disabled={stage === ORDER.at(-1)}
+                onClick={() => stage !== ORDER.at(-1) && setStage(ORDER[ORDER.indexOf(stage) + 1])}
+              >
+                Next step
+              </button>
+            </div>
+          </div>
 
-          <section className="playground-panel" aria-label={STAGES[stage]}>
+          <section className="playground-panel" aria-label={STAGES[stage].label}>
             {stage === 'embeddings' && (
               <NumberStripFigure tokens={run.views.embeddings} token={run.tokens.length - 1} />
             )}
@@ -229,6 +271,9 @@ export default function Playground() {
             )}
             {stage === 'ffn' && (
               <FeedForwardFigure tokens={run.tokens} activations={run.views.activations} />
+            )}
+            {stage === 'residual' && (
+              <ResidualFigure tokens={run.tokens} steps={run.views.residual} />
             )}
             {stage === 'output' && (
               <SamplingFigure
