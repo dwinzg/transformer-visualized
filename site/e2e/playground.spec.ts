@@ -55,8 +55,10 @@ test("a token's chance can be opened step by step", async ({ page }) => {
   await expectNoA11yViolations(page);
   await page.getByRole('radio', { name: 'Top-k, k = 5' }).check();
   await expect(inspector).toContainText('Then the keep rule leaves only some tokens');
+  await expect(inspector).toContainText('before the keep rule');
   await inspector.getByRole('button', { name: 'Close' }).click();
   await expect(inspector).toHaveCount(0);
+  await expect(ball).toBeFocused();
 });
 
 test('a sampled token can be added to the text', async ({ page }) => {
@@ -142,8 +144,15 @@ test('every stage shows the real numbers', async ({ page }) => {
   await expect(inspector).toContainText('a weight of 0.66');
   await expect(inspector).toContainText('add up the 32 products');
   await expectNoA11yViolations(page);
+  // Another head shows other numbers, so the open explanation goes away.
+  await page.getByRole('group', { name: 'Head' }).getByRole('radio', { name: '4' }).check();
+  await expect(inspector).toHaveCount(0);
+  await page.getByRole('group', { name: 'Head' }).getByRole('radio', { name: '3' }).check();
+  await expect(inspector).toBeVisible();
   await inspector.getByRole('button', { name: 'Close' }).click();
   await expect(inspector).toHaveCount(0);
+  // Focus goes back to the token that opened it.
+  await expect(page.getByRole('button', { name: /Lily, show the math/ })).toBeFocused();
   await page.getByRole('radio', { name: 'Feed forward' }).check();
   await expect(page.locator('.ffn-summary')).toContainText('of 512 neurons');
   await expect(page.locator('.ffn-figure .prob-bar')).toHaveCount(8);
