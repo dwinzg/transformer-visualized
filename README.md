@@ -32,6 +32,10 @@ Every step has a figure to touch. Pick a guess and see the exact chances, or add
 
 <img src="docs/images/use-4-loop.png" alt="A sentence that grew by three guesses, with a count of guesses made" width="600">
 
+The later chapters show how the same model is used today. Slide a note out of the model's window and watch it forget, or compare guesses with and without a sentence in the prompt.
+
+<img src="docs/images/use-12-context.png" alt="The context window figure with the note about Fluffy pushed out of the 128-token window, and 'her' now the top guess" width="600">
+
 ### See the whole model
 
 The diagram from the paper, Figure 1 of "Attention Is All You Need", redrawn so you can tap every box. Each part has a short article with its sizes, the formula and a few lines of PyTorch. The code runs on our real model and prints the same numbers you see on the page.
