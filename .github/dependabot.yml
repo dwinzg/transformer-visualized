@@ -9,6 +9,13 @@ updates:
     # Rebasing on every merge to main would rerun CI each time.
     rebase-strategy: disabled
     # A new major version comes in a PR of its own, so it cannot hold the others back.
+    ignore:
+      # TypeScript 7 breaks typescript-eslint and astro check for now.
+      - dependency-name: typescript
+        update-types: [version-update:semver-major]
+      # The types follow the Node version the site runs on, 24 LTS.
+      - dependency-name: '@types/node'
+        update-types: [version-update:semver-major]
     groups:
       npm:
         patterns: ['*']

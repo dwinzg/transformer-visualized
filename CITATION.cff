@@ -3,6 +3,8 @@ message: 'If you use this site or its code, please cite it as below.'
 title: 'Transformer Visualized'
 abstract: 'An interactive, visual guide to how transformer language models work, from a simple story to the exact math. Runs in the browser.'
 type: software
+version: '0.1.0'
+date-released: '2026-10-07'
 authors:
   - alias: dwinzg
 repository-code: 'https://github.com/dwinzg/transformer-visualized'
