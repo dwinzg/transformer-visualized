@@ -154,5 +154,47 @@
     "term": "Top-p sampling",
     "short": "Sampling only from the fewest most likely tokens whose probabilities add up to at least p. Also called nucleus sampling.",
     "related": ["sampling", "top-k"]
+  },
+  {
+    "id": "context-window",
+    "term": "Context window",
+    "short": "How many tokens a model can read at once. Text before that is cut off. Ours holds 128 tokens.",
+    "related": ["token", "prompt"]
+  },
+  {
+    "id": "prompt",
+    "term": "Prompt",
+    "short": "The text given to a model. To the model it is the start of the text, and it guesses what comes next.",
+    "related": ["context-window", "language-model"]
+  },
+  {
+    "id": "retrieval",
+    "term": "Retrieval",
+    "short": "Looking up passages that might help, and putting them in the prompt before the model answers.",
+    "related": ["prompt", "tool-call"]
+  },
+  {
+    "id": "tool-call",
+    "term": "Tool call",
+    "short": "A request the model writes as text, such as a sum for a calculator. A program runs it and adds the answer to the text.",
+    "related": ["agent", "retrieval"]
+  },
+  {
+    "id": "agent",
+    "term": "Agent",
+    "short": "A model that repeats tool calls on its own, reading each result and deciding what to do next, until a task is done.",
+    "related": ["tool-call"]
+  },
+  {
+    "id": "chain-of-thought",
+    "term": "Chain of thought",
+    "short": "Steps a model writes before its answer. Each step joins the text it reads for the next guess.",
+    "related": ["reasoning-model"]
+  },
+  {
+    "id": "reasoning-model",
+    "term": "Reasoning model",
+    "short": "A model trained to write long reasoning before it answers, often with rewards for right answers.",
+    "related": ["chain-of-thought"]
   }
 ]

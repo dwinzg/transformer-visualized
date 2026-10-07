@@ -1,0 +1,169 @@
+---
+title: Context and prompts
+order: 5
+part: today
+summary: A model only reads the text in front of it, so what you put in that text, the prompt, steers every guess.
+goals:
+  - Say what a context window is and what happens to text that falls out of it
+  - Explain why adding a sentence to a prompt can change the answer
+  - Tell a model that continues text from one trained to follow instructions
+minutes: 10
+recap:
+  - A model reads only the last tokens that fit in its context window. Ours fits 128, GPT-2 fits 1,024.
+  - Anything outside the window is gone. The model cannot use what it cannot read.
+  - A prompt is the start of the text. Facts and examples in it change every guess after it.
+  - Chat models are trained further to follow instructions. Our model only continues stories.
+references:
+  - radford2019
+  - brown2020
+  - olsson2022
+  - ouyang2022
+---
+
+The first chapters followed one sentence through the model. This one asks a practical question. If the model only ever guesses the next token, how do people get it to do what they want? The answer starts with what the model can read.
+
+<Step title="The model only reads a window">
+
+<ContextWindow
+  note="Sara had a cat named Fluffy."
+  filler=" The sun was bright and the birds sang in the trees. Sara played in the garden with her ball."
+  question=" Every morning, Sara gave milk to"
+  most={8}
+  caption="Add sentences between the note and the question, and watch the note fall out of the window."
+/>
+
+<Level of="story">
+
+A model reads a fixed number of tokens at a time, called its <Term id="context-window">context window</Term>. Anything earlier is cut off, as if it was never written.
+
+Our model learns that Sara's cat is called Fluffy from the first sentence, and guesses "Fluffy" for who gets the milk. Add sentences in between, and the note slips further back. Once it falls out of the window, the model has never heard of Fluffy.
+
+</Level>
+
+<Level of="numbers">
+
+Our model's window is 128 tokens, because it learned one position embedding for each of 128 places. With the note right before the question, the text is 14 tokens and "Fluffy" gets 83%. With 5 sentences in between, it is 119 tokens and "Fluffy" drops to 43%. With 6, the text is 140 tokens, the note is cut off, and "her" leads with 44%.
+
+GPT-2 has a window of 1,024 tokens (<Ref id="radford2019" />). Many large models today fit far more, but the rule is the same. What falls outside is not read.
+
+</Level>
+
+<Level of="formula">
+
+With a window of <Tex tex="w" /> tokens, the guess for the next token only depends on the last <Tex tex="w" /> tokens.
+
+<Tex
+  display
+  tex="P(t_{n+1} \mid t_1, \dots, t_n) \approx P(t_{n+1} \mid t_{n-w+1}, \dots, t_n), \qquad w = 128"
+/>
+
+</Level>
+
+<Level of="code">
+
+```ts
+const window = model.config.contextLength; // 128
+const trace = forward(model, ids.slice(-window)); // only the last 128 tokens go in
+```
+
+</Level>
+
+</Step>
+
+<PredictReveal question="A text is 200 tokens long. Our model reads it. How many of its first tokens does the model never see?" options={['0', '72', '128']} answer={1}>
+
+72. The window holds 128 tokens, so it keeps the last 128 and drops the first 200 minus 128, which is 72.
+
+</PredictReveal>
+
+<Step title="A prompt is the start of the text">
+
+<CompareGuesses
+  texts={[
+    {
+      label: 'With the note',
+      text: 'Sara had a cat named Fluffy. Every morning, Sara gave milk to',
+    },
+    { label: 'Without it', text: 'Every morning, Sara gave milk to' },
+  ]}
+  caption="The same question, with and without one sentence before it."
+/>
+
+<Level of="story">
+
+The text you give a model is called a <Term id="prompt">prompt</Term>. To the model, it is simply the start of the text, and its job is to guess what comes next.
+
+So everything in the prompt steers the guesses. Without the first sentence, the model has no reason to think of Fluffy, and guesses "her" or "the". One extra sentence changes the answer.
+
+</Level>
+
+<Level of="numbers">
+
+With the note, "Fluffy" gets 83%. Without it, "her" gets 39% and "the" gets 26%, and "Fluffy" is not in the top five.
+
+</Level>
+
+</Step>
+
+<Step title="Examples in the prompt">
+
+<CompareGuesses
+  texts={[
+    { label: 'After two examples', text: 'Ben said, "Zog." Mia said, "Zog." Tim said, "' },
+    { label: 'Without them', text: 'Tim said, "' },
+  ]}
+  caption="Zog is a made-up word. Two examples are enough for the model to try it."
+/>
+
+<Level of="story">
+
+A prompt can also show the model what to do, by giving a few examples first. Here Ben and Mia both say a made-up word, "Zog". When Tim speaks, the model's top guess starts with "Z". It never saw "Zog" in training. It copied the pattern from the prompt.
+
+Large models do this with whole tasks. Show a few questions with their answers, and they answer the next question the same way (<Ref id="brown2020" />). Nothing in the model changes. The examples are just more text to read.
+
+</Level>
+
+<Level of="numbers">
+
+After the two examples, "Z" is the top guess with 20%. Without them, the top guesses are "I" with 20% and "No" with 12%, and "Z" is far behind.
+
+Researchers found attention heads that do this kind of copying. They spot a token that appeared before and look at what came right after it last time, called induction heads (<Ref id="olsson2022" />).
+
+</Level>
+
+</Step>
+
+<Step title="Trained to follow instructions">
+
+<CompareGuesses
+  texts={[{ label: 'An instruction', text: 'Write a poem about a cat.' }]}
+  caption="Our model reads an instruction as the start of a story."
+/>
+
+<Level of="story">
+
+Ask our model to write a poem, and it does not. It guesses "It", "The" or "I", the way a story might go on after that sentence. It only ever learned to continue children's stories.
+
+Chat models start the same way, as models that continue text. Then they are trained further on examples of instructions with good answers, and on people's ratings of their answers (<Ref id="ouyang2022" />). That is what turns a model that continues text into an assistant that answers. Underneath, it still guesses one token at a time.
+
+</Level>
+
+<Level of="numbers">
+
+After "Write a poem about a cat.", the top guesses are "It" with 13%, "The" with 11% and "I" with 9%.
+
+</Level>
+
+</Step>
+
+<Callout kind="myth">
+
+A chat model does not remember your conversation by itself. Each time, the app sends the conversation so far as part of the prompt. Apps that seem to remember older chats put notes from them into the prompt too. When a conversation outgrows the window, the oldest part has to be cut or summed up.
+
+</Callout>
+
+<Exercise prompt="A model's window holds 1,024 tokens. Your conversation so far is 900 tokens, and you paste in a page of 300 more. How many tokens fall out of the window?" answer={176} tolerance={0}>
+
+900 plus 300 is 1,200 tokens. The window keeps the last 1,024, so 1,200 minus 1,024, which is 176 tokens, fall out from the start.
+
+</Exercise>
