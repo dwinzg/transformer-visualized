@@ -1,0 +1,28 @@
+name: Suggest a feature
+description: An idea for a new figure, page, chapter or tool.
+labels: [enhancement]
+body:
+  - type: textarea
+    id: what
+    attributes:
+      label: What
+      description: What you would like the site to have.
+    validations:
+      required: true
+  - type: textarea
+    id: why
+    attributes:
+      label: Why
+      description: Who it helps and what it helps them understand.
+    validations:
+      required: true
+  - type: textarea
+    id: how
+    attributes:
+      label: How it could work
+      description: Ideas, sketches or examples from elsewhere. Optional.
+  - type: textarea
+    id: done
+    attributes:
+      label: Done when
+      description: How we will know it is finished. Optional.
