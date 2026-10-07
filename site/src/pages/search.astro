@@ -40,7 +40,7 @@ const entries: SearchEntry[] = [
     text: term.data.short,
   })),
   ...(await getCollection('faq')).map((q) => ({
-    kind: 'FAQ' as const,
+    kind: 'Answer' as const,
     title: q.data.question,
     href: `faq/#${q.id}`,
     text: q.data.answer,
@@ -101,7 +101,7 @@ const entries: SearchEntry[] = [
       </p>
     </noscript>
     <p class="status" role="status" data-search-status></p>
-    <ol class="results" data-search-results></ol>
+    <ol class="results" role="list" data-search-results></ol>
   </section>
   <script
     type="application/json"
@@ -157,37 +157,40 @@ const entries: SearchEntry[] = [
       return li;
     };
 
-    const show = (query: string) => {
+    let statusTimer: number | undefined;
+    const show = (query: string, announceNow: boolean) => {
       const hits = search(index, query);
       list.replaceChildren(...hits.map(item));
+      // The query lives in the address, so a search can be shared, and Back returns to it.
+      const url = new URL(location.href);
+      if (query) url.searchParams.set('q', query);
+      else url.searchParams.delete('q');
+      history.replaceState(null, '', url);
+
       const q = query.trim();
-      status.textContent = !q
+      const text = !q
         ? ''
         : hits.length === 0
           ? `Nothing found for “${q}”. Try fewer or shorter words.`
           : `${hits.length === 30 ? 'The top 30' : hits.length} ${hits.length === 1 ? 'result' : 'results'} for “${q}”.`;
+      // A screen reader reads the status each time it changes, so while typing it waits for a pause.
+      clearTimeout(statusTimer);
+      if (announceNow) status.textContent = text;
+      else statusTimer = window.setTimeout(() => (status.textContent = text), 700);
     };
 
-    // The query lives in the address, so a search can be shared, and Back returns to it.
-    const params = new URLSearchParams(location.search);
-    input.value = params.get('q') ?? '';
-    show(input.value);
+    input.value = new URLSearchParams(location.search).get('q') ?? '';
+    show(input.value, true);
 
     let timer: number | undefined;
     input.addEventListener('input', () => {
       clearTimeout(timer);
-      timer = window.setTimeout(() => {
-        const url = new URL(location.href);
-        if (input.value) url.searchParams.set('q', input.value);
-        else url.searchParams.delete('q');
-        history.replaceState(null, '', url);
-        show(input.value);
-      }, 150);
+      timer = window.setTimeout(() => show(input.value, false), 150);
     });
     form.addEventListener('submit', (event) => {
       event.preventDefault();
       clearTimeout(timer);
-      show(input.value);
+      show(input.value, true);
       list.querySelector('a')?.focus();
     });
   }
