@@ -1,9 +1,12 @@
 import AttentionGrid from './AttentionGrid.astro';
 import Callout from './Callout.astro';
+import CompareGuesses from './CompareGuesses.astro';
+import ContextWindow from './ContextWindow.astro';
 import Exercise from './Exercise.astro';
 import Figure from '../Figure.astro';
 import GenerationLoop from './GenerationLoop.astro';
 import Level from './Level.astro';
+import Loop from './Loop.astro';
 import NearestTokens from './NearestTokens.astro';
 import NextWord from './NextWord.astro';
 import NumberStrip from './NumberStrip.astro';
@@ -22,10 +25,13 @@ import ToyAttention from './ToyAttention.astro';
 export const mdxComponents = {
   AttentionGrid,
   Callout,
+  CompareGuesses,
+  ContextWindow,
   Exercise,
   Figure,
   GenerationLoop,
   Level,
+  Loop,
   NearestTokens,
   NextWord,
   NumberStrip,

@@ -1,0 +1,22 @@
+---
+import Figure from '../Figure.astro';
+import Island from '../figures/CompareGuessesFigure.tsx';
+import { compareGuesses } from '../../lib/demo-data';
+
+interface Props {
+  texts: { label: string; text: string }[];
+  caption: string;
+}
+const { texts, caption } = Astro.props;
+const items = compareGuesses(texts.map((t) => t.text)).map((data, i) => ({
+  label: texts[i].label,
+  ...data,
+}));
+---
+
+<Figure
+  caption={caption}
+  description="A choice of texts. For the chosen one, its tokens and bars for the model's five likeliest next tokens with their chances."
+>
+  <Island client:visible items={items} />
+</Figure>
