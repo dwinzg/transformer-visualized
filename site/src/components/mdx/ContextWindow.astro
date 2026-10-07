@@ -16,7 +16,7 @@ const { window, steps } = contextWindow(note, filler, question, most);
 
 <Figure
   caption={caption}
-  description="A slider adds sentences between a note and a question. A bar shows the whole text and outlines the last 128 tokens, the part the model can read. Bars show the model's likeliest next tokens."
+  description={`A slider adds sentences between a note and a question. A bar shows the whole text and outlines the last ${window} tokens, the part the model can read. Bars show the model's likeliest next tokens.`}
 >
   <Island client:visible window={window} steps={steps} note={note} question={question.trim()} />
 </Figure>
