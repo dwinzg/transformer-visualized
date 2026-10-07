@@ -2,9 +2,13 @@
   {
     "id": "what-is-a-transformer",
     "question": "What is a transformer?",
-    "answer": "A transformer is the kind of model behind today's chatbots. It turns text into numbers, passes them through a stack of layers where each word gathers information from the words before it, and ends with a score for every possible next piece of text.",
+    "answer": "A transformer is the kind of model behind today's chatbots. It turns text into numbers and passes them through a stack of layers where each word gathers information from the other words. In models like GPT, each word looks only at the words before it. At the end comes a score for every possible next piece of text.",
     "steps": ["introduction#step-inside-a-transformer-does-the-guessing"],
-    "sources": [{ "ref": "vaswani2017" }]
+    "sources": [
+      {
+        "ref": "vaswani2017"
+      }
+    ]
   },
   {
     "id": "how-does-it-write",
@@ -19,9 +23,14 @@
     "answer": "The model gives chances, not one answer. The next piece is drawn at random using those chances, so two runs can pick different pieces and then go different ways. The temperature controls how adventurous the draw is. Greedy decoding always takes the top guess and gives the same text every time.",
     "steps": [
       "prediction#step-scores-become-chances",
-      "prediction#step-turning-the-temperature-up-or-down"
+      "prediction#step-turning-the-temperature-up-or-down",
+      "prediction#step-greedy-top-k-and-top-p"
     ],
-    "sources": [{ "ref": "holtzman2020" }]
+    "sources": [
+      {
+        "ref": "holtzman2020"
+      }
+    ]
   },
   {
     "id": "why-tokens",
@@ -44,12 +53,16 @@
     "question": "Does the model know what words mean?",
     "answer": "Nobody tells it. The model only sees token ids, and it learns numbers for each one that help it guess the next token. Along the way, words used in similar ways end up with similar numbers, such as girl and boy. Whether that counts as knowing what a word means is a question this site leaves open. What it shows is what the numbers do.",
     "steps": ["embeddings#step-similar-words-get-similar-numbers"],
-    "sources": [{ "ref": "mikolov2013" }]
+    "sources": [
+      {
+        "ref": "mikolov2013"
+      }
+    ]
   },
   {
     "id": "why-divide",
     "question": "Why does attention divide the scores by the square root of the list length?",
-    "answer": "A dot product adds up one product per number, so with longer lists the scores tend to get bigger. Very big scores make softmax put almost all the weight on one token, and then training learns very slowly. Dividing by the square root of the length keeps the scores in a range where softmax still spreads its weight. In our model the lists have 32 numbers, so the scores are divided by about 5.66.",
+    "answer": "A dot product adds up one product per number, so the longer the lists, the bigger the scores tend to get. Very big scores make softmax put almost all the weight on one token, and then training learns very slowly. Dividing by the square root of the length keeps the scores in a range where softmax still spreads its weight. In our model each head's query and key lists have 32 numbers, so the scores are divided by about 5.66.",
     "steps": ["attention#step-questions-name-tags-and-backpacks"],
     "sources": [
       {
@@ -91,7 +104,7 @@
   {
     "id": "attention-explains",
     "question": "Do the attention weights explain why the model chose a word?",
-    "answer": "Not on their own. They show where a head looked, not why the model decided what it did. Researchers disagree about how much the weights can tell you, so treat them as a clue to test, not an explanation.",
+    "answer": "Not on their own. They show where a head looked, not why the model decided what it did. Studies of other kinds of models found that quite different weights can lead to the same prediction, and others argued the weights can still be useful clues. Treat them as a clue to test, not an explanation.",
     "steps": ["attention#step-many-heads-many-layers"],
     "sources": [
       {
@@ -109,7 +122,7 @@
   {
     "id": "why-add",
     "question": "Why does each layer add to a token's numbers instead of replacing them?",
-    "answer": "Adding keeps what came before, so nothing earlier is lost and each layer only has to learn a change. This also makes deep stacks of layers much easier to train.",
+    "answer": "This is called a residual connection. Each layer adds its result to the token's numbers, so the earlier numbers are kept, not overwritten, and each layer only has to learn a change. This also makes deep stacks of layers much easier to train.",
     "steps": ["prediction#step-one-score-for-every-token"],
     "sources": [
       {
@@ -122,7 +135,7 @@
   {
     "id": "why-small",
     "question": "Why is the model on this site so small?",
-    "answer": "So it runs in your browser and every number can be shown. It has about 1.3 million learned numbers, 4 layers and a vocabulary of 4,096 tokens. It was trained on simple children's stories, and research has shown that models this small can still write fluent short stories.",
+    "answer": "So it runs in your browser and every number can be shown. It has about 1.3 million learned numbers, 4 layers and a vocabulary of 4,096 tokens. It was trained on simple children's stories, and research has shown that models with under 10 million learned numbers can still write fluent short stories like these.",
     "steps": ["introduction#step-inside-a-transformer-does-the-guessing"],
     "sources": [
       {
@@ -138,7 +151,9 @@
     "answer": "A chat model follows the same plan with far more layers and learned numbers, trained on far more text. It is then trained further to follow instructions, using examples written by people and their ratings of its answers. This site covers the plan they share.",
     "steps": ["introduction#step-inside-a-transformer-does-the-guessing"],
     "sources": [
-      { "ref": "brown2020" },
+      {
+        "ref": "brown2020"
+      },
       {
         "ref": "ouyang2022",
         "where": "Abstract",
@@ -149,7 +164,7 @@
   {
     "id": "privacy",
     "question": "Does this site send what I type anywhere?",
-    "answer": "No. The model runs in your browser, so your text stays on your device. The playground does put your text in the page's address, so a link you share carries it.",
+    "answer": "No. The model runs in your browser, so the site does nothing with your text on any server. The playground and search do put your text in the page's address, so it can be shared. If you open, reload or share that address, it goes to the site's host like any web address.",
     "steps": [],
     "sources": []
   }

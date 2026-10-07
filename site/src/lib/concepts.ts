@@ -124,7 +124,7 @@ export const PARTS: Record<PartId, Part> = {
     title: 'Add and norm',
     color: 'residual',
     story:
-      "Add keeps what came in and puts the new result on top, so nothing is lost. Norm rescales each token's numbers to a steady range.",
+      "Add, called a residual connection, keeps what came in and puts the new result on top, so earlier numbers are kept. Norm rescales each token's numbers to a steady range.",
     notes: {
       gpt2: 'GPT-2 moves the norm to the start of each step, before attention and before the feed-forward layer.',
     },
