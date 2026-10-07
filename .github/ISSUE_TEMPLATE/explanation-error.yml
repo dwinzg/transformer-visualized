@@ -1,0 +1,24 @@
+name: Report an error in an explanation
+description: Something in a lesson, figure or the glossary is wrong, unclear or out of date.
+labels: [content]
+body:
+  - type: input
+    id: page
+    attributes:
+      label: Page
+      description: The link to the page, with the section if you can.
+      placeholder: https://dwinzg.github.io/transformer-visualized/learn/attention/#step-...
+    validations:
+      required: true
+  - type: textarea
+    id: problem
+    attributes:
+      label: What is wrong or unclear
+      description: Quote the sentence or describe the figure.
+    validations:
+      required: true
+  - type: textarea
+    id: source
+    attributes:
+      label: A source, if you have one
+      description: A paper, book or other link that shows the right version.
