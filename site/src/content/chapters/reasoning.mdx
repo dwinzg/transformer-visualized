@@ -40,7 +40,7 @@ The first chapter showed how a model writes, one token at a time, each one added
 
 A model gets one pass through its layers for each token it writes. A question that needs several steps of work can be too much for the few tokens of a short answer.
 
-Writing the steps down changes that. Each step the model writes becomes text in its window, so the next guess can build on it. One hard jump becomes several small ones. Asking for the steps first, or showing a few worked examples in the prompt, is called <Term id="chain-of-thought">chain of thought</Term> (<Ref id="wei2022" />).
+Writing the steps down changes that. Each step the model writes becomes text in its window, so the next guess can build on it. One hard jump becomes several small ones. Showing a few worked examples with their steps in the prompt, so the model writes steps too, is called <Term id="chain-of-thought">chain of thought</Term> (<Ref id="wei2022" />).
 
 </Level>
 
@@ -82,7 +82,7 @@ So reasoning helps most on problems that really need steps, and is a waste on si
 
 <Level of="numbers">
 
-A pass of our tiny model takes a few hundredths of a second in your browser. A large model needs far more work per token, which is why long reasoning can take a minute or more.
+A pass of our tiny model takes a tiny fraction of a second in your browser. A large model needs far more work per token, which is why long reasoning can take a minute or more.
 
 </Level>
 
@@ -96,6 +96,6 @@ A pass of our tiny model takes a few hundredths of a second in your browser. A l
 
 <Callout kind="myth">
 
-The written steps are not always how the model really reached its answer. In one study, a hidden pattern in the prompt pushed models toward an answer, and their written reasoning never mentioned it, while still sounding convincing (<Ref id="turpin2023" />). Treat the steps as a helpful draft, not a window into the model.
+The written steps are not always how the model really reached its answer. In one study, a pattern in the prompt, such as the right answer always being (A), pushed models toward an answer, and their written reasoning almost never mentioned it, while still sounding convincing (<Ref id="turpin2023" />). Treat the steps as a helpful draft, not a window into the model.
 
 </Callout>

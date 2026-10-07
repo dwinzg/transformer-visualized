@@ -1157,6 +1157,10 @@
         "given": "Maria"
       },
       {
+        "family": "Hambro",
+        "given": "Eric"
+      },
+      {
         "family": "Zettlemoyer",
         "given": "Luke"
       },
@@ -1228,7 +1232,7 @@
     ],
     "title": "DeepSeek-R1: Incentivizing Reasoning Capability in LLMs via Reinforcement Learning",
     "year": 2025,
-    "venue": "arXiv preprint",
+    "venue": "Nature 645, 633 to 638",
     "url": "https://arxiv.org/abs/2501.12948v2",
     "arxiv": "2501.12948v2",
     "note": "Reasoning models. Reinforcement learning on problems with checkable answers teaches a model to write long reasoning before it answers.",
