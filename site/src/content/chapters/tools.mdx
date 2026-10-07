@@ -1,0 +1,149 @@
+---
+title: Retrieval and tools
+order: 6
+part: today
+summary: A model only knows what it learned and what is in its window, so programs around it look things up and do sums, and put the results in the text.
+goals:
+  - Say why a model gets facts and sums wrong, and what retrieval adds
+  - Follow the steps of a tool call, from the model's text to the program's answer
+  - Explain what makes a model an agent
+minutes: 10
+recap:
+  - A model has no way to look anything up. It only has what it learned and what is in its window.
+  - Retrieval finds text that might help and puts it in the prompt before the model answers.
+  - For a tool call, the model writes a request as text, a program runs it, and the answer is added to the text.
+  - An agent repeats this loop, writing what to do next, reading the result, and going on until the task is done.
+references:
+  - lewis2020
+  - schick2023
+  - yao2023
+---
+
+The last chapter showed that a sentence in the prompt can change the answer. This chapter turns that into a plan. If the model is missing something, put it in the text.
+
+<Step title="What the model cannot know">
+
+<CompareGuesses
+  texts={[
+    { label: 'A fact', text: 'The capital of France is' },
+    { label: 'A sum', text: 'Lily has 2 apples. Tom gives her 1 more. Now Lily has' },
+  ]}
+  caption="Our model was trained on children's stories, so it has neither facts nor sums."
+/>
+
+<Level of="story">
+
+A model has only two places to find an answer. One is what it learned in training, stored in its numbers. The other is the text in its window. It cannot open a book or a web page, and it has no calculator.
+
+Our model learned from simple stories, so it does not know that Paris is the capital of France, and it cannot add. Large models know far more, but they still forget things, mix them up, and get long sums wrong. They also know nothing that happened after their training.
+
+</Level>
+
+<Level of="numbers">
+
+After "The capital of France is", the top guesses are "a" with 12% and "not" with 11%. After the apples, "a" gets 17%, "two" 14% and "three" only 7%.
+
+</Level>
+
+</Step>
+
+<Step title="Look it up first">
+
+<CompareGuesses
+  texts={[
+    {
+      label: 'With the note',
+      text: 'The note said that the key was under the rug. Tom looked for the key under the',
+    },
+    { label: 'Without it', text: 'Tom looked for the key under the' },
+  ]}
+  caption="A note found first and put in the prompt changes the guess."
+/>
+
+<Level of="story">
+
+<Term id="retrieval">Retrieval</Term> means looking up text that might help before the model
+answers. A program searches a collection of documents, picks the passages that match the question
+best, and puts them in the prompt. Then the model answers with that text in its window (
+<Ref id="lewis2020" />
+).
+
+Our model shows the idea on a small scale. Given a note that says where the key is, it guesses "rug". Without the note, it guesses "tree" or "bed", like most stories would.
+
+</Level>
+
+<Level of="numbers">
+
+With the note, "rug" gets 46%. Without it, "tree" gets 30% and "bed" 25%, and "rug" is not in the top five.
+
+</Level>
+
+</Step>
+
+<Callout kind="simplification">
+
+Real retrieval systems often find passages by comparing lists of numbers for the question and for each passage, much like the embeddings in an earlier chapter. Here the note is simply written into the prompt by hand.
+
+</Callout>
+
+<Step title="Asking a program for help">
+
+<Loop
+  steps={[
+    { who: 'Text', text: 'Lily has 2 apples. Tom gives her 1 more. Now Lily has' },
+    { who: 'Model', text: '[Calculator(2 + 1)]', code: true },
+    { who: 'Program', text: 'Runs the calculator and adds its answer, 3, to the text.' },
+    { who: 'Model', text: 'Reads it all and goes on: 3 apples.' },
+  ]}
+  caption="A tool call, step by step. Our simplification, since our model was never trained to use tools."
+/>
+
+<Level of="story">
+
+A <Term id="tool-call">tool call</Term> lets a model use a program, such as a calculator or a search engine. The model is trained to write a request in a set format, as ordinary text. The program around the model watches for that format, runs the tool, and adds the result to the text. Then the model goes on guessing, with the answer in its window.
+
+The model never runs anything itself. It only writes text. A model can learn when a call is worth making from a few examples of each tool (<Ref id="schick2023" />).
+
+</Level>
+
+<Level of="numbers">
+
+Writing the answer into the text is not enough for our tiny model. Even after "2 plus 1 is 3." is added before the question, it still guesses "two" with 14% and "three" with only 7%. Using a tool's answer is a skill a model has to learn, and ours never did.
+
+</Level>
+
+</Step>
+
+<Step title="Agents repeat the loop">
+
+<Loop
+  steps={[
+    { who: 'Model', text: 'Writes what it thinks it should do next.' },
+    { who: 'Model', text: 'Writes an action, such as a search or a click.' },
+    { who: 'Program', text: 'Carries out the action and adds what happened to the text.' },
+  ]}
+  repeats
+  caption="An agent's loop. Every step is text in the same window."
+/>
+
+<Level of="story">
+
+An <Term id="agent">agent</Term> is a model that repeats the tool loop on its own. It writes what it thinks it should do, writes an action, reads what the action returned, and goes on, until the task is done (<Ref id="yao2023" />).
+
+Every step lands in the same window. A long task fills it up, so agents have to keep notes short or drop old steps, the same limit you saw in the last chapter.
+
+</Level>
+
+</Step>
+
+<Callout kind="myth">
+
+When a chat app shows a model searching the web, the model is not browsing. It writes a search request as text. A program runs the search and pastes the results into the prompt, and the model reads them like any other text.
+
+</Callout>
+
+<PredictReveal question="A model is asked about yesterday's weather. Its training ended a year ago, and nothing is looked up. What can it do?" options={['Say what the weather was', 'Guess, or say it does not know', 'Check the weather online']} answer={1}>
+
+It can only guess, or say it does not know. Yesterday is not in its training and not in its window. Retrieval or a tool call would put the answer in the text first.
+
+</PredictReveal>

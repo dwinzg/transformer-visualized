@@ -1,0 +1,101 @@
+---
+title: Thinking step by step
+order: 7
+part: today
+summary: A model that writes out its steps before the answer gets each step into its window, and models trained to do this solve much harder problems.
+goals:
+  - Explain why writing out steps can help a model that guesses one token at a time
+  - Say how reasoning models are trained, and what that costs
+  - Tell why written reasoning is not always how a model really decided
+minutes: 8
+recap:
+  - Each step a model writes becomes text it reads for the next guess, so a hard jump becomes several small ones.
+  - Reasoning models are trained with rewards for right answers on problems that can be checked, and learn to write long reasoning.
+  - Every written token costs a full pass of the model, so thinking longer takes more time and more of the window.
+  - Written reasoning can sound right and still leave out what really drove the answer.
+references:
+  - wei2022
+  - deepseek2025
+  - turpin2023
+---
+
+The first chapter showed how a model writes, one token at a time, each one added to the text before the next guess. This chapter is about using that on purpose.
+
+<Step title="Writing the steps down">
+
+<Loop
+  steps={[
+    {
+      who: 'Text',
+      text: 'Lily has 2 apples. Tom gives her 1 more, and Ben gives her 3. How many now? Let us count.',
+    },
+    { who: 'Model', text: 'She starts with 2. One more makes 3.' },
+    { who: 'Model', text: 'Three more makes 6.' },
+    { who: 'Model', text: 'So Lily has 6 apples.' },
+  ]}
+  caption="Each written step is in the window when the next one is guessed. A made-up example, since our model cannot do sums."
+/>
+
+<Level of="story">
+
+A model gets one pass through its layers for each token it writes. A question that needs several steps of work can be too much for the few tokens of a short answer.
+
+Writing the steps down changes that. Each step the model writes becomes text in its window, so the next guess can build on it. One hard jump becomes several small ones. Asking for the steps first, or showing a few worked examples in the prompt, is called <Term id="chain-of-thought">chain of thought</Term> (<Ref id="wei2022" />).
+
+</Level>
+
+<Level of="numbers">
+
+With eight worked examples in the prompt, a large model with 540 billion learned numbers did better on school math word problems than any earlier result (<Ref id="wei2022" />). Small models were not helped the same way, and our model, with about 1.3 million numbers, cannot add at all.
+
+</Level>
+
+</Step>
+
+<PredictReveal question="Why can writing out steps help a model that only ever guesses the next token?" options={['Each step it writes is text it can read for the next guess', 'It switches on a separate thinking part of the model', 'It makes the context window bigger']} answer={0}>
+
+Each written step joins the text in the window, so the next guess can use it. The model and its window stay the same. It just has more to read.
+
+</PredictReveal>
+
+<Step title="Models trained to reason">
+
+<Level of="story">
+
+A <Term id="reasoning-model">reasoning model</Term> is trained to write long reasoning before it answers, without being asked. One way is to give it problems whose answers can be checked, such as math or code, and reward it when the final answer is right. Over many rounds, it learns on its own to try steps, check them, and start again when something looks wrong (<Ref id="deepseek2025" />).
+
+It is still the same kind of model, guessing one token at a time. What changed is the habit it learned, to think on the page first.
+
+</Level>
+
+</Step>
+
+<Step title="Thinking costs tokens">
+
+<Level of="story">
+
+Every token of reasoning is written like any other, with a full pass through the model. A model that thinks for a thousand tokens before answering does a thousand passes first. That takes time, costs money to run, and fills the context window.
+
+So reasoning helps most on problems that really need steps, and is a waste on simple questions.
+
+</Level>
+
+<Level of="numbers">
+
+A pass of our tiny model takes a few hundredths of a second in your browser. A large model needs far more work per token, which is why long reasoning can take a minute or more.
+
+</Level>
+
+</Step>
+
+<Exercise prompt="A model writes 500 tokens of reasoning and then a 50 token answer. Each token takes 0.02 seconds. How many seconds does the reply take?" answer={11} tolerance={0}>
+
+500 plus 50 is 550 tokens. 550 times 0.02 is 11 seconds.
+
+</Exercise>
+
+<Callout kind="myth">
+
+The written steps are not always how the model really reached its answer. In one study, a hidden pattern in the prompt pushed models toward an answer, and their written reasoning never mentioned it, while still sounding convincing (<Ref id="turpin2023" />). Treat the steps as a helpful draft, not a window into the model.
+
+</Callout>

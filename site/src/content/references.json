@@ -1133,6 +1133,137 @@
     "topics": ["today"]
   },
   {
+    "id": "schick2023",
+    "type": "paper",
+    "authors": [
+      {
+        "family": "Schick",
+        "given": "Timo"
+      },
+      {
+        "family": "Dwivedi-Yu",
+        "given": "Jane"
+      },
+      {
+        "family": "Dessì",
+        "given": "Roberto"
+      },
+      {
+        "family": "Raileanu",
+        "given": "Roberta"
+      },
+      {
+        "family": "Lomeli",
+        "given": "Maria"
+      },
+      {
+        "family": "Zettlemoyer",
+        "given": "Luke"
+      },
+      {
+        "family": "Cancedda",
+        "given": "Nicola"
+      },
+      {
+        "family": "Scialom",
+        "given": "Thomas"
+      }
+    ],
+    "title": "Toolformer: Language Models Can Teach Themselves to Use Tools",
+    "year": 2023,
+    "venue": "Advances in Neural Information Processing Systems 36 (NeurIPS 2023)",
+    "url": "https://arxiv.org/abs/2302.04761v1",
+    "arxiv": "2302.04761v1",
+    "note": "Tool calling. A model learns to write calls to a calculator, a search engine and other tools in its text, and to use their answers.",
+    "topics": ["today"]
+  },
+  {
+    "id": "yao2023",
+    "type": "paper",
+    "authors": [
+      {
+        "family": "Yao",
+        "given": "Shunyu"
+      },
+      {
+        "family": "Zhao",
+        "given": "Jeffrey"
+      },
+      {
+        "family": "Yu",
+        "given": "Dian"
+      },
+      {
+        "family": "Du",
+        "given": "Nan"
+      },
+      {
+        "family": "Shafran",
+        "given": "Izhak"
+      },
+      {
+        "family": "Narasimhan",
+        "given": "Karthik"
+      },
+      {
+        "family": "Cao",
+        "given": "Yuan"
+      }
+    ],
+    "title": "ReAct: Synergizing Reasoning and Acting in Language Models",
+    "year": 2023,
+    "venue": "ICLR 2023",
+    "url": "https://arxiv.org/abs/2210.03629v3",
+    "arxiv": "2210.03629v3",
+    "note": "Agents. A model takes turns writing its reasoning and an action, reads what the action returned, and goes on.",
+    "topics": ["today"]
+  },
+  {
+    "id": "deepseek2025",
+    "type": "paper",
+    "authors": [
+      {
+        "literal": "DeepSeek-AI"
+      }
+    ],
+    "title": "DeepSeek-R1: Incentivizing Reasoning Capability in LLMs via Reinforcement Learning",
+    "year": 2025,
+    "venue": "arXiv preprint",
+    "url": "https://arxiv.org/abs/2501.12948v2",
+    "arxiv": "2501.12948v2",
+    "note": "Reasoning models. Reinforcement learning on problems with checkable answers teaches a model to write long reasoning before it answers.",
+    "topics": ["today"]
+  },
+  {
+    "id": "turpin2023",
+    "type": "paper",
+    "authors": [
+      {
+        "family": "Turpin",
+        "given": "Miles"
+      },
+      {
+        "family": "Michael",
+        "given": "Julian"
+      },
+      {
+        "family": "Perez",
+        "given": "Ethan"
+      },
+      {
+        "family": "Bowman",
+        "given": "Samuel R."
+      }
+    ],
+    "title": "Language Models Don't Always Say What They Think: Unfaithful Explanations in Chain-of-Thought Prompting",
+    "year": 2023,
+    "venue": "Advances in Neural Information Processing Systems 36 (NeurIPS 2023)",
+    "url": "https://arxiv.org/abs/2305.04388v2",
+    "arxiv": "2305.04388v2",
+    "note": "Written reasoning can look convincing and still leave out what really drove a model's answer.",
+    "topics": ["today", "interpretability"]
+  },
+  {
     "id": "geva2021",
     "type": "paper",
     "authors": [
