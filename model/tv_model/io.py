@@ -12,8 +12,15 @@ from safetensors.torch import save_file
 
 from .config import config_from_engine_json
 from .gpt import GPT
+from .llama import build_model
 
 FORMAT_ID = "transformer-visualized/gpt2/1"
+# Llama-style files have their own format, so an older engine refuses them instead of misreading.
+LLAMA_FORMAT_ID = "transformer-visualized/llama/1"
+
+
+def format_for(cfg) -> str:
+    return LLAMA_FORMAT_ID if cfg.arch == "llama" else FORMAT_ID
 
 
 def _sort_metadata_header(path: Path) -> None:
@@ -46,7 +53,7 @@ def _sort_metadata_header(path: Path) -> None:
 
 
 def save_model(model: GPT, path: Path, extra_metadata: Mapping[str, str] | None = None) -> None:
-    metadata = {"format": FORMAT_ID, "config": json.dumps(model.cfg.to_engine_json())}
+    metadata = {"format": format_for(model.cfg), "config": json.dumps(model.cfg.to_engine_json())}
     if extra_metadata:
         reserved = sorted(set(extra_metadata) & set(metadata))
         if reserved:
@@ -61,15 +68,17 @@ def save_model(model: GPT, path: Path, extra_metadata: Mapping[str, str] | None 
     _sort_metadata_header(path)
 
 
-def load_model(path: Path) -> GPT:
+def load_model(path: Path) -> GPT:  # or a Llama, with the same interface
     with safe_open(str(path), framework="pt") as f:
         metadata = f.metadata() or {}
-        if metadata.get("format") != FORMAT_ID:
-            raise ValueError(
-                f"{path}: expected format {FORMAT_ID!r}, got {metadata.get('format')!r}"
-            )
+        if metadata.get("format") not in (FORMAT_ID, LLAMA_FORMAT_ID):
+            raise ValueError(f"{path}: unknown format {metadata.get('format')!r}")
         cfg = config_from_engine_json(json.loads(metadata["config"]))
+        if metadata.get("format") != format_for(cfg):
+            raise ValueError(
+                f"{path}: expected format {format_for(cfg)!r}, got {metadata.get('format')!r}"
+            )
         state = {name: f.get_tensor(name) for name in f.keys()}
-    model = GPT(cfg)
+    model = build_model(cfg)
     model.load_state_dict(state, strict=True)
     return model.eval()

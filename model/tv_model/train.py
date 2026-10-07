@@ -20,6 +20,7 @@ from .config import PRESETS, config_from_engine_json
 from .encode import read_tokens
 from .gpt import GPT
 from .io import save_model
+from .llama import build_model
 
 
 @dataclass
@@ -108,7 +109,7 @@ def train(cfg: TrainConfig) -> dict:
     out_dir.mkdir(parents=True, exist_ok=True)
     train_tokens = read_tokens(data_dir / "train.bin")
     valid_tokens = read_tokens(data_dir / "valid.bin")
-    model = GPT(model_cfg).to(device)
+    model = build_model(model_cfg).to(device)
     optimizer = configure_optimizer(model, cfg)
     rng = np.random.default_rng(cfg.seed)
     best_val = float("inf")
@@ -179,7 +180,7 @@ def train(cfg: TrainConfig) -> dict:
 
 def load_checkpoint(path: Path) -> tuple[GPT, dict]:
     checkpoint = torch.load(path, map_location="cpu", weights_only=True)
-    model = GPT(config_from_engine_json(checkpoint["config"]))
+    model = build_model(config_from_engine_json(checkpoint["config"]))
     model.load_state_dict(checkpoint["model"])
     return model.eval(), {"step": checkpoint["step"], "val_loss": checkpoint["val_loss"]}
 

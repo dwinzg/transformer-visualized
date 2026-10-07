@@ -37,12 +37,37 @@ _PER_LAYER = [
 _PER_HEAD = ["q", "k", "v", "scores", "scaledMasked", "weights", "out"]
 
 
+# A Llama-style model has no position table, an RMSNorm that keeps only the mean square, a gated
+# feed forward, and queries and keys before and after their rotation.
+_LLAMA_TOP_LEVEL = ["tokenEmbeddings", "embeddings", "lnFinal.meanSquare", "lnFinal.out", "logits"]
+_LLAMA_PER_LAYER = [
+    "input",
+    "ln1.meanSquare",
+    "ln1.out",
+    "attnConcat",
+    "attnOut",
+    "residAfterAttn",
+    "ln2.meanSquare",
+    "ln2.out",
+    "mlpGate",
+    "mlpUp",
+    "mlpAct",
+    "mlpOut",
+    "output",
+]
+_LLAMA_PER_HEAD = ["qBeforeRope", "kBeforeRope", *_PER_HEAD]
+
+
 def expected_trace_names(cfg: ModelConfig) -> set[str]:
-    names = set(_TOP_LEVEL)
+    llama = cfg.arch == "llama"
+    names = set(_LLAMA_TOP_LEVEL if llama else _TOP_LEVEL)
     for layer in range(cfg.n_layers):
-        names.update(f"layers.{layer}.{name}" for name in _PER_LAYER)
+        names.update(
+            f"layers.{layer}.{name}" for name in (_LLAMA_PER_LAYER if llama else _PER_LAYER)
+        )
         for head in range(cfg.n_heads):
-            names.update(f"layers.{layer}.heads.{head}.{name}" for name in _PER_HEAD)
+            per_head = _LLAMA_PER_HEAD if llama else _PER_HEAD
+            names.update(f"layers.{layer}.heads.{head}.{name}" for name in per_head)
     return names
 
 
