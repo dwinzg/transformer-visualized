@@ -1,0 +1,89 @@
+---
+import training from '../../../models/tiny/training.json';
+import Figure from '../components/Figure.astro';
+import TrainingFigure from '../components/figures/TrainingFigure.tsx';
+import Ref from '../components/mdx/Ref.astro';
+import BaseLayout from '../layouts/BaseLayout.astro';
+import { withBase } from '../lib/paths';
+import { chanceLoss, strongestHead, type Snapshot, type TrainingData } from '../lib/training';
+
+const data = training as TrainingData;
+const snaps = data.snapshots;
+const first = snaps[0];
+const last = snaps[snaps.length - 1];
+const pct = (p: number) => `${Math.round(p * 100)}%`;
+const steps = (n: number) => n.toLocaleString('en-US');
+// The first saved step where each skill passes half, and the best copying score, for the text.
+const firstAbove = (pick: (s: Snapshot) => number, at: number) => snaps.find((s) => pick(s) >= at);
+const recallAt = firstAbove((s) => s.recall, 0.5);
+const recallBefore = snaps[snaps.indexOf(recallAt!) - 2];
+const copyPeak = snaps.reduce((a, b) => (b.copy > a.copy ? b : a));
+const head = strongestHead(last.induction);
+---
+
+<BaseLayout
+  title="Watch it learn"
+  description="Slide through the tiny model's training and watch its guesses, stories and skills appear."
+>
+  <section class="prose page">
+    <h1>Watch it learn</h1>
+    <p class="lede">
+      We trained the model again with the same recipe and saved it {data.snapshots.length} times
+      along the way. Slide back to the start, where it knows nothing, and forward to the end.
+    </p>
+    <Figure
+      caption="Every number comes from a saved copy of the model at that step."
+      description="A slider moves through saved copies of the model during training. For each one it shows the loss on a chart, a story the model writes, its guesses after a sentence, how well it uses earlier text, and a table of how much each attention head copies."
+    >
+      <TrainingFigure client:visible data={data} chance={chanceLoss(4096)} />
+    </Figure>
+
+    <h2>What changes</h2>
+    <p>
+      Training shows the model a batch of text, measures how surprised it was by each next token,
+      and nudges every number a little to be less surprised next time. That surprise is the
+      <strong>loss</strong>. At the start the model guesses blindly among 4,096 tokens, a loss of
+      {first.valLoss.toFixed(2)}. By the end it is {last.valLoss.toFixed(2)}.
+    </p>
+    <p>
+      The story shows the order things are learned in. First common tokens like "." and "the", then
+      words that go together, then whole sentences about a boy named Tim. Using what came earlier in
+      the text comes later. Remembering Fluffy from the first sentence is still at
+      {pct(recallBefore.recall)} after {steps(recallBefore.step)} steps and passes half by step{' '}
+      {steps(recallAt!.step)}.
+    </p>
+
+    <h2>Heads that copy</h2>
+    <p>
+      Some attention heads learn a simple trick. When a token shows up again, they look at the token
+      that came right after it last time, and pass that along as a guess. These are called induction
+      heads, and in larger models they appear at the same point in training as a jump in using
+      earlier text (<Ref id="olsson2022" />
+      ).
+    </p>
+    <p>
+      The table measures this on random tokens repeated twice. In our small model the scores stay
+      low, at most {head.score.toFixed(2)}, for layer {head.layer + 1}, head {head.head + 1}. Random
+      tokens are nothing like the stories it learned from, so the skills above show the copying more
+      clearly. Copying the made-up word Zog comes last of all, peaking at {pct(copyPeak.copy)} after{' '}
+      {steps(copyPeak.step)} steps and settling at {pct(last.copy)}. Training does not only add
+      skills. It also trades them against each other.
+    </p>
+
+    <p class="note">
+      This is a second run of the recipe in the{' '}
+      <a href={withBase('learn/introduction/')}>chapters</a>, so its last copy is close to the model
+      the rest of the site uses, but not the same file.
+    </p>
+  </section>
+</BaseLayout>
+
+<style>
+  .page {
+    padding-block: var(--space-12);
+  }
+  .lede,
+  .note {
+    color: var(--color-text-secondary);
+  }
+</style>
