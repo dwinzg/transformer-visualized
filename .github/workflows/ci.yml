@@ -34,9 +34,33 @@ jobs:
       - run: npm ci
       - run: npm run check
 
+  # The browser tests only matter when the site, the engine, the model or the packages change.
+  # A change to repo files alone, such as templates, workflows or notes, skips them.
+  changes:
+    if: ${{ !github.event.pull_request.draft }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    outputs:
+      app: ${{ steps.diff.outputs.app }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+          fetch-depth: 0
+      - id: diff
+        env:
+          BASE: ${{ github.event.pull_request.base.sha }}
+        run: |
+          if [ -z "$BASE" ] || git diff --name-only "$BASE" HEAD | grep -qE '^(site|packages|models)/|^package(-lock)?\.json$'; then
+            echo "app=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "app=false" >> "$GITHUB_OUTPUT"
+          fi
+
   # One job per browser, side by side. Together they ran close to the 30 minute limit.
   e2e:
-    if: ${{ !github.event.pull_request.draft }}
+    needs: changes
+    if: ${{ needs.changes.outputs.app == 'true' }}
     runs-on: ubuntu-latest
     timeout-minutes: 25
     strategy:
