@@ -7,11 +7,13 @@ const chapters = (await getCollection('chapters', ({ data }) => !data.draft)).so
   (a, b) => a.data.order - b.data.order,
 );
 // The Learn menu holds every way to study, the same four the home page offers.
-const learnMenu = [
+const learnMenu: { href: string; label: string; gap?: boolean }[] = [
   { href: withBase('learn/'), label: 'All chapters' },
-  ...chapters.map((c) => ({
+  ...chapters.map((c, i) => ({
     href: withBase(`learn/${c.id}/`),
     label: `${c.data.order}. ${c.data.title}`,
+    // A small gap where the chapters about using the model today begin.
+    gap: c.data.part === 'today' && chapters[i - 1]?.data.part !== 'today',
   })),
   { href: withBase('learn/architecture/'), label: 'The whole model', gap: true },
   { href: withBase('review/'), label: 'Quick review' },
