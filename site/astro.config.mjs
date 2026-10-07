@@ -10,6 +10,27 @@ export default defineConfig({
   // Code blocks take their colors from the --astro-code-* tokens in src/styles/tokens.css,
   // so they follow the site theme and meet the contrast the token test enforces.
   markdown: { shikiConfig: { theme: 'css-variables' } },
+  // GitHub Pages cannot send headers, so the policy goes in a meta tag. Astro hashes every script
+  // and style it emits. Inline style attributes stay allowed, since KaTeX, Shiki and the figures
+  // use them, and an attribute cannot run code.
+  security: {
+    csp: {
+      directives: [
+        "default-src 'self'",
+        "img-src 'self' data:",
+        "font-src 'self' data:",
+        "object-src 'none'",
+        "base-uri 'self'",
+        "form-action 'self'",
+      ],
+      styleDirective: {
+        resources: [
+          { resource: "'self'", kind: 'element' },
+          { resource: "'unsafe-inline'", kind: 'attribute' },
+        ],
+      },
+    },
+  },
   integrations: [react(), mdx()],
   vite: {
     build: {
