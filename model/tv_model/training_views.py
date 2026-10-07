@@ -48,7 +48,10 @@ def top_next(model: GPT, tokenizer, text: str, count: int = 5) -> list[dict]:
 def chance_of(model: GPT, tokenizer, prompt: str, answer: str) -> float:
     """The chance the model writes exactly `answer` next, one token after another."""
     prompt_ids = tokenizer.encode(prompt).ids
-    answer_ids = tokenizer.encode(prompt + answer).ids[len(prompt_ids) :]
+    full = tokenizer.encode(prompt + answer).ids
+    if full[: len(prompt_ids)] != prompt_ids:
+        raise ValueError(f"{answer!r} changes how {prompt!r} is split into tokens")
+    answer_ids = full[len(prompt_ids) :]
     ids = prompt_ids + answer_ids
     logp = torch.log_softmax(model(torch.tensor([ids[:-1]]))[0], dim=-1)
     start = len(prompt_ids) - 1
@@ -76,6 +79,17 @@ def induction_scores(model: GPT) -> list[list[float]]:
     return [[round(float(s), 4) for s in row] for row in totals / INDUCTION_SEEDS]
 
 
+def induction_chance() -> float:
+    """The score of a head that spreads its weight evenly over every token it can see."""
+    rows = range(INDUCTION_HALF + 1, 2 * INDUCTION_HALF)
+    return round(float(np.mean([1 / (i + 1) for i in rows])), 4)
+
+
+def printable(text: str) -> str:
+    """An untrained model writes stray bytes. Control characters and broken bytes become spaces."""
+    return "".join(c if c.isprintable() or c == "\n" else " " for c in text).replace("\ufffd", " ")
+
+
 def snapshot_view(path: Path, tokenizer) -> dict:
     model = load_model(path)
     with safe_open(str(path), framework="pt") as f:
@@ -85,14 +99,16 @@ def snapshot_view(path: Path, tokenizer) -> dict:
         "step": step,
         "valLoss": round(float(meta["val_loss"]), 4),
         "next": top_next(model, tokenizer, NEXT),
-        "story": generate_text(model, tokenizer, STORY, STORY_TOKENS, 0.8, 40, 0)[len(STORY) :],
+        "story": printable(
+            generate_text(model, tokenizer, STORY, STORY_TOKENS, 0.8, 40, 0)[len(STORY) :]
+        ),
         "recall": chance_of(model, tokenizer, *RECALL),
         "copy": chance_of(model, tokenizer, *COPY),
         "induction": induction_scores(model),
     }
 
 
-def build(snapshots: Path, tokenizer_path: Path) -> dict:
+def build(snapshots: Path, tokenizer_path: Path, tokens_per_step: int = 64 * 128) -> dict:
     tokenizer = load_tokenizer(tokenizer_path)
     views = [snapshot_view(p, tokenizer) for p in sorted(snapshots.glob("step-*.safetensors"))]
     return {
@@ -102,7 +118,8 @@ def build(snapshots: Path, tokenizer_path: Path) -> dict:
             "recall": {"text": RECALL[0], "answer": RECALL[1]},
             "copy": {"text": COPY[0], "answer": COPY[1]},
         },
-        "tokensPerStep": 64 * 128,
+        "tokensPerStep": tokens_per_step,
+        "inductionChance": induction_chance(),
         "snapshots": views,
     }
 
@@ -112,8 +129,10 @@ def main(argv: list[str] | None = None) -> None:
     parser.add_argument("--snapshots", type=Path, required=True)
     parser.add_argument("--tokenizer", type=Path, required=True)
     parser.add_argument("--out", type=Path, required=True)
+    # The tiny preset trains on batches of 64 sequences of 128 tokens.
+    parser.add_argument("--tokens-per-step", type=int, default=64 * 128)
     args = parser.parse_args(argv)
-    data = build(args.snapshots, args.tokenizer)
+    data = build(args.snapshots, args.tokenizer, args.tokens_per_step)
     args.out.write_text(json.dumps(data, indent=1) + "\n")
     print(f"wrote {len(data['snapshots'])} snapshots to {args.out}")
 

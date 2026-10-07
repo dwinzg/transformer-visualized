@@ -12,6 +12,7 @@
   }
  },
  "tokensPerStep": 8192,
+ "inductionChance": 0.017,
  "snapshots": [
   {
    "step": 0,
@@ -43,7 +44,7 @@
      "p": 0.0005
     }
    ],
-   "story": " magnet magnetalk foreverurtain neveratch myster ret diaryexpected sword\u0019 pers shoe gum smiling tube search trophag glue letake Spot milk im smelly cir embarrassed",
+   "story": " magnet magnetalk foreverurtain neveratch myster ret diaryexpected sword  pers shoe gum smiling tube search trophag glue letake Spot milk im smelly cir embarrassed",
    "recall": 0.0002,
    "copy": 0.0,
    "induction": [
@@ -103,7 +104,7 @@
      "p": 0.0005
     }
    ],
-   "story": " dan hosp up\ufffd of was pen and follow rememberlla the up. meatting fly hosp search pro was but but loved pastry hay it lion\ufffdzag",
+   "story": " dan hosp up  of was pen and follow rememberlla the up. meatting fly hosp search pro was but but loved pastry hay it lion zag",
    "recall": 0.0002,
    "copy": 0.0,
    "induction": [
