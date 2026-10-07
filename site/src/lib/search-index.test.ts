@@ -68,7 +68,9 @@ describe('chapter source', () => {
     for (const file of readdirSync(dir).filter((f) => f.endsWith('.mdx'))) {
       const lines = readFileSync(join(dir, file), 'utf8').split('\n');
       // A citation alone on its line becomes its own block and breaks the paragraph around it.
-      const broken = lines.filter((line) => /^<Ref\b[^>]*\/>\)?\.?$/.test(line) || / \($/.test(line));
+      const broken = lines.filter(
+        (line) => /^<Ref\b[^>]*\/>\)?\.?$/.test(line) || / \($/.test(line),
+      );
       expect(broken, file).toEqual([]);
     }
   });
