@@ -30,8 +30,8 @@ const fold = (s: string) =>
   }).join('');
 
 // A light stem, so "tokens" finds "token" and the other way around.
-const stem = (w: string) =>
-  w.length > 3 && w.endsWith('s') && !w.endsWith('ss') ? w.slice(0, -1) : w;
+// Words like "this", "bus" and "class" keep their s.
+const stem = (w: string) => (w.length > 3 && /[^isu]s$/.test(w) ? w.slice(0, -1) : w);
 
 export const words = (s: string) =>
   fold(s)
@@ -49,7 +49,7 @@ export const prepare = (entries: SearchEntry[]): Prepared[] =>
 // Glossary terms and answers are the most direct hit for the same words.
 const KIND_BONUS: Partial<Record<SearchEntry['kind'], number>> = {
   Glossary: 3,
-  FAQ: 2,
+  Answer: 2,
   Chapter: 1,
 };
 
@@ -68,11 +68,14 @@ export function search(index: Prepared[], query: string, limit = 30): Hit[] {
         all = false;
         break;
       }
-      // Repeats help a little, but one strong page should not drown out the rest.
-      score += inTitle * 10 + Math.min(inText, 10);
+      // A word in the title counts once, and repeats in the text help a little, so one long
+      // page cannot drown out the rest.
+      score += Math.min(inTitle, 1) * 10 + Math.min(inText, 10);
       if (item.titleWords.includes(term)) score += 5;
     }
     if (!all) continue;
+    // A title that is exactly the query, such as the glossary term itself, comes first.
+    if (item.titleWords.join(' ') === terms.join(' ')) score += 20;
     score += KIND_BONUS[item.entry.kind] ?? 0;
     hits.push({ entry: item.entry, score, snippet: snippet(item.entry.text, terms) });
   }

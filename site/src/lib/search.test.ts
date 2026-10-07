@@ -23,6 +23,19 @@ describe('search', () => {
     expect(search(index, 'softmax banana')).toEqual([]);
   });
 
+  it('puts the exact term first, even when other titles repeat the word', () => {
+    const tokens = prepare([
+      entry('Answer', 'Why can a token not look at the tokens after it?', 'The causal mask.'),
+      entry('Step', 'Text becomes tokens', 'A model reads tokens.'),
+      entry('Glossary', 'Token', 'One piece of text.'),
+    ]);
+    expect(search(tokens, 'token')[0].entry.title).toBe('Token');
+  });
+
+  it('keeps the s of words like "this"', () => {
+    expect(words('this tags class')).toEqual(['this', 'tag', 'class']);
+  });
+
   it('ranks a glossary term with the exact title above a longer step', () => {
     expect(search(index, 'softmax')[0].entry.kind).toBe('Glossary');
   });
