@@ -22,7 +22,7 @@ The home page shows a real model writing a sentence, one guess at a time. Tap an
 
 ### Learn from scratch
 
-Five short chapters follow one sentence through the model. Each step starts as a story. Switch to Numbers, Formula or Code at any time.
+Five short chapters follow one sentence through the model, and three more show how it is used today, with prompts, tools and reasoning. Each step starts as a story. Switch to Numbers, Formula or Code at any time.
 
 <img src="docs/images/use-2-depth.png" alt="A chapter with the Story, Numbers, Formula and Code switch" width="600">
 
@@ -68,14 +68,14 @@ Every figure has a Start over button, and everything works with a keyboard and a
 
 ## What's inside
 
-- **Five chapters.** What a language model does, tokens, embeddings and position, attention, and prediction.
+- **Eight chapters.** What a language model does, tokens, embeddings and position, attention, and prediction. Then context and prompts, retrieval and tools, and thinking step by step.
 - **Search and answers.** Search the whole site, or read short answers to common questions, each linked to its step and source.
 - **A tiny real model.** A GPT-2 style model, trained on short children's stories, runs right in your browser. You can inspect every number it produces.
 - **Toy examples.** Small enough to work out by hand before you meet the real thing.
 - **Sources you can check.** The references page lists every paper with a pinned link, and points to what to read next about today's models. Simplifications are labeled as ours.
 - **Works anywhere.** It runs in the browser with no account, no server and no tracking. Install it and it works offline too.
 
-Coming next: chapters on the terms people hear today, a training playground and a Llama-style model next to GPT-2. The [milestones](https://github.com/dwinzg/transformer-visualized/milestones) show what each release will bring.
+Coming next: a training playground and a Llama-style model next to GPT-2. The [milestones](https://github.com/dwinzg/transformer-visualized/milestones) show what each release will bring.
 
 ## How to run
 
