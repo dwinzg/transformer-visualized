@@ -113,6 +113,8 @@ def train(cfg: TrainConfig) -> dict:
     rng = np.random.default_rng(cfg.seed)
     best_val = float("inf")
     snapshots = {int(s) for s in cfg.snapshot_steps.split(",") if s.strip()}
+    if any(s < 0 or s > cfg.max_steps for s in snapshots):
+        raise ValueError(f"snapshot steps must be between 0 and {cfg.max_steps}")
     start = time.time()
     with (out_dir / "log.jsonl").open("w") as log:
 
