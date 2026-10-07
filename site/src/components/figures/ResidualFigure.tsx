@@ -72,8 +72,8 @@ export default function ResidualFigure({
             <strong>{n.mean.toFixed(4)}</strong>.
           </li>
           <li>
-            Measure how spread out they are, the square root of their variance plus a tiny amount.
-            That is <strong>{n.spread.toFixed(4)}</strong>.
+            Measure how spread out they are, add a tiny amount to their variance and take the square
+            root. That is <strong>{n.spread.toFixed(4)}</strong>.
           </li>
           <li>
             Subtract the average and divide by the spread. Now every token&apos;s numbers sit on the

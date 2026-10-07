@@ -48,7 +48,7 @@ function residualView(trace: Trace, count: number): ResidualStep[][] {
 }
 
 /** How many of a token's numbers the norm view walks through. */
-export const NORM_SHOWN = 4;
+const NORM_SHOWN = 4;
 
 /** How the final norm rescales one token's numbers before they become chances. */
 export interface NormStep {
