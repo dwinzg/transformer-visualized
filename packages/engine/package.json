@@ -12,7 +12,7 @@
     "bench": "vitest bench --run --reporter=verbose"
   },
   "devDependencies": {
-    "@types/node": "^24.13.6",
+    "@types/node": "^26.6.4",
     "vitest": "^5.0.1"
   }
 }
