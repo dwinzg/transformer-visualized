@@ -62,7 +62,8 @@ jobs:
     needs: changes
     if: ${{ needs.changes.outputs.app == 'true' }}
     runs-on: ubuntu-latest
-    timeout-minutes: 25
+    # WebKit is the slowest browser and has taken over 20 minutes on a busy runner.
+    timeout-minutes: 40
     strategy:
       fail-fast: false
       matrix:
