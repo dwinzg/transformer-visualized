@@ -36,13 +36,13 @@ The first chapters followed one sentence through the model. This one asks a prac
 
 A model reads a fixed number of tokens at a time, called its <Term id="context-window">context window</Term>. Anything earlier is cut off, as if it was never written.
 
-Our model learns that Sara's cat is called Fluffy from the first sentence, and guesses "Fluffy" for who gets the milk. Add sentences in between, and the note slips further back. Once it falls out of the window, the model has never heard of Fluffy.
+Our model reads that Sara's cat is called Fluffy in the first sentence, and guesses "Fluffy" for who gets the milk. Add sentences in between, and the note slips further back. Once it falls out of the window, the model has never heard of Fluffy.
 
 </Level>
 
 <Level of="numbers">
 
-Our model's window is 128 tokens, because it learned one position embedding for each of 128 places. With the note right before the question, the text is 14 tokens and "Fluffy" gets 83%. With 5 sentences in between, it is 119 tokens and "Fluffy" drops to 43%. With 6, the text is 140 tokens, the note is cut off, and "her" leads with 44%.
+Our model's window is 128 tokens, because it learned one position embedding for each of 128 places. With the note right before the question, the text is 14 tokens and "Fluffy" gets 83%. With 5 sentences in between, it is 119 tokens and "Fluffy" drops to 43%. With 6, the text is 140 tokens and the note is cut off. "Fluffy" is gone, and "her" with 44% and "the" with 43% are nearly tied.
 
 GPT-2 has a window of 1,024 tokens (<Ref id="radford2019" />). Many large models today fit far more, but the rule is the same. What falls outside is not read.
 
@@ -54,7 +54,7 @@ With a window of <Tex tex="w" /> tokens, the guess for the next token only depen
 
 <Tex
   display
-  tex="P(t_{n+1} \mid t_1, \dots, t_n) \approx P(t_{n+1} \mid t_{n-w+1}, \dots, t_n), \qquad w = 128"
+  tex="P_{\text{model}}(t_{n+1} \mid t_1, \dots, t_n) = P_{\text{model}}(t_{n+1} \mid t_{n-w+1}, \dots, t_n), \qquad w = 128"
 />
 
 </Level>
@@ -117,7 +117,7 @@ With the note, "Fluffy" gets 83%. Without it, "her" gets 39% and "the" gets 26%,
 
 <Level of="story">
 
-A prompt can also show the model what to do, by giving a few examples first. Here Ben and Mia both say a made-up word, "Zog". When Tim speaks, the model's top guess starts with "Z". It never saw "Zog" in training. It copied the pattern from the prompt.
+A prompt can also show the model what to do, by giving a few examples first. Here Ben and Mia both say a made-up word, "Zog". When Tim speaks, the model's top guess starts with "Z". "Zog" is not a real word, so the model is unlikely to have seen it in training. It copied the pattern from the prompt.
 
 Large models do this with whole tasks. Show a few questions with their answers, and they answer the next question the same way (<Ref id="brown2020" />). Nothing in the model changes. The examples are just more text to read.
 
@@ -125,9 +125,9 @@ Large models do this with whole tasks. Show a few questions with their answers, 
 
 <Level of="numbers">
 
-After the two examples, "Z" is the top guess with 20%. Without them, the top guesses are "I" with 20% and "No" with 12%, and "Z" is far behind.
+After the two examples, "Z" is the top guess with 20%. Without them, the top guesses are "I" with 20% and "No" with 12%, and "Z" is not in the top five.
 
-Researchers found attention heads that do this kind of copying. They spot a token that appeared before and look at what came right after it last time, called induction heads (<Ref id="olsson2022" />).
+Researchers found attention heads that do this kind of copying, called induction heads. Each one spots a token that appeared before and looks at what came right after it last time (<Ref id="olsson2022" />).
 
 </Level>
 
@@ -144,7 +144,7 @@ Researchers found attention heads that do this kind of copying. They spot a toke
 
 Ask our model to write a poem, and it does not. It guesses "It", "The" or "I", the way a story might go on after that sentence. It only ever learned to continue children's stories.
 
-Chat models start the same way, as models that continue text. Then they are trained further on examples of instructions with good answers, and on people's ratings of their answers (<Ref id="ouyang2022" />). That is what turns a model that continues text into an assistant that answers. Underneath, it still guesses one token at a time.
+Chat models start the same way, as models that continue text. Then they are trained further on examples of instructions with good answers, and on people's rankings of their answers (<Ref id="ouyang2022" />). That is what turns a model that continues text into an assistant that answers. Underneath, it still guesses one token at a time.
 
 </Level>
 

@@ -252,7 +252,7 @@ describe('the applied chapters', () => {
     const { window, steps } = contextWindow(NOTE, FILLER, QUESTION, 8);
     expect(window).toBe(128);
     const top = steps.map((s) => s.guesses[0].token.text);
-    // Matches PyTorch: 0.832 with no filler, then fading, then gone past 128 tokens.
+    // Matches PyTorch: 0.832 with no filler, still high, then fading, then gone past 128 tokens.
     expect(steps[0].total).toBe(14);
     expect(steps[0].guesses[0].p).toBeCloseTo(0.832, 3);
     expect(top.slice(0, 6)).toEqual(Array(6).fill(' Fluffy'));
@@ -261,16 +261,35 @@ describe('the applied chapters', () => {
     expect(steps[6].seen).toBe(128);
     expect(top[6]).toBe(' her');
     expect(steps[6].guesses.some((g) => g.token.text === ' Fluffy')).toBe(false);
+    // The numbers the chapter quotes.
+    expect(Math.round(steps[5].guesses[0].p * 100)).toBe(43);
+    expect(steps[6].guesses.slice(0, 2).map((g) => [g.token.text, Math.round(g.p * 100)])).toEqual([
+      [' her', 44],
+      [' the', 43],
+    ]);
+    // Whenever any token is cut off, the whole note is, so "inside" is never half true.
+    for (const s of steps) {
+      const cut = s.total - s.seen;
+      expect(cut === 0 || cut >= s.note.to).toBe(true);
+    }
   });
 
   // Every number the applied chapters quote. If the model is retrained, update the chapters too.
   it.each([
     ['The capital of France is', [' a', 12], [' not', 11]],
-    ['Lily has 2 apples. Tom gives her 1 more. Now Lily has', [' a', 17], [' two', 14]],
+    [
+      'Lily has 2 apples. Tom gives her 1 more. Now Lily has',
+      [' a', 17],
+      [' two', 14],
+      [' enough', 7],
+      [' three', 7],
+    ],
     [
       'Lily has 2 apples. Tom gives her 1 more. 2 plus 1 is 3. Now Lily has',
       [' two', 14],
       [' a', 14],
+      [' enough', 7],
+      [' three', 7],
     ],
     [
       'The note said that the key was under the rug. Tom looked for the key under the',
@@ -280,13 +299,22 @@ describe('the applied chapters', () => {
     ['Tom looked for the key under the', [' tree', 30], [' bed', 25]],
     ['Ben said, "Zog." Mia said, "Zog." Tim said, "', ['Z', 20], ['I', 9]],
     ['Tim said, "', ['I', 20], ['No', 12]],
-    ['Write a poem about a cat.', [' It', 13], [' The', 11]],
+    ['Write a poem about a cat.', [' It', 13], [' The', 11], [' I', 9]],
   ] as const)('gives the quoted guesses after %j', (text, ...top) => {
     const [{ guesses }] = compareGuesses([text]);
     top.forEach(([token, percent], i) => {
       expect(guesses[i].token.text).toBe(token);
       expect(Math.round(guesses[i].p * 100)).toBe(percent);
     });
+  });
+
+  it.each([
+    ['Every morning, Sara gave milk to', ' Fluffy'],
+    ['Tom looked for the key under the', ' rug'],
+    ['Tim said, "', 'Z'],
+  ])('leaves the answer out of the top five after %j', (text, missing) => {
+    const [{ guesses }] = compareGuesses([text]);
+    expect(guesses.map((g) => g.token.text)).not.toContain(missing);
   });
 
   it('compares the guesses with and without the note', () => {
