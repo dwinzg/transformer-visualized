@@ -7,6 +7,19 @@ import { withBase } from '../../lib/paths';
 const chapters = (await getCollection('chapters', ({ data }) => !data.draft)).sort(
   (a, b) => a.data.order - b.data.order,
 );
+const parts = [
+  {
+    id: 'core',
+    title: 'Inside the model',
+    chapters: chapters.filter((c) => c.data.part === 'core'),
+  },
+  {
+    id: 'today',
+    title: 'Using it today',
+    intro: 'How prompts, retrieval, tools and reasoning build on the same model.',
+    chapters: chapters.filter((c) => c.data.part === 'today'),
+  },
+].filter((part) => part.chapters.length > 0);
 ---
 
 <BaseLayout
@@ -16,8 +29,8 @@ const chapters = (await getCollection('chapters', ({ data }) => !data.draft)).so
   <section class="prose page">
     <h1>Learn</h1>
     <p class="intro">
-      Each chapter follows the same sentence through one part of the model. Pick how you want things
-      explained. You can change it at any step.
+      The first chapters follow one sentence through the model, and the later ones show how it is
+      used today. Pick how you want things explained. You can change it at any step.
     </p>
     <DepthDial explain />
     <a class="map-row press" href={withBase('learn/architecture/')}>
@@ -26,23 +39,31 @@ const chapters = (await getCollection('chapters', ({ data }) => !data.draft)).so
         A clickable map of every part, with sizes, formulas and PyTorch code.
       </span>
     </a>
-    <ol class="chapters">
-      {chapters.map((chapter) => (
-        <li>
-          <a class="press" href={withBase(`learn/${chapter.id}/`)}>
-            <span class="token-chip number">
-              <span class="visually-hidden">Chapter </span>
-              {chapter.data.order}
-            </span>
-            <span class="text">
-              <span class="title">{chapter.data.title}</span>
-              <span class="summary">{chapter.data.summary}</span>
-              <span class="minutes">About {chapter.data.minutes} minutes</span>
-            </span>
-          </a>
-        </li>
-      ))}
-    </ol>
+    {parts.map((part) => (
+      <section aria-labelledby={`part-${part.id}`}>
+        <h2 id={`part-${part.id}`} class="part-title">
+          {part.title}
+        </h2>
+        {part.intro && <p class="part-intro">{part.intro}</p>}
+        <ol class="chapters" start={part.chapters[0].data.order}>
+          {part.chapters.map((chapter) => (
+            <li>
+              <a class="press" href={withBase(`learn/${chapter.id}/`)}>
+                <span class="token-chip number">
+                  <span class="visually-hidden">Chapter </span>
+                  {chapter.data.order}
+                </span>
+                <span class="text">
+                  <span class="title">{chapter.data.title}</span>
+                  <span class="summary">{chapter.data.summary}</span>
+                  <span class="minutes">About {chapter.data.minutes} minutes</span>
+                </span>
+              </a>
+            </li>
+          ))}
+        </ol>
+      </section>
+    ))}
   </section>
 </BaseLayout>
 
@@ -56,6 +77,14 @@ const chapters = (await getCollection('chapters', ({ data }) => !data.draft)).so
 <style>
   .page {
     padding-block: var(--space-12);
+  }
+  .part-title {
+    margin: var(--space-8) 0 var(--space-2);
+    font-size: var(--text-title-3);
+  }
+  .part-intro {
+    margin: 0 0 var(--space-3);
+    color: var(--color-text-secondary);
   }
   .intro {
     color: var(--color-text-secondary);
