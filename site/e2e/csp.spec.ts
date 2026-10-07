@@ -16,6 +16,7 @@ const PAGES = [
   'references/',
   'review/',
   'no-such-page/',
+  'dev/figures/',
 ];
 
 for (const path of PAGES) {
@@ -29,8 +30,19 @@ for (const path of PAGES) {
     });
     await page.goto(path);
     await expect(page.locator('meta[http-equiv="content-security-policy"]')).toHaveCount(1);
-    // Scrolling to the end wakes every island that waits until it is seen.
-    await page.evaluate(() => window.scrollTo(0, document.body.scrollHeight));
+    // A policy in a meta tag only covers what comes after it, so no inline script may come first.
+    const before = await page.evaluate(() => {
+      const meta = document.querySelector('meta[http-equiv="content-security-policy"]')!;
+      return [...document.querySelectorAll('script:not([src])')].filter(
+        (s) => s.compareDocumentPosition(meta) & Node.DOCUMENT_POSITION_FOLLOWING,
+      ).length;
+    });
+    expect(before).toBe(0);
+    // Bringing each island into view wakes the ones that wait until they are seen.
+    for (const island of await page.locator('astro-island').all()) {
+      await island.scrollIntoViewIfNeeded();
+    }
+    await expect(page.locator('astro-island[ssr]')).toHaveCount(0, { timeout: 20_000 });
     await page.waitForLoadState('networkidle');
     if (path === 'playground/') {
       await expect(page.getByRole('list', { name: 'Tokens' })).toBeVisible({ timeout: 20_000 });

@@ -37,17 +37,12 @@ const fullTitle = title === 'Transformer Visualized' ? title : `${title} · Tran
       media="(prefers-color-scheme: dark)"
       data-scheme="dark"
     />
-    <script is:inline>
-      document.documentElement.classList.add('js');
-      try {
-        const saved = localStorage.getItem('tv-theme');
-        if (saved === 'light' || saved === 'dark') document.documentElement.dataset.theme = saved;
-      } catch {
-        // Storage can be unavailable; fall back to the system theme.
-      }
-    </script>
+    <script is:inline src={withBase('theme.js')}></script>
     <slot name="head" />
-    <script is:inline define:vars={{ sw: withBase('sw.js') }}>
+    <script>
+      import { withBase } from '../lib/paths';
+
+      const sw = withBase('sw.js');
       // Keeps the site for offline use. Only the built site has sw.js, so the dev server's 404 is ignored.
       // A new version waits until the reader says so, then the page reloads into it. Without the
       // note, it would wait until every tab of the site was closed, which is easy to miss.
@@ -55,7 +50,7 @@ const fullTitle = title === 'Transformer Visualized' ? title : `${title} · Tran
         let asked = false;
         const note = () => document.querySelector('[data-update-note]');
         // The status region is always on the page. Adding text to it is what gets announced.
-        const offer = (worker) => {
+        const offer = (worker: ServiceWorker) => {
           const region = note();
           if (!region || region.childElementCount > 0) return;
           const text = document.createElement('span');
