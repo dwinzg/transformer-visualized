@@ -42,6 +42,8 @@ const chapters = defineCollection({
     minutes: z.number().int().positive(),
     recap: z.array(z.string().min(1)).min(2).max(5),
     references: z.array(reference('references')).min(1),
+    // The core chapters follow one sentence through the model. The others connect it to today.
+    part: z.enum(['core', 'today']).default('core'),
     draft: z.boolean().default(false),
   }),
 });
