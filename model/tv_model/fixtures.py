@@ -17,9 +17,10 @@ from pathlib import Path
 import torch
 from safetensors.torch import save_file
 
-from .config import MICRO, ModelConfig
+from .config import LLAMA_MICRO, MICRO, ModelConfig
 from .gpt import GPT, Trace
 from .io import save_model
+from .llama import build_model
 from .trace import flatten_trace
 
 MICRO_SEED = 0
@@ -39,12 +40,21 @@ def make_fixture_model(cfg: ModelConfig, seed: int) -> GPT:
     architecture-dependent number of draws from the global stream, so seeding it globally would
     make the fixture depend on that unrelated detail and would also reseed the caller's RNG.
     """
-    model = GPT(cfg)
+    model = build_model(cfg)
     generator = torch.Generator().manual_seed(seed)
     with torch.no_grad():
         for name, param in model.named_parameters():
             noise = torch.randn(param.shape, generator=generator)
-            if name.endswith(("ln_1.weight", "ln_2.weight", "ln_f.weight")):
+            if name.endswith(
+                (
+                    "ln_1.weight",
+                    "ln_2.weight",
+                    "ln_f.weight",
+                    "norm_1.weight",
+                    "norm_2.weight",
+                    "norm_f.weight",
+                )
+            ):
                 param.copy_(1.0 + 0.1 * noise)
             elif name.endswith(".bias"):
                 param.copy_(0.1 * noise)
@@ -60,9 +70,9 @@ def _write_trace(model: GPT, token_ids: list[int], path: Path) -> None:
     save_file(flatten_trace(trace), str(path))
 
 
-def write_micro_fixtures(out_dir: Path) -> None:
+def write_micro_fixtures(out_dir: Path, cfg: ModelConfig = MICRO) -> None:
     out_dir.mkdir(parents=True, exist_ok=True)
-    model = make_fixture_model(MICRO, MICRO_SEED)
+    model = make_fixture_model(cfg, MICRO_SEED)
     save_model(
         model, out_dir / "model.safetensors", {"purpose": "Engine test fixture with random weights"}
     )
@@ -105,16 +115,16 @@ def write_model_fixtures(
 
 def main(argv: list[str] | None = None) -> None:
     parser = argparse.ArgumentParser(description="Write golden fixtures for the engine tests.")
-    parser.add_argument("preset", choices=["micro", "tiny"])
+    parser.add_argument("preset", choices=["micro", "tiny", "llama-micro", "llama-tiny"])
     parser.add_argument("--out", type=Path, required=True)
     parser.add_argument("--model", type=Path)
     parser.add_argument("--tokenizer", type=Path)
     args = parser.parse_args(argv)
-    if args.preset == "micro":
-        write_micro_fixtures(args.out)
+    if args.preset in ("micro", "llama-micro"):
+        write_micro_fixtures(args.out, LLAMA_MICRO if args.preset == "llama-micro" else MICRO)
     else:
         if args.model is None or args.tokenizer is None:
-            parser.error("the tiny preset needs --model and --tokenizer")
+            parser.error(f"the {args.preset} preset needs --model and --tokenizer")
         write_model_fixtures(args.model, args.tokenizer, TINY_PROMPTS, args.out)
 
 
