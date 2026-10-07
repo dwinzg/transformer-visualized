@@ -18,6 +18,7 @@ const PAGES = [
   'glossary/',
   'references/',
   'review/',
+  'training/',
   'search/?q=attention',
   'faq/',
   'no-such-page/',
