@@ -61,3 +61,15 @@ describe('stepsOf', () => {
     expect(steps.every((s) => !/[<>{}]/.test(s.text))).toBe(true);
   });
 });
+
+describe('chapter source', () => {
+  it('keeps each citation inside its sentence, where MDX renders it inline', () => {
+    const dir = join(import.meta.dirname, '../content/chapters');
+    for (const file of readdirSync(dir).filter((f) => f.endsWith('.mdx'))) {
+      const lines = readFileSync(join(dir, file), 'utf8').split('\n');
+      // A citation alone on its line becomes its own block and breaks the paragraph around it.
+      const broken = lines.filter((line) => /^<Ref\b[^>]*\/>\)?\.?$/.test(line) || / \($/.test(line));
+      expect(broken, file).toEqual([]);
+    }
+  });
+});

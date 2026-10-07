@@ -23,18 +23,20 @@ const pct = (n: number, of: number) => `${(n / of) * 100}%`;
 /** A note, more and more text after it, and the window of tokens the model can still read. */
 export default function ContextWindowFigure({ window, steps, note, question }: Props) {
   const [gap, setGap] = useState(0);
+  const [announcement, setAnnouncement] = useState('');
   const id = useId();
   const step = steps[gap];
   const longest = steps[steps.length - 1].total;
+  // The note counts as inside only when none of its tokens is cut off. The note is short, so a
+  // step that cuts some tokens cuts all of it, as the tests check.
   const inside = step.total - step.seen <= step.note.from;
   const reads = step.total <= window ? `all ${step.total}` : `only the last ${window}`;
-  const summary = `${step.total} tokens in all. The model can read ${window}, so it reads ${reads}, and the note is ${inside ? 'inside' : 'outside'} its window.`;
 
   return (
     <div className="window-figure">
       <label className="window-slider" htmlFor={`${id}-gap`}>
         <span>
-          Sentences in between: <output htmlFor={`${id}-gap`}>{gap}</output>
+          Sentences in between <strong>{gap}</strong>
         </span>
         <input
           id={`${id}-gap`}
@@ -43,7 +45,15 @@ export default function ContextWindowFigure({ window, steps, note, question }: P
           max={steps.length - 1}
           value={gap}
           aria-valuetext={`${gap} sentences, ${step.total} tokens`}
-          onChange={(e) => setGap(Number(e.target.value))}
+          onChange={(e) => {
+            const next = Number(e.target.value);
+            setGap(next);
+            const s = steps[next];
+            const seenAll = s.total - s.seen <= s.note.from;
+            setAnnouncement(
+              `${s.total} tokens. The note is ${seenAll ? 'inside' : 'outside'} the window. Top guesses: ${describeGuesses(s.guesses)}.`,
+            );
+          }}
         />
       </label>
       <p className="window-text">
@@ -78,7 +88,7 @@ export default function ContextWindowFigure({ window, steps, note, question }: P
       </p>
       <ProbabilityBars guesses={step.guesses} label="The model's guesses for the next token" />
       <p className="visually-hidden" aria-live="polite">
-        {gap > 0 ? `${summary} Top guesses: ${describeGuesses(step.guesses)}.` : ''}
+        {announcement}
       </p>
     </div>
   );
