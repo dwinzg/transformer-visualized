@@ -1,0 +1,267 @@
+---
+import { getCollection } from 'astro:content';
+import BaseLayout from '../layouts/BaseLayout.astro';
+import { formatAuthors } from '../lib/citations';
+import { mapPath, PARTS } from '../lib/concepts';
+import { withBase } from '../lib/paths';
+import { plainText, stepsOf, type SearchEntry } from '../lib/search-index';
+
+// The whole index is built here, at build time, and sits in the page as data. The site is small,
+// so this is quick to load, works offline, and needs no server or outside service.
+const chapters = (await getCollection('chapters', ({ data }) => !data.draft)).sort(
+  (a, b) => a.data.order - b.data.order,
+);
+const entries: SearchEntry[] = [
+  ...chapters.flatMap((chapter) => {
+    const body = chapter.body ?? '';
+    const first = body.search(/<Step\s/);
+    const intro = first < 0 ? body : body.slice(0, first);
+    const { title, summary, goals, recap } = chapter.data;
+    return [
+      {
+        kind: 'Chapter' as const,
+        title,
+        href: `learn/${chapter.id}/`,
+        text: [summary, ...goals, ...recap, plainText(intro)].join(' '),
+      },
+      ...stepsOf(body).map((step) => ({
+        kind: 'Step' as const,
+        title: step.title,
+        context: title,
+        href: `learn/${chapter.id}/#${step.id}`,
+        text: step.text,
+      })),
+    ];
+  }),
+  ...(await getCollection('glossary')).map((term) => ({
+    kind: 'Glossary' as const,
+    title: term.data.term,
+    href: `glossary/#${term.id}`,
+    text: term.data.short,
+  })),
+  ...(await getCollection('faq')).map((q) => ({
+    kind: 'FAQ' as const,
+    title: q.data.question,
+    href: `faq/#${q.id}`,
+    text: q.data.answer,
+  })),
+  ...Object.values(PARTS).map((part) => ({
+    kind: 'Map' as const,
+    title: part.title,
+    context: 'The whole model',
+    href: mapPath(part.id),
+    text: `${part.story} ${part.numbers}`,
+  })),
+  ...(await getCollection('references')).map((ref) => ({
+    kind: 'Source' as const,
+    title: ref.data.title,
+    context: `${formatAuthors(ref.data.authors)}, ${ref.data.year}`,
+    href: `references/#${ref.id}`,
+    text: ref.data.note ?? '',
+  })),
+  {
+    kind: 'Page',
+    title: 'Playground',
+    href: 'playground/',
+    text: 'Type any text and step through tokens, embeddings, attention, the residual stream and the prediction, with every number shown.',
+  },
+  {
+    kind: 'Page',
+    title: 'Quick review',
+    href: 'review/',
+    text: 'One card per part of the model, to review the whole transformer at a glance.',
+  },
+];
+---
+
+<BaseLayout title="Search" description="Search the chapters, glossary, questions and sources.">
+  <section class="prose page">
+    <h1>Search</h1>
+    <form role="search" action={withBase('search/')} data-search-form>
+      <label for="search-input">Search the chapters, glossary, questions and sources</label>
+      <div class="search-row">
+        <input
+          id="search-input"
+          type="search"
+          name="q"
+          autocomplete="off"
+          spellcheck="false"
+          enterkeyhint="search"
+          data-search-input
+        />
+        <button type="submit" class="figure-button press">
+          Search
+        </button>
+      </div>
+    </form>
+    <noscript>
+      <p>
+        Search needs JavaScript. The <a href={withBase('glossary/')}>glossary</a> and the{' '}
+        <a href={withBase('faq/')}>questions and answers</a> work without it.
+      </p>
+    </noscript>
+    <p class="status" role="status" data-search-status></p>
+    <ol class="results" data-search-results></ol>
+  </section>
+  <script
+    type="application/json"
+    id="search-data"
+    set:html={JSON.stringify(entries).replace(/</g, '\\u003c')}
+  />
+</BaseLayout>
+
+<script>
+  import { prepare, search, type Hit } from '../lib/search';
+  import { withBase } from '../lib/paths';
+
+  const data = document.getElementById('search-data');
+  const input = document.querySelector<HTMLInputElement>('[data-search-input]');
+  const form = document.querySelector<HTMLFormElement>('[data-search-form]');
+  const status = document.querySelector<HTMLElement>('[data-search-status]');
+  const list = document.querySelector<HTMLOListElement>('[data-search-results]');
+
+  if (data && input && form && status && list) {
+    const index = prepare(JSON.parse(data.textContent ?? '[]'));
+
+    const item = ({ entry, snippet }: Hit) => {
+      const li = document.createElement('li');
+      const kind = document.createElement('span');
+      kind.className = 'kind';
+      kind.textContent = entry.kind;
+      const link = document.createElement('a');
+      link.href = withBase(entry.href);
+      link.textContent = entry.title;
+      const head = document.createElement('p');
+      head.className = 'result-head';
+      head.append(kind, ' ', link);
+      if (entry.context) {
+        const context = document.createElement('span');
+        context.className = 'context';
+        context.textContent = ` in ${entry.context}`;
+        head.append(context);
+      }
+      li.append(head);
+      if (snippet.length > 0) {
+        const p = document.createElement('p');
+        p.className = 'snippet';
+        p.append(
+          ...snippet.map((piece) => {
+            if (!piece.mark) return piece.text;
+            const mark = document.createElement('mark');
+            mark.textContent = piece.text;
+            return mark;
+          }),
+        );
+        li.append(p);
+      }
+      return li;
+    };
+
+    const show = (query: string) => {
+      const hits = search(index, query);
+      list.replaceChildren(...hits.map(item));
+      const q = query.trim();
+      status.textContent = !q
+        ? ''
+        : hits.length === 0
+          ? `Nothing found for “${q}”. Try fewer or shorter words.`
+          : `${hits.length === 30 ? 'The top 30' : hits.length} ${hits.length === 1 ? 'result' : 'results'} for “${q}”.`;
+    };
+
+    // The query lives in the address, so a search can be shared, and Back returns to it.
+    const params = new URLSearchParams(location.search);
+    input.value = params.get('q') ?? '';
+    show(input.value);
+
+    let timer: number | undefined;
+    input.addEventListener('input', () => {
+      clearTimeout(timer);
+      timer = window.setTimeout(() => {
+        const url = new URL(location.href);
+        if (input.value) url.searchParams.set('q', input.value);
+        else url.searchParams.delete('q');
+        history.replaceState(null, '', url);
+        show(input.value);
+      }, 150);
+    });
+    form.addEventListener('submit', (event) => {
+      event.preventDefault();
+      clearTimeout(timer);
+      show(input.value);
+      list.querySelector('a')?.focus();
+    });
+  }
+</script>
+
+<style>
+  .page {
+    padding-block: var(--space-12);
+  }
+  label {
+    display: block;
+    margin-bottom: var(--space-2);
+    color: var(--color-text-secondary);
+  }
+  .search-row {
+    display: flex;
+    gap: var(--space-2);
+  }
+  input,
+  button {
+    min-height: var(--touch-target);
+    font: inherit;
+    border: 1px solid var(--color-control-border);
+    border-radius: var(--radius-sm);
+    background: var(--color-surface);
+    color: var(--color-text);
+  }
+  button {
+    padding: 0 var(--space-4);
+    cursor: pointer;
+  }
+  input {
+    flex: 1;
+    min-width: 0;
+    padding: 0 var(--space-3);
+  }
+  .status {
+    color: var(--color-text-secondary);
+    min-height: 1.5em;
+  }
+  .results {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+  }
+  .results :global(li) {
+    padding-block: var(--space-3);
+    border-bottom: 1px solid var(--color-separator);
+  }
+  .results :global(p) {
+    margin: 0;
+  }
+  .results :global(.kind) {
+    font-size: var(--text-caption);
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: var(--color-text-secondary);
+  }
+  .results :global(.result-head a) {
+    font-weight: 600;
+  }
+  .results :global(.context),
+  .results :global(.snippet) {
+    color: var(--color-text-secondary);
+    font-size: var(--text-subheadline);
+  }
+  .results :global(.snippet) {
+    margin-top: var(--space-1);
+    overflow-wrap: anywhere;
+  }
+  .results :global(mark) {
+    background: color-mix(in srgb, var(--concept-query) 20%, transparent);
+    color: var(--color-text);
+    border-radius: 2px;
+  }
+</style>
