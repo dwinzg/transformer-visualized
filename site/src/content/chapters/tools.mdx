@@ -27,6 +27,10 @@ The last chapter showed that a sentence in the prompt can change the answer. Thi
   texts={[
     { label: 'A fact', text: 'The capital of France is' },
     { label: 'A sum', text: 'Lily has 2 apples. Tom gives her 1 more. Now Lily has' },
+    {
+      label: 'With the answer',
+      text: 'Lily has 2 apples. Tom gives her 1 more. 2 plus 1 is 3. Now Lily has',
+    },
   ]}
   caption="Our model was trained on children's stories, so it has neither facts nor sums."
 />
@@ -62,11 +66,7 @@ After "The capital of France is", the top guesses are "a" with 12% and "not" wit
 
 <Level of="story">
 
-<Term id="retrieval">Retrieval</Term> means looking up text that might help before the model
-answers. A program searches a collection of documents, picks the passages that match the question
-best, and puts them in the prompt. Then the model answers with that text in its window (
-<Ref id="lewis2020" />
-).
+<Term id="retrieval">Retrieval</Term> means looking up text that might help before the model answers. A program searches a collection of documents, picks the passages that match the question best, and puts them in the prompt. Then the model answers with that text in its window (<Ref id="lewis2020" />).
 
 Our model shows the idea on a small scale. Given a note that says where the key is, it guesses "rug". Without the note, it guesses "tree" or "bed", like most stories would.
 
@@ -93,7 +93,7 @@ Real retrieval systems often find passages by comparing lists of numbers for the
     { who: 'Text', text: 'Lily has 2 apples. Tom gives her 1 more. Now Lily has' },
     { who: 'Model', text: '[Calculator(2 + 1)]', code: true },
     { who: 'Program', text: 'Runs the calculator and adds its answer, 3, to the text.' },
-    { who: 'Model', text: 'Reads it all and goes on: 3 apples.' },
+    { who: 'Model', text: 'Reads it all and goes on with 3 apples.' },
   ]}
   caption="A tool call, step by step. Our simplification, since our model was never trained to use tools."
 />
@@ -108,7 +108,7 @@ The model never runs anything itself. It only writes text. A model can learn whe
 
 <Level of="numbers">
 
-Writing the answer into the text is not enough for our tiny model. Even after "2 plus 1 is 3." is added before the question, it still guesses "two" with 14% and "three" with only 7%. Using a tool's answer is a skill a model has to learn, and ours never did.
+Writing the answer into the text is not enough for our tiny model. Even after "2 plus 1 is 3." is added before the question, as in the third tab of the first figure, it still guesses "two" with 14% and "three" with only 7%. Using a tool's answer is a skill a model has to learn, and ours never did.
 
 </Level>
 
