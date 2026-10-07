@@ -43,3 +43,23 @@ export type {
 export { bytesToUnicode, Tokenizer } from './tokenizer';
 export type { TokenizerJson } from './tokenizer';
 export { ASCII_EQUIVALENTS, normalizeText, unsupportedCharacters } from './normalize';
+export {
+  flattenLlamaTrace,
+  forwardLlama,
+  LLAMA_FORMAT,
+  llamaFromTensors,
+  loadLlama,
+  parseLlamaConfig,
+  rmsNorm,
+  rope,
+  silu,
+} from './llama';
+export type {
+  LlamaBlockWeights,
+  LlamaConfig,
+  LlamaHeadTrace,
+  LlamaLayerTrace,
+  LlamaModel,
+  LlamaTrace,
+  RmsNormTrace,
+} from './llama';
