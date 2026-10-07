@@ -111,6 +111,18 @@ Then open http://localhost:4321/transformer-visualized/. Offline use only works 
 
 The model is trained with Python, which you only need if you want to retrain it. The steps are in [model/README.md](model/README.md).
 
+## Related projects
+
+These explainers came first, and each is worth your time. They shaped what we tried to do differently here.
+
+- [Transformer Explainer](https://poloclub.github.io/transformer-explainer/) runs GPT-2 live in your browser and shows each step as you type.
+- [LLM Visualization](https://bbycroft.net/llm) walks through every multiply of a small model in 3D.
+- [AnimatedLLM](https://animatedllm.github.io/) animates real models step by step for people new to the field, in several languages.
+- [The Illustrated Transformer](https://jalammar.github.io/illustrated-transformer/) explains the original paper with clear drawings.
+- [3Blue1Brown's neural network videos](https://www.3blue1brown.com/topics/neural-networks) build the intuition with animation, attention included.
+
+What we add is one ladder from a plain story to the exact math, on a small model where you can trace every number.
+
 ## Contributing
 
 Contributions are welcome, especially from people who are learning this for the first time. If something confused you, that's useful to hear. See [CONTRIBUTING.md](CONTRIBUTING.md) for how to help, the writing style and how we cite sources.
