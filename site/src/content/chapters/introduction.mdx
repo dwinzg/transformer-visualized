@@ -157,7 +157,7 @@ Here <Tex tex="\theta" /> stands for all of the model's learned parameters.
 
 ```ts
 const model = loadModel(
-  await (await fetch('/transformer-visualized/models/tiny/model.safetensors')).arrayBuffer(),
+  await (await fetch(modelUrl)).arrayBuffer(), // modelUrl is where the site keeps the file
 );
 console.log(model.config); // { vocabSize: 4096, dModel: 128, nLayers: 4, ... }
 ```

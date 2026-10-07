@@ -19,6 +19,7 @@ declare const trace: Trace;
 declare const ids: number[];
 declare const tokenIds: number[];
 declare const promptIds: number[];
+declare const modelUrl: string;
 declare const scores: ReturnType<typeof rowView>;
 `;
 

@@ -6,13 +6,19 @@ updates:
     directory: /
     schedule:
       interval: monthly
+    # Rebasing on every merge to main would rerun CI each time.
+    rebase-strategy: disabled
+    # A new major version comes in a PR of its own, so it cannot hold the others back.
     groups:
       npm:
         patterns: ['*']
+        update-types: [minor, patch]
   - package-ecosystem: github-actions
     directory: /
     schedule:
       interval: monthly
+    # Rebasing on every merge to main would rerun CI each time.
+    rebase-strategy: disabled
     groups:
       actions:
         patterns: ['*']
