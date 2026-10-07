@@ -74,4 +74,13 @@ describe('chapter source', () => {
       expect(broken, file).toEqual([]);
     }
   });
+
+  it('keeps each citation on a page next to its closing bracket', () => {
+    const dir = join(import.meta.dirname, '../pages');
+    for (const file of readdirSync(dir).filter((f) => f.endsWith('.astro'))) {
+      const text = readFileSync(join(dir, file), 'utf8');
+      // A newline between the citation and ")" shows up as a space before the bracket.
+      expect(text, file).not.toMatch(/<Ref\b[^>]*\/>\s*\n\s*\)/);
+    }
+  });
 });

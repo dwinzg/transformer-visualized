@@ -1193,3 +1193,23 @@ td.is-hidden {
   outline-offset: -2px;
   font-weight: 600;
 }
+.train-where {
+  margin: 0;
+}
+/* The two skill lines differ by pattern as well as color: Zog's line is dashed. */
+.train-chart g.line-copy polyline {
+  stroke-dasharray: 6 4;
+}
+.train-skills .key.line-copy {
+  border-radius: 0;
+  height: 3px;
+  width: 16px;
+  vertical-align: 3px;
+  background: repeating-linear-gradient(90deg, var(--concept-value) 0 6px, transparent 6px 9px);
+}
+.train-skills .key.line-recall {
+  border-radius: 0;
+  height: 3px;
+  width: 16px;
+  vertical-align: 3px;
+}
