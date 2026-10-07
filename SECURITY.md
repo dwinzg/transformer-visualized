@@ -1,6 +1,6 @@
 # Security
 
-transformer-visualized is a static site. It has no server, no accounts and no cookies, and it sends nothing you type anywhere. The model runs in your browser.
+transformer-visualized is a static site. It has no server, no accounts and no cookies. The model runs in your browser, so what you type stays there. The playground does put your text in the page's address, so a link you share carries it.
 
 ## Reporting a problem
 
@@ -10,6 +10,6 @@ Say what you found, how to see it, and which browser you used. You'll get a repl
 
 ## What is in place
 
-- Every page carries a content security policy. Scripts and styles must come from the site itself, and each inline one is allowed by its hash.
+- Every page carries a content security policy. Scripts and styles must come from the site itself, and each inline one is allowed by its hash. A test loads every page and fails if the policy blocks anything.
 - Everything the site loads comes from its own address. Links to papers and other sites only open them.
 - Workflow actions are pinned to exact commits, and Dependabot keeps them and the npm packages up to date.
