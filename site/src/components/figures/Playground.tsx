@@ -39,7 +39,7 @@ const STAGES: Record<Stage, { label: string; guide: string }> = {
   residual: {
     label: 'Residual stream',
     guide:
-      "Every step adds its result to the token's numbers, so nothing is lost. A norm rescales them at the end.",
+      "Every step adds its result to the token's numbers, so earlier numbers are kept. A norm rescales them at the end.",
   },
   output: {
     label: 'Next token',

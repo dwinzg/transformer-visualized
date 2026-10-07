@@ -8,7 +8,7 @@ import { stepsOf } from '../lib/search-index';
 const questions = await getCollection('faq');
 const chapters = await getCollection('chapters', ({ data }) => !data.draft);
 
-// Each answer links to the steps that explain it, by the step's own title. A step that is not on
+// Each answer links to the steps that explain it, by chapter and step id. A step that is not on
 // its chapter page fails the build, so a renamed step cannot leave a broken link behind.
 const steps = new Map(
   chapters.flatMap((chapter) =>
@@ -52,7 +52,7 @@ const items = await Promise.all(
       you can <a href={withBase('search/')}>search the whole site</a> too.
     </p>
     {items.map((item) => (
-      <section class="qa target-highlight" id={item.id} aria-labelledby={`${item.id}-q`}>
+      <article class="qa target-highlight" id={item.id} aria-labelledby={`${item.id}-q`}>
         <h2 id={`${item.id}-q`}>{item.question}</h2>
         <p>{item.answer}</p>
         {item.links.length > 0 && (
@@ -62,7 +62,7 @@ const items = await Promise.all(
               <>
                 {i > 0 && (i === item.links.length - 1 ? ' and ' : ', ')}
                 <a href={link.href}>
-                  {link.chapter}, {link.title}
+                  {link.title} ({link.chapter})
                 </a>
               </>
             ))}
@@ -82,7 +82,7 @@ const items = await Promise.all(
             ))}
           </ul>
         )}
-      </section>
+      </article>
     ))}
   </section>
 </BaseLayout>
