@@ -8,7 +8,8 @@ def test_presets_have_the_documented_shapes():
     assert (TINY.n_layers, TINY.n_heads, TINY.d_mlp) == (4, 4, 512)
     assert (MICRO.vocab_size, MICRO.context_length, MICRO.d_model) == (64, 16, 16)
     assert (MICRO.n_layers, MICRO.n_heads, MICRO.d_mlp) == (2, 2, 64)
-    assert PRESETS == {"tiny": TINY, "micro": MICRO}
+    assert set(PRESETS) == {"tiny", "micro", "llama-tiny", "llama-micro"}
+    assert PRESETS["tiny"] == TINY and PRESETS["micro"] == MICRO
 
 
 def test_d_head_divides_d_model_across_heads():
