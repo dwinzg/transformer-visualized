@@ -1037,3 +1037,68 @@ td.is-hidden {
 .prob-word .attn-inspect {
   color: inherit;
 }
+
+/* Context window: a note, filler, and the window of tokens the model reads. */
+.compare-figure,
+.window-figure {
+  display: grid;
+  gap: var(--space-3);
+}
+.window-slider {
+  display: grid;
+  gap: var(--space-1);
+  font-size: var(--text-subheadline);
+}
+.window-slider input {
+  width: 100%;
+  min-height: var(--touch-target);
+}
+.window-text {
+  margin: 0;
+}
+.window-text mark {
+  border-radius: 4px;
+  padding: 0 2px;
+  color: var(--color-text);
+}
+.window-text mark.is-seen,
+.window-note.is-seen {
+  background: color-mix(in srgb, var(--concept-output) 28%, transparent);
+}
+.window-text mark.is-lost {
+  background: transparent;
+  text-decoration: line-through;
+}
+.window-filler {
+  color: var(--color-text-secondary);
+}
+.window-track {
+  height: 20px;
+}
+.window-text-bar {
+  position: relative;
+  height: 100%;
+  border: 1px solid var(--color-control-border);
+  border-radius: 6px;
+  background: var(--color-surface);
+}
+.window-note {
+  position: absolute;
+  inset: 0 auto 0 0;
+  border-radius: 6px 0 0 6px;
+}
+.window-note.is-lost {
+  background: repeating-linear-gradient(45deg, var(--color-separator) 0 4px, transparent 4px 8px);
+}
+.window-seen {
+  position: absolute;
+  top: -3px;
+  bottom: -3px;
+  border: 2px solid var(--concept-query);
+  border-radius: 8px;
+}
+.window-summary {
+  margin: 0;
+  font-size: var(--text-subheadline);
+  color: var(--color-text-secondary);
+}

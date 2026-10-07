@@ -246,3 +246,54 @@ export function tiedScores(text: string, count = 5): TiedScores {
     }),
   };
 }
+
+/** The model's five likeliest next tokens after each text, side by side. */
+export function compareGuesses(
+  texts: readonly string[],
+): { tokens: DisplayToken[]; guesses: Guess[] }[] {
+  return texts.map((text) => {
+    assertSupported(text);
+    const ids = getTokenizer().encode(normalizeText(text));
+    return { tokens: toDisplay(ids), guesses: topGuesses(ids, 1) };
+  });
+}
+
+export interface WindowedGuesses {
+  /** Filler sentences between the note and the question. */
+  gap: number;
+  /** Tokens in the whole text. */
+  total: number;
+  /** Tokens the model reads, the last contextLength of them. */
+  seen: number;
+  /** The note's tokens, counted from the start of the text. */
+  note: { from: number; to: number };
+  guesses: Guess[];
+}
+
+/**
+ * A note, then more and more filler, then a question. The model only ever reads its last
+ * contextLength tokens, so once the note falls out of that window it cannot use it.
+ */
+export function contextWindow(note: string, filler: string, question: string, most: number) {
+  const window = getModel().config.contextLength;
+  const encode = (text: string) => {
+    assertSupported(text);
+    return getTokenizer().encode(normalizeText(text));
+  };
+  const noteIds = encode(note);
+  const steps: WindowedGuesses[] = [];
+  for (let gap = 0; gap <= most; gap++) {
+    const ids = encode(note + filler.repeat(gap) + question);
+    // The note encodes the same at the start of any text, so its tokens are the first ones.
+    if (noteIds.some((id, i) => ids[i] !== id))
+      throw new Error('demo-data: the note must come first');
+    steps.push({
+      gap,
+      total: ids.length,
+      seen: Math.min(ids.length, window),
+      note: { from: 0, to: noteIds.length },
+      guesses: topGuesses(ids.slice(-window), 1),
+    });
+  }
+  return { window, steps };
+}
