@@ -1102,3 +1102,94 @@ td.is-hidden {
   font-size: var(--text-subheadline);
   color: var(--color-text-secondary);
 }
+
+/* Training playground: one slider over the saved snapshots, and panels that follow it. */
+.train-figure {
+  display: grid;
+  gap: var(--space-4);
+}
+.train-slider {
+  display: grid;
+  gap: var(--space-1);
+}
+.train-slider input {
+  width: 100%;
+  min-height: var(--touch-target);
+}
+.train-panel h2 {
+  margin: 0 0 var(--space-1);
+  font-size: var(--text-headline);
+}
+.train-panel p {
+  margin: 0 0 var(--space-2);
+  color: var(--color-text-secondary);
+  font-size: var(--text-subheadline);
+}
+.train-panel .train-story {
+  color: var(--color-text);
+  font-size: var(--text-body);
+  overflow-wrap: anywhere;
+  white-space: pre-wrap;
+}
+.train-chart {
+  width: 100%;
+  max-width: 480px;
+  height: auto;
+}
+.train-chart .axis {
+  stroke: var(--color-separator);
+}
+.train-chart .guide {
+  stroke: var(--color-text-secondary);
+  stroke-dasharray: 4 4;
+}
+.train-chart .tick {
+  fill: var(--color-text-secondary);
+  font-size: 11px;
+}
+.train-chart polyline {
+  stroke-width: 2.5;
+}
+.train-chart g.line-loss {
+  stroke: var(--concept-output);
+  fill: var(--concept-output);
+}
+.train-chart g.line-recall,
+.key.line-recall {
+  stroke: var(--concept-query);
+  fill: var(--concept-query);
+  background: var(--concept-query);
+}
+.train-chart g.line-copy,
+.key.line-copy {
+  stroke: var(--concept-value);
+  fill: var(--concept-value);
+  background: var(--concept-value);
+}
+.train-skills {
+  margin: 0 0 var(--space-2);
+  padding: 0;
+  list-style: none;
+}
+.train-skills .key {
+  display: inline-block;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  vertical-align: -1px;
+}
+.train-heads {
+  border-collapse: collapse;
+  font-variant-numeric: tabular-nums;
+}
+.train-heads th,
+.train-heads td {
+  padding: var(--space-1) var(--space-2);
+  text-align: right;
+  font-size: var(--text-subheadline);
+}
+.train-heads td.is-best {
+  outline: 2px solid var(--color-text);
+  outline-offset: -2px;
+  font-weight: 600;
+}

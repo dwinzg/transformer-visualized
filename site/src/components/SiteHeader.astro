@@ -17,6 +17,7 @@ const learnMenu: { href: string; label: string; gap?: boolean }[] = [
   })),
   { href: withBase('learn/architecture/'), label: 'The whole model', gap: true },
   { href: withBase('review/'), label: 'Quick review' },
+  { href: withBase('training/'), label: 'Watch it learn' },
   { href: withBase('faq/'), label: 'Questions and answers' },
 ];
 const links = [
@@ -26,7 +27,9 @@ const links = [
   { href: withBase('search/'), label: 'Search' },
 ];
 const current = Astro.url.pathname;
-const inLearn = ['learn/', 'review/', 'faq/'].some((path) => current.startsWith(withBase(path)));
+const inLearn = ['learn/', 'review/', 'faq/', 'training/'].some((path) =>
+  current.startsWith(withBase(path)),
+);
 ---
 
 <header class="site-header" data-site-header>
