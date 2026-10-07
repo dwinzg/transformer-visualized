@@ -51,6 +51,15 @@ against the same revision of the dataset, but check before committing.
 .venv/bin/python -m tv_model.fixtures tiny --model ../models/tiny/model.safetensors --tokenizer ../models/tiny/tokenizer.json --out ../packages/engine/test/fixtures/tiny
 ```
 
+## Snapshots for the training page
+
+The site's Watch it learn page shows a second run of the same recipe, saved at 17 steps. To make it again, train with `--snapshot-steps`, then turn the snapshots into the small JSON the page reads. The snapshots stay in `runs/`, and only the JSON is committed.
+
+```sh
+.venv/bin/python -m tv_model.train --preset tiny --data-dir data --out-dir runs/snapshots --snapshot-steps 0,25,50,100,150,200,300,400,500,750,1000,1500,2000,3000,5000,10000,25000
+.venv/bin/python -m tv_model.training_views --snapshots runs/snapshots/snapshots --tokenizer ../models/tiny/tokenizer.json --out ../models/tiny/training.json
+```
+
 To generate the samples on the model card, run `tv_model.sample` with the shipped weights, one
 of the card's prompts and one of its seeds:
 
