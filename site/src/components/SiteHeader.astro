@@ -15,14 +15,16 @@ const learnMenu = [
   })),
   { href: withBase('learn/architecture/'), label: 'The whole model', gap: true },
   { href: withBase('review/'), label: 'Quick review' },
+  { href: withBase('faq/'), label: 'Questions and answers' },
 ];
 const links = [
   { href: withBase('playground/'), label: 'Playground' },
   { href: withBase('glossary/'), label: 'Glossary' },
   { href: withBase('references/'), label: 'References' },
+  { href: withBase('search/'), label: 'Search' },
 ];
 const current = Astro.url.pathname;
-const inLearn = current.startsWith(withBase('learn/')) || current.startsWith(withBase('review/'));
+const inLearn = ['learn/', 'review/', 'faq/'].some((path) => current.startsWith(withBase(path)));
 ---
 
 <header class="site-header" data-site-header>
