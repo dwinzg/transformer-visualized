@@ -1,5 +1,5 @@
 import { useId, useState } from 'react';
-import { describeGuesses, type Guess } from '../../lib/guess-tree';
+import type { Guess } from '../../lib/guess-tree';
 import { logX, strongestHead, tokenCount, type TrainingData } from '../../lib/training';
 import { ProbabilityBars } from './ProbabilityBars';
 import './figures.css';
@@ -44,12 +44,18 @@ function Chart({
       <text className="tick" x={PAD.left - 4} y={y(0)} textAnchor="end">
         0
       </text>
-      <text className="tick" x={PAD.left} y={H - 4}>
-        start
-      </text>
-      <text className="tick" x={W - PAD.right} y={H - 4} textAnchor="end">
-        step {last.toLocaleString('en-US')}
-      </text>
+      {/* Steps are spaced by powers of ten, so the early changes get room. */}
+      {[0, 100, 1000, 10000].map((tick) => (
+        <text
+          key={tick}
+          className="tick"
+          x={x(tick)}
+          y={H - 4}
+          textAnchor={tick ? 'middle' : 'start'}
+        >
+          {tick ? tick.toLocaleString('en-US') : 'step 0'}
+        </text>
+      ))}
       {guide && (
         <>
           <line
@@ -81,6 +87,7 @@ function Chart({
 export default function TrainingFigure({ data, chance }: Props) {
   const { snapshots, prompts, tokensPerStep } = data;
   const [at, setAt] = useState(snapshots.length - 1);
+  const [announcement, setAnnouncement] = useState('');
   const id = useId();
   const snap = snapshots[at];
   const steps = snapshots.map((s) => s.step);
@@ -93,16 +100,19 @@ export default function TrainingFigure({ data, chance }: Props) {
     next: [],
   }));
   const best = strongestHead(snap.induction);
-  // Shaded against the highest score of the whole run, since every score here is small.
-  const top = Math.max(...snapshots.flatMap((s) => s.induction.flat()));
+  // Shaded by how far a score rises above an even spread, against the highest of the whole run.
+  const chanceScore = data.inductionChance;
+  const top = Math.max(...snapshots.flatMap((s) => s.induction.flat())) - chanceScore;
+  const shade = (score: number) => Math.round((Math.max(0, score - chanceScore) / top) * 50);
   const percent = (p: number) => `${Math.round(p * 100)}%`;
 
   return (
     <div className="train-figure">
-      <label className="train-slider" htmlFor={`${id}-step`}>
-        <span>
+      <div className="train-slider">
+        <label htmlFor={`${id}-step`}>Training step</label>
+        <p className="train-where" aria-hidden="true">
           <strong>{where}</strong>, {tokens} tokens read
-        </span>
+        </p>
         <input
           id={`${id}-step`}
           type="range"
@@ -110,9 +120,15 @@ export default function TrainingFigure({ data, chance }: Props) {
           max={snapshots.length - 1}
           value={at}
           aria-valuetext={`${where}, ${tokens} tokens read`}
-          onChange={(e) => setAt(Number(e.target.value))}
+          onChange={(e) => {
+            const next = snapshots[Number(e.target.value)];
+            setAt(Number(e.target.value));
+            setAnnouncement(
+              `Loss ${next.valLoss.toFixed(2)}. Top guess ${next.next[0].text.trim()}.`,
+            );
+          }}
         />
-      </label>
+      </div>
 
       <section className="train-panel" aria-labelledby={`${id}-loss`}>
         <h2 id={`${id}-loss`}>Loss {snap.valLoss.toFixed(2)}</h2>
@@ -148,30 +164,40 @@ export default function TrainingFigure({ data, chance }: Props) {
         <h2 id={`${id}-skills`}>Using what came earlier in the text</h2>
         <ul className="train-skills">
           <li>
-            <span className="key line-recall" aria-hidden="true" /> Remembers{' '}
-            <strong>{prompts.recall.answer.trim()}</strong> from an earlier sentence:{' '}
+            <span className="key line-recall" aria-hidden="true" /> Remembering{' '}
+            <strong>{prompts.recall.answer.trim()}</strong> from an earlier sentence,{' '}
             {percent(snap.recall)}
           </li>
           <li>
-            <span className="key line-copy" aria-hidden="true" /> Copies the made-up word{' '}
-            <strong>{prompts.copy.answer.trim()}</strong>: {percent(snap.copy)}
+            <span className="key line-copy" aria-hidden="true" /> Copying the made-up word{' '}
+            <strong>{prompts.copy.answer.trim()}</strong>, {percent(snap.copy)}
           </li>
         </ul>
         <Chart
           steps={steps}
           lines={[
-            { values: snapshots.map((s) => s.recall), className: 'line-recall' },
-            { values: snapshots.map((s) => s.copy), className: 'line-copy' },
+            {
+              values: snapshots.map((s) => s.recall),
+              className: 'line-recall',
+            },
+            {
+              values: snapshots.map((s) => s.copy),
+              className: 'line-copy',
+            },
           ]}
           at={at}
           max={1}
           format={() => '100%'}
-          label={`The chance of each answer over training. Now ${percent(snap.recall)} and ${percent(snap.copy)}.`}
+          label={`The chance of each answer over training. Remembering ${prompts.recall.answer.trim()} now ${percent(snap.recall)}, copying ${prompts.copy.answer.trim()} now ${percent(snap.copy)}.`}
         />
       </section>
 
       <section className="train-panel" aria-labelledby={`${id}-heads`}>
-        <h2 id={`${id}-heads`}>Heads that copy what came next before</h2>
+        <h2 id={`${id}-heads`}>Heads that look for what came next last time</h2>
+        <p>
+          A head that spreads its weight evenly scores about {data.inductionChance.toFixed(2)}.
+          Shaded cells score above that.
+        </p>
         <div
           className="attn-score-scroll"
           tabIndex={0}
@@ -202,7 +228,7 @@ export default function TrainingFigure({ data, chance }: Props) {
                       key={h}
                       className={l === best.layer && h === best.head ? 'is-best' : undefined}
                       style={{
-                        background: `color-mix(in srgb, var(--concept-value) ${Math.round((score / top) * 50)}%, var(--color-surface))`,
+                        background: `color-mix(in srgb, var(--concept-value) ${shade(score)}%, var(--color-surface))`,
                       }}
                     >
                       {score.toFixed(2)}
@@ -216,7 +242,7 @@ export default function TrainingFigure({ data, chance }: Props) {
       </section>
 
       <p className="visually-hidden" aria-live="polite">
-        {`${where}. Loss ${snap.valLoss.toFixed(2)}. Top guesses: ${describeGuesses(guesses)}.`}
+        {announcement}
       </p>
     </div>
   );

@@ -12,7 +12,7 @@ test('sliding back to the start shows an untrained model', async ({ page }) => {
   await figure.getByRole('slider').fill('0');
   await expect(figure).toContainText('Before any training');
   await expect(figure).toContainText('Loss 8.33');
-  await expect(figure).toContainText('Remembers Fluffy from an earlier sentence: 0%');
+  await expect(figure).toContainText('Remembering Fluffy from an earlier sentence, 0%');
 });
 
 test('the Learn menu links to the training page', async ({ page }) => {
