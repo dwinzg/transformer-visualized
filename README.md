@@ -62,6 +62,8 @@ Pick a layer and a head to see what each token looks at, and the scores behind t
 
 Slide through the model's training, from blind guessing to whole stories. See the loss fall, the guesses sharpen, and the moment it starts using a name from an earlier sentence.
 
+<img src="docs/images/use-13-training.png" alt="The training page after 2,000 steps, with the loss curve, a story, the guesses and the chance of remembering Fluffy rising" width="600">
+
 ### Find your way
 
 Every page is one step away. The Learn menu in the header lists the chapters, the whole model and the quick review. On a phone, it all sits behind one Menu button.
