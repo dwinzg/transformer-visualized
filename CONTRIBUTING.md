@@ -28,7 +28,18 @@ npm run check
 4. Title pull requests with [Conventional Commits](https://www.conventionalcommits.org/), for example `feat: add attention heatmap`.
 5. Write commit messages and pull request descriptions for other engineers. Keep them objective and concise.
 6. Complete the pull request template, including screenshots for visual changes.
-7. Pull requests are squash-merged after checks pass and a maintainer approves.
+7. Add a label so the release notes can sort it, such as `enhancement`, `bug`, `content`, `accessibility` or `documentation`.
+8. Pull requests are rebase-merged after checks pass and a maintainer approves, so each commit stays in the history. Keep each commit a working step with a clear message.
+
+## Releases
+
+Versions follow [Semantic Versioning](https://semver.org/). Until the site goes public, versions start with 0. Each feature that readers notice, such as a new page or chapter, gets a minor version, and fixes get a patch version.
+
+Each release has a milestone that collects its issues. To make a release, a maintainer:
+
+1. Updates `version` and `date-released` in `CITATION.cff`, in the last pull request of the release. The packages are private, so their versions stay at 0.0.0 and the git tag is the version.
+2. After it merges, creates the release from `main` with `gh release create v<version> --generate-notes`. The notes are grouped by the labels above.
+3. Closes the milestone.
 
 ## Content standards
 
