@@ -15,6 +15,8 @@ const PAGES = [
   'glossary/',
   'references/',
   'review/',
+  'search/?q=attention',
+  'faq/',
   'no-such-page/',
   'dev/figures/',
 ];
