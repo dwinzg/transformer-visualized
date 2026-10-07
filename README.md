@@ -60,17 +60,22 @@ Every page is one step away. The Learn menu in the header lists the chapters, th
 
 <img src="docs/images/use-10-menu.png" alt="The Learn menu open in the header, listing the chapters, the whole model and the quick review" width="480">
 
+Search finds any term, step, question or source, and shows the words it matched. Questions and answers covers what people often ask, each answer linked to the step that explains it.
+
+<img src="docs/images/use-11-search.png" alt="The search page showing results for 'causal mask', with the matching words marked" width="600">
+
 Every figure has a Start over button, and everything works with a keyboard and a screen reader.
 
 ## What's inside
 
 - **Five chapters.** What a language model does, tokens, embeddings and position, attention, and prediction.
+- **Search and answers.** Search the whole site, or read short answers to common questions, each linked to its step and source.
 - **A tiny real model.** A GPT-2 style model, trained on short children's stories, runs right in your browser. You can inspect every number it produces.
 - **Toy examples.** Small enough to work out by hand before you meet the real thing.
 - **Sources you can check.** The references page lists every paper with a pinned link, and points to what to read next about today's models. Simplifications are labeled as ours.
 - **Works anywhere.** It runs in the browser with no account, no server and no tracking. Install it and it works offline too.
 
-Coming later: a chapter on the full transformer block, how training works, and a bigger GPT-2 sized model.
+Coming next: chapters on the terms people hear today, a training playground and a Llama-style model next to GPT-2. The [milestones](https://github.com/dwinzg/transformer-visualized/milestones) show what each release will bring.
 
 ## How to run
 
