@@ -95,4 +95,21 @@ describe('runPlayground', () => {
     const run = runPlayground(model, tokenizer, 'The cat sat');
     expect(structuredClone(run)).toEqual(run);
   });
+
+  it('rescales each token in the final norm, matching PyTorch for "her"', () => {
+    const { norm } = runPlayground(model, tokenizer, 'Lily wanted to play with her').views!;
+    expect(norm).toHaveLength(6);
+    const her = norm[5];
+    // The same numbers the Final norm code on the map page prints.
+    expect(her.values.map((v) => v.output)).toEqual([
+      expect.closeTo(0.8167, 3),
+      expect.closeTo(2.4633, 3),
+      expect.closeTo(-3.1536, 3),
+      expect.closeTo(8.8186, 3),
+    ]);
+    for (const v of her.values) {
+      expect(v.normalized).toBeCloseTo((v.input - her.mean) / her.spread, 3);
+      expect(v.output).toBeCloseTo(v.normalized * v.gamma + v.beta, 3);
+    }
+  });
 });
