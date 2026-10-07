@@ -19,6 +19,7 @@ import torch.nn.functional as F
 from .config import PRESETS, config_from_engine_json
 from .encode import read_tokens
 from .gpt import GPT
+from .io import save_model
 
 
 @dataclass
@@ -37,6 +38,8 @@ class TrainConfig:
     eval_batches: int = 40
     seed: int = 1337
     device: str = "auto"
+    # Steps at which to also save the weights, such as "0,100,1000", for the training playground.
+    snapshot_steps: str = ""
 
 
 def pick_device(name: str) -> torch.device:
@@ -109,6 +112,7 @@ def train(cfg: TrainConfig) -> dict:
     optimizer = configure_optimizer(model, cfg)
     rng = np.random.default_rng(cfg.seed)
     best_val = float("inf")
+    snapshots = {int(s) for s in cfg.snapshot_steps.split(",") if s.strip()}
     start = time.time()
     with (out_dir / "log.jsonl").open("w") as log:
 
@@ -135,6 +139,17 @@ def train(cfg: TrainConfig) -> dict:
                         "val_loss": val_loss,
                     }
                     torch.save(checkpoint, out_dir / "ckpt.pt")
+            if step in snapshots:
+                # The weights before this step's update, so step 0 is the untrained model.
+                snap_loss = _estimate_loss(
+                    model, valid_tokens, cfg, model_cfg.context_length, device
+                )
+                save_model(
+                    model,
+                    out_dir / "snapshots" / f"step-{step:05d}.safetensors",
+                    {"step": str(step), "val_loss": f"{snap_loss:.6f}"},
+                )
+                write({"step": step, "snapshot_val_loss": snap_loss})
             if step == cfg.max_steps:
                 break
             lr = lr_at(step, cfg)
