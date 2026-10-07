@@ -1,0 +1,126 @@
+---
+import { getCollection, getEntry } from 'astro:content';
+import BaseLayout from '../layouts/BaseLayout.astro';
+import { citationLabel } from '../lib/citations';
+import { withBase } from '../lib/paths';
+import { stepsOf } from '../lib/search-index';
+
+const questions = await getCollection('faq');
+const chapters = await getCollection('chapters', ({ data }) => !data.draft);
+
+// Each answer links to the steps that explain it, by the step's own title. A step that is not on
+// its chapter page fails the build, so a renamed step cannot leave a broken link behind.
+const steps = new Map(
+  chapters.flatMap((chapter) =>
+    stepsOf(chapter.body ?? '').map((step) => [
+      `${chapter.id}#${step.id}`,
+      { title: step.title, chapter: chapter.data.title },
+    ]),
+  ),
+);
+const stepLink = (key: string) => {
+  const step = steps.get(key);
+  if (!step) throw new Error(`The FAQ links to a step that does not exist: "${key}"`);
+  const [chapter, id] = key.split('#');
+  return { href: withBase(`learn/${chapter}/#${id}`), ...step };
+};
+const sources = async (list: (typeof questions)[number]['data']['sources']) =>
+  Promise.all(
+    list.map(async (source) => {
+      const entry = (await getEntry(source.ref))!;
+      return { ...source, id: entry.id, label: citationLabel(entry.data), title: entry.data.title };
+    }),
+  );
+const items = await Promise.all(
+  questions.map(async (q) => ({
+    id: q.id,
+    ...q.data,
+    links: q.data.steps.map(stepLink),
+    cited: await sources(q.data.sources),
+  })),
+);
+---
+
+<BaseLayout
+  title="Questions and answers"
+  description="Short answers to common questions about transformers, each linked to the step that explains it."
+>
+  <section class="prose page">
+    <h1>Questions and answers</h1>
+    <p class="lead">
+      Short answers to questions people often ask. Each one links to the step that explains it, and
+      you can <a href={withBase('search/')}>search the whole site</a> too.
+    </p>
+    {items.map((item) => (
+      <section class="qa target-highlight" id={item.id} aria-labelledby={`${item.id}-q`}>
+        <h2 id={`${item.id}-q`}>{item.question}</h2>
+        <p>{item.answer}</p>
+        {item.links.length > 0 && (
+          <p class="more">
+            Read more in{' '}
+            {item.links.map((link, i) => (
+              <>
+                {i > 0 && (i === item.links.length - 1 ? ' and ' : ', ')}
+                <a href={link.href}>
+                  {link.chapter}, {link.title}
+                </a>
+              </>
+            ))}
+            .
+          </p>
+        )}
+        {item.cited.length > 0 && (
+          <ul class="sources" aria-label="Sources">
+            {item.cited.map((source) => (
+              <li>
+                <a href={withBase(`references/#${source.id}`)} title={source.title}>
+                  {source.label}
+                </a>
+                {source.where && <>, {source.where}</>}
+                {source.quote && <q>{source.quote}</q>}
+              </li>
+            ))}
+          </ul>
+        )}
+      </section>
+    ))}
+  </section>
+</BaseLayout>
+
+<style>
+  .page {
+    padding-block: var(--space-12);
+  }
+  .lead {
+    color: var(--color-text-secondary);
+  }
+  .qa {
+    padding-block: var(--space-4);
+    border-bottom: 1px solid var(--color-separator);
+  }
+  .qa h2 {
+    font-size: var(--text-title-3);
+    margin: 0 0 var(--space-2);
+  }
+  .qa p {
+    margin: 0 0 var(--space-2);
+  }
+  .more,
+  .sources {
+    color: var(--color-text-secondary);
+    font-size: var(--text-subheadline);
+  }
+  .sources {
+    margin: 0;
+    padding-left: var(--space-5);
+  }
+  /* Each source sits on its own line, so its link gets a full-size tap target. */
+  .sources a {
+    display: inline-block;
+    min-height: 24px;
+  }
+  .sources q {
+    display: block;
+    font-style: italic;
+  }
+</style>

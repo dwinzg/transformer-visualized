@@ -46,4 +46,21 @@ const chapters = defineCollection({
   }),
 });
 
-export const collections = { references, glossary, chapters };
+// Common questions. Each answer points back to the steps that explain it, as "chapter#step-id".
+const faq = defineCollection({
+  loader: file('src/content/faq.json'),
+  schema: z.object({
+    question: z.string().min(1),
+    answer: z.string().min(1),
+    steps: z.array(z.string().regex(/^[a-z-]+#step-[a-z0-9-]+$/)),
+    sources: z.array(
+      z.object({
+        ref: reference('references'),
+        where: z.string().optional(),
+        quote: z.string().optional(),
+      }),
+    ),
+  }),
+});
+
+export const collections = { references, glossary, chapters, faq };
