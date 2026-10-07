@@ -38,7 +38,8 @@ const STAGES: Record<Stage, { label: string; guide: string }> = {
   },
   residual: {
     label: 'Residual stream',
-    guide: "Every step adds its result to the token's numbers, so nothing is lost on the way.",
+    guide:
+      "Every step adds its result to the token's numbers, so nothing is lost. A norm rescales them at the end.",
   },
   output: {
     label: 'Next token',
@@ -312,7 +313,11 @@ export default function Playground() {
               <FeedForwardFigure tokens={run.tokens} activations={run.views.activations} />
             )}
             {stage === 'residual' && (
-              <ResidualFigure tokens={run.tokens} steps={run.views.residual} />
+              <ResidualFigure
+                tokens={run.tokens}
+                steps={run.views.residual}
+                norms={run.views.norm}
+              />
             )}
             {stage === 'output' && (
               <SamplingFigure
