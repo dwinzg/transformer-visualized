@@ -6,6 +6,7 @@ import torch
 
 from tv_model.config import MICRO
 from tv_model.gpt import GPT
+from tv_model.io import load_model
 from tv_model.train import (
     TrainConfig,
     configure_optimizer,
@@ -77,3 +78,35 @@ def test_training_learns_a_predictable_pattern(tmp_path):
     assert model.cfg == MICRO and not model.training
     assert info["val_loss"] == summary["best_val_loss"]
     assert json.loads((tmp_path / "run" / "summary.json").read_text())["steps"] == 300
+
+
+def test_snapshots_save_the_weights_at_the_chosen_steps(tmp_path):
+    data = tmp_path / "data"
+    data.mkdir()
+    pattern = np.tile(np.arange(64, dtype="<u2"), 50)
+    pattern.tofile(data / "train.bin")
+    pattern.tofile(data / "valid.bin")
+    cfg = TrainConfig(
+        preset="micro",
+        data_dir=str(data),
+        out_dir=str(tmp_path / "run"),
+        batch_size=4,
+        max_steps=20,
+        warmup_steps=5,
+        eval_every=10,
+        eval_batches=2,
+        device="cpu",
+        snapshot_steps="0,7,20",
+    )
+    train(cfg)
+    snaps = sorted((tmp_path / "run" / "snapshots").iterdir())
+    assert [p.name for p in snaps] == [
+        "step-00000.safetensors",
+        "step-00007.safetensors",
+        "step-00020.safetensors",
+    ]
+    assert load_model(snaps[1]).cfg == MICRO
+    records = [
+        json.loads(line) for line in (tmp_path / "run" / "log.jsonl").read_text().splitlines()
+    ]
+    assert [r["step"] for r in records if "snapshot_val_loss" in r] == [0, 7, 20]
