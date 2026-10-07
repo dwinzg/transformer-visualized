@@ -50,6 +50,13 @@ test('every place in the search index exists on its page', async ({ page, reques
     }
     if (hash) expect(pages.get(path), href).toContain(`id="${hash}"`);
   }
+  // Each chapter's steps are indexed exactly, none missing and none extra.
+  for (const [path, html] of pages) {
+    if (!path.startsWith('learn/') || path === 'learn/architecture/' || path === 'learn/') continue;
+    const onPage = [...html.matchAll(/id="(step-[^"]+)"[^>]*data-step/g)].map((m) => m[1]);
+    const indexed = hrefs.filter((h) => h.startsWith(`${path}#step-`)).map((h) => h.split('#')[1]);
+    expect(indexed, path).toEqual(onPage);
+  }
 });
 
 test('the header links to search, and the Learn menu to the questions', async ({ page }) => {

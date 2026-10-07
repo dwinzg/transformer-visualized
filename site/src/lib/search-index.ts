@@ -2,7 +2,7 @@ import { stepId } from './stepId';
 
 /** One thing search can find: a chapter, a step, a term, a map part, a question or a source. */
 export interface SearchEntry {
-  kind: 'Chapter' | 'Step' | 'Glossary' | 'Map' | 'FAQ' | 'Source' | 'Page';
+  kind: 'Chapter' | 'Step' | 'Glossary' | 'Map' | 'Answer' | 'Source' | 'Page';
   title: string;
   /** Where it lives, such as the chapter of a step. */
   context?: string;
@@ -29,6 +29,10 @@ function dropBraces(text: string): string {
 export function plainText(mdx: string): string {
   let text = mdx
     .replace(/^```[\s\S]*?^```/gm, ' ')
+    // Inline math keeps its letters and numbers, so "n = 6" still reads. Display math goes.
+    .replace(/<Tex\b(?![^>]*\bdisplay\b)[^>]*?\btex="([^"]*)"[^>]*\/>/g, (_, tex: string) =>
+      tex.replace(/\\[a-zA-Z]+|[{}\\]/g, ' '),
+    )
     .replace(/<Tex\b[^]*?\/>/g, ' ')
     .replace(/<Tex\b[^]*?<\/Tex>/g, ' ');
   text = dropBraces(text)
@@ -52,7 +56,9 @@ export function plainText(mdx: string): string {
 /** Splits a chapter body into its steps, with the same ids the page gives them. */
 export function stepsOf(body: string): { id: string; title: string; text: string }[] {
   const taken = new Set<string>();
-  const starts = [...body.matchAll(/<Step\s+title="([^"]*)"/g)];
+  // Code samples never hold a real step, so they are blanked first, keeping every position.
+  const prose = body.replace(/^```[\s\S]*?^```/gm, (code) => ' '.repeat(code.length));
+  const starts = [...prose.matchAll(/<Step\b[^>]*?\btitle="([^"]*)"/g)];
   return starts.map((match, i) => {
     const title = match[1].replace(/&(quot|amp|lt|gt|apos);/g, (_, n: string) => ENTITIES[n]);
     const id = stepId(title, taken);
