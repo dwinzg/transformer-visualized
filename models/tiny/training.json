@@ -1,0 +1,1037 @@
+{
+ "prompts": {
+  "next": "Lily wanted to play with her",
+  "story": "Once upon a time",
+  "recall": {
+   "text": "Sara had a cat named Fluffy. Every morning, Sara gave milk to",
+   "answer": " Fluffy"
+  },
+  "copy": {
+   "text": "Ben said, \"Zog.\" Mia said, \"Zog.\" Tim said, \"",
+   "answer": "Zog"
+  }
+ },
+ "tokensPerStep": 8192,
+ "snapshots": [
+  {
+   "step": 0,
+   "valLoss": 8.3291,
+   "next": [
+    {
+     "id": 2797,
+     "text": "Where",
+     "p": 0.0005
+    },
+    {
+     "id": 2467,
+     "text": " bounce",
+     "p": 0.0005
+    },
+    {
+     "id": 1546,
+     "text": "cle",
+     "p": 0.0005
+    },
+    {
+     "id": 3574,
+     "text": " learning",
+     "p": 0.0005
+    },
+    {
+     "id": 625,
+     "text": " bl",
+     "p": 0.0005
+    }
+   ],
+   "story": " magnet magnetalk foreverurtain neveratch myster ret diaryexpected sword\u0019 pers shoe gum smiling tube search trophag glue letake Spot milk im smelly cir embarrassed",
+   "recall": 0.0002,
+   "copy": 0.0,
+   "induction": [
+    [
+     0.0169,
+     0.0169,
+     0.0171,
+     0.0171
+    ],
+    [
+     0.017,
+     0.017,
+     0.0168,
+     0.0169
+    ],
+    [
+     0.0172,
+     0.0171,
+     0.0168,
+     0.017
+    ],
+    [
+     0.017,
+     0.0171,
+     0.0169,
+     0.017
+    ]
+   ]
+  },
+  {
+   "step": 25,
+   "valLoss": 7.9975,
+   "next": [
+    {
+     "id": 14,
+     "text": ".",
+     "p": 0.0009
+    },
+    {
+     "id": 263,
+     "text": " the",
+     "p": 0.0006
+    },
+    {
+     "id": 283,
+     "text": " was",
+     "p": 0.0006
+    },
+    {
+     "id": 327,
+     "text": " day",
+     "p": 0.0005
+    },
+    {
+     "id": 12,
+     "text": ",",
+     "p": 0.0005
+    }
+   ],
+   "story": " dan hosp up\ufffd of was pen and follow rememberlla the up. meatting fly hosp search pro was but but loved pastry hay it lion\ufffdzag",
+   "recall": 0.0002,
+   "copy": 0.0,
+   "induction": [
+    [
+     0.0169,
+     0.0169,
+     0.0171,
+     0.0171
+    ],
+    [
+     0.017,
+     0.017,
+     0.0168,
+     0.0169
+    ],
+    [
+     0.0171,
+     0.0171,
+     0.0169,
+     0.017
+    ],
+    [
+     0.017,
+     0.0171,
+     0.0169,
+     0.0169
+    ]
+   ]
+  },
+  {
+   "step": 50,
+   "valLoss": 7.6431,
+   "next": [
+    {
+     "id": 14,
+     "text": ".",
+     "p": 0.0019
+    },
+    {
+     "id": 327,
+     "text": " day",
+     "p": 0.0009
+    },
+    {
+     "id": 283,
+     "text": " was",
+     "p": 0.0008
+    },
+    {
+     "id": 12,
+     "text": ",",
+     "p": 0.0008
+    },
+    {
+     "id": 263,
+     "text": " the",
+     "p": 0.0008
+    }
+   ],
+   "story": " was you found it.\n found and. She boy the of. meat\" fly something you day was,\" but loved!. They and Tim old",
+   "recall": 0.0003,
+   "copy": 0.0,
+   "induction": [
+    [
+     0.0169,
+     0.0169,
+     0.0171,
+     0.0171
+    ],
+    [
+     0.017,
+     0.017,
+     0.0169,
+     0.0169
+    ],
+    [
+     0.0171,
+     0.0171,
+     0.0169,
+     0.017
+    ],
+    [
+     0.017,
+     0.017,
+     0.017,
+     0.017
+    ]
+   ]
+  },
+  {
+   "step": 100,
+   "valLoss": 6.574,
+   "next": [
+    {
+     "id": 14,
+     "text": ".",
+     "p": 0.008
+    },
+    {
+     "id": 283,
+     "text": " was",
+     "p": 0.0029
+    },
+    {
+     "id": 12,
+     "text": ",",
+     "p": 0.0029
+    },
+    {
+     "id": 263,
+     "text": " the",
+     "p": 0.0029
+    },
+    {
+     "id": 267,
+     "text": " and",
+     "p": 0.0026
+    }
+   ],
+   "story": " named you up. of was but and of it! the up.\"\". He you day was played.\" all! were not and he saw",
+   "recall": 0.0003,
+   "copy": 0.0,
+   "induction": [
+    [
+     0.0169,
+     0.0169,
+     0.0171,
+     0.017
+    ],
+    [
+     0.017,
+     0.017,
+     0.017,
+     0.0169
+    ],
+    [
+     0.0171,
+     0.017,
+     0.0169,
+     0.017
+    ],
+    [
+     0.017,
+     0.017,
+     0.017,
+     0.017
+    ]
+   ]
+  },
+  {
+   "step": 150,
+   "valLoss": 5.5265,
+   "next": [
+    {
+     "id": 14,
+     "text": ".",
+     "p": 0.0367
+    },
+    {
+     "id": 387,
+     "text": " mom",
+     "p": 0.0109
+    },
+    {
+     "id": 267,
+     "text": " and",
+     "p": 0.0098
+    },
+    {
+     "id": 283,
+     "text": " was",
+     "p": 0.0091
+    },
+    {
+     "id": 411,
+     "text": " friends",
+     "p": 0.0085
+    }
+   ],
+   "story": " named you they. He was \"?\" were it! his of. \". He they said was a.\" They the. They and he saw",
+   "recall": 0.0003,
+   "copy": 0.0,
+   "induction": [
+    [
+     0.017,
+     0.0169,
+     0.017,
+     0.0171
+    ],
+    [
+     0.017,
+     0.017,
+     0.017,
+     0.017
+    ],
+    [
+     0.017,
+     0.017,
+     0.017,
+     0.017
+    ],
+    [
+     0.0169,
+     0.0169,
+     0.0169,
+     0.0169
+    ]
+   ]
+  },
+  {
+   "step": 200,
+   "valLoss": 4.7555,
+   "next": [
+    {
+     "id": 14,
+     "text": ".",
+     "p": 0.053
+    },
+    {
+     "id": 387,
+     "text": " mom",
+     "p": 0.0477
+    },
+    {
+     "id": 411,
+     "text": " friends",
+     "p": 0.0279
+    },
+    {
+     "id": 267,
+     "text": " and",
+     "p": 0.0153
+    },
+    {
+     "id": 266,
+     "text": " to",
+     "p": 0.0122
+    }
+   ],
+   "story": ", \"I. He was a and played. They his friend. \"What, \"Thank was a big tree! Tim it and he saw",
+   "recall": 0.0003,
+   "copy": 0.0,
+   "induction": [
+    [
+     0.0172,
+     0.017,
+     0.0172,
+     0.0172
+    ],
+    [
+     0.0168,
+     0.017,
+     0.017,
+     0.017
+    ],
+    [
+     0.0169,
+     0.017,
+     0.0169,
+     0.017
+    ],
+    [
+     0.0169,
+     0.017,
+     0.017,
+     0.0167
+    ]
+   ]
+  },
+  {
+   "step": 300,
+   "valLoss": 4.0551,
+   "next": [
+    {
+     "id": 387,
+     "text": " mom",
+     "p": 0.1432
+    },
+    {
+     "id": 411,
+     "text": " friends",
+     "p": 0.0841
+    },
+    {
+     "id": 14,
+     "text": ".",
+     "p": 0.0565
+    },
+    {
+     "id": 358,
+     "text": " friend",
+     "p": 0.0359
+    },
+    {
+     "id": 615,
+     "text": " toys",
+     "p": 0.0188
+    }
+   ],
+   "story": ", \"I will play with a little girl. The girl and the sun. The bird is very happy. \nThe bird liked to take his",
+   "recall": 0.0002,
+   "copy": 0.0,
+   "induction": [
+    [
+     0.0174,
+     0.0172,
+     0.0179,
+     0.0178
+    ],
+    [
+     0.0139,
+     0.0191,
+     0.0152,
+     0.0172
+    ],
+    [
+     0.0174,
+     0.017,
+     0.0169,
+     0.0169
+    ],
+    [
+     0.018,
+     0.017,
+     0.0172,
+     0.017
+    ]
+   ]
+  },
+  {
+   "step": 400,
+   "valLoss": 3.6693,
+   "next": [
+    {
+     "id": 387,
+     "text": " mom",
+     "p": 0.1276
+    },
+    {
+     "id": 14,
+     "text": ".",
+     "p": 0.0653
+    },
+    {
+     "id": 411,
+     "text": " friends",
+     "p": 0.0653
+    },
+    {
+     "id": 358,
+     "text": " friend",
+     "p": 0.0352
+    },
+    {
+     "id": 615,
+     "text": " toys",
+     "p": 0.0351
+    }
+   ],
+   "story": ", you found a big door. The man saw a big tree. The bird was very sad. The bird said, \"I want to take you",
+   "recall": 0.0002,
+   "copy": 0.0,
+   "induction": [
+    [
+     0.0173,
+     0.0175,
+     0.0184,
+     0.0186
+    ],
+    [
+     0.0024,
+     0.012,
+     0.0067,
+     0.0063
+    ],
+    [
+     0.0186,
+     0.0143,
+     0.0113,
+     0.0122
+    ],
+    [
+     0.0165,
+     0.0148,
+     0.0162,
+     0.0158
+    ]
+   ]
+  },
+  {
+   "step": 500,
+   "valLoss": 3.4073,
+   "next": [
+    {
+     "id": 387,
+     "text": " mom",
+     "p": 0.1404
+    },
+    {
+     "id": 14,
+     "text": ".",
+     "p": 0.0612
+    },
+    {
+     "id": 598,
+     "text": " house",
+     "p": 0.0413
+    },
+    {
+     "id": 706,
+     "text": " room",
+     "p": 0.0411
+    },
+    {
+     "id": 358,
+     "text": " friend",
+     "p": 0.0332
+    }
+   ],
+   "story": ", there was a little boy named Max. Sam lived in a friendly sun. Tim lived in a boy named Tim loved to play with his friends.",
+   "recall": 0.0007,
+   "copy": 0.0,
+   "induction": [
+    [
+     0.0172,
+     0.0173,
+     0.0186,
+     0.0188
+    ],
+    [
+     0.0007,
+     0.0043,
+     0.0032,
+     0.0025
+    ],
+    [
+     0.0157,
+     0.0104,
+     0.0042,
+     0.0083
+    ],
+    [
+     0.0164,
+     0.0142,
+     0.0159,
+     0.0143
+    ]
+   ]
+  },
+  {
+   "step": 750,
+   "valLoss": 2.9796,
+   "next": [
+    {
+     "id": 14,
+     "text": ".",
+     "p": 0.1185
+    },
+    {
+     "id": 476,
+     "text": " ball",
+     "p": 0.1124
+    },
+    {
+     "id": 615,
+     "text": " toys",
+     "p": 0.103
+    },
+    {
+     "id": 387,
+     "text": " mom",
+     "p": 0.0927
+    },
+    {
+     "id": 411,
+     "text": " friends",
+     "p": 0.0557
+    }
+   ],
+   "story": ", there was a little boy named Tim. Tim liked to play. One day, Tim went to the park to play with his red ball. He",
+   "recall": 0.0031,
+   "copy": 0.0,
+   "induction": [
+    [
+     0.017,
+     0.0171,
+     0.0188,
+     0.0187
+    ],
+    [
+     0.0005,
+     0.003,
+     0.0009,
+     0.001
+    ],
+    [
+     0.0176,
+     0.0062,
+     0.0027,
+     0.0086
+    ],
+    [
+     0.0154,
+     0.0107,
+     0.0162,
+     0.015
+    ]
+   ]
+  },
+  {
+   "step": 1000,
+   "valLoss": 2.7613,
+   "next": [
+    {
+     "id": 411,
+     "text": " friends",
+     "p": 0.3071
+    },
+    {
+     "id": 476,
+     "text": " ball",
+     "p": 0.1396
+    },
+    {
+     "id": 615,
+     "text": " toys",
+     "p": 0.0915
+    },
+    {
+     "id": 358,
+     "text": " friend",
+     "p": 0.0811
+    },
+    {
+     "id": 446,
+     "text": " toy",
+     "p": 0.034
+    }
+   ],
+   "story": ", in a small town, there was a little boy named Tim. Tim loved to play near the forest. One day, Tim met a little brother",
+   "recall": 0.1881,
+   "copy": 0.0001,
+   "induction": [
+    [
+     0.0168,
+     0.0168,
+     0.017,
+     0.0178
+    ],
+    [
+     0.0008,
+     0.0025,
+     0.0008,
+     0.0007
+    ],
+    [
+     0.0107,
+     0.0077,
+     0.0018,
+     0.0104
+    ],
+    [
+     0.013,
+     0.0093,
+     0.0197,
+     0.0168
+    ]
+   ]
+  },
+  {
+   "step": 1500,
+   "valLoss": 2.4656,
+   "next": [
+    {
+     "id": 411,
+     "text": " friends",
+     "p": 0.332
+    },
+    {
+     "id": 446,
+     "text": " toy",
+     "p": 0.0876
+    },
+    {
+     "id": 358,
+     "text": " friend",
+     "p": 0.0821
+    },
+    {
+     "id": 14,
+     "text": ".",
+     "p": 0.0765
+    },
+    {
+     "id": 476,
+     "text": " ball",
+     "p": 0.0547
+    }
+   ],
+   "story": ", there was a little boy named Tim. Tim lived in a big store with his friend, a boy named Tim. They were playing and had a",
+   "recall": 0.1574,
+   "copy": 0.0,
+   "induction": [
+    [
+     0.0166,
+     0.0165,
+     0.0138,
+     0.0146
+    ],
+    [
+     0.0,
+     0.0004,
+     0.0006,
+     0.0004
+    ],
+    [
+     0.0081,
+     0.0064,
+     0.0017,
+     0.0099
+    ],
+    [
+     0.0128,
+     0.0049,
+     0.024,
+     0.024
+    ]
+   ]
+  },
+  {
+   "step": 2000,
+   "valLoss": 2.3424,
+   "next": [
+    {
+     "id": 411,
+     "text": " friends",
+     "p": 0.3206
+    },
+    {
+     "id": 446,
+     "text": " toy",
+     "p": 0.1591
+    },
+    {
+     "id": 615,
+     "text": " toys",
+     "p": 0.0744
+    },
+    {
+     "id": 358,
+     "text": " friend",
+     "p": 0.0637
+    },
+    {
+     "id": 387,
+     "text": " mom",
+     "p": 0.05
+    }
+   ],
+   "story": ", there was a little boy named Tim. Tim had a friend named Tim. Tim was a big boy who liked to play outside. They had a",
+   "recall": 0.384,
+   "copy": 0.0,
+   "induction": [
+    [
+     0.0163,
+     0.0162,
+     0.0139,
+     0.0132
+    ],
+    [
+     0.0,
+     0.0003,
+     0.0002,
+     0.0
+    ],
+    [
+     0.0059,
+     0.006,
+     0.0012,
+     0.0065
+    ],
+    [
+     0.0138,
+     0.0044,
+     0.0275,
+     0.0284
+    ]
+   ]
+  },
+  {
+   "step": 3000,
+   "valLoss": 2.2315,
+   "next": [
+    {
+     "id": 411,
+     "text": " friends",
+     "p": 0.2191
+    },
+    {
+     "id": 615,
+     "text": " toys",
+     "p": 0.1404
+    },
+    {
+     "id": 446,
+     "text": " toy",
+     "p": 0.1314
+    },
+    {
+     "id": 476,
+     "text": " ball",
+     "p": 0.0748
+    },
+    {
+     "id": 2052,
+     "text": " dolls",
+     "p": 0.0439
+    }
+   ],
+   "story": ", there was a little boy named Tim. Tim liked to play outside. One day, Tim's mom said, \"Tim, it's time to",
+   "recall": 0.8474,
+   "copy": 0.0011,
+   "induction": [
+    [
+     0.0163,
+     0.016,
+     0.0134,
+     0.0129
+    ],
+    [
+     0.0,
+     0.0,
+     0.0,
+     0.0
+    ],
+    [
+     0.0032,
+     0.0048,
+     0.0004,
+     0.004
+    ],
+    [
+     0.0193,
+     0.0039,
+     0.0326,
+     0.0378
+    ]
+   ]
+  },
+  {
+   "step": 5000,
+   "valLoss": 2.1397,
+   "next": [
+    {
+     "id": 446,
+     "text": " toy",
+     "p": 0.2404
+    },
+    {
+     "id": 476,
+     "text": " ball",
+     "p": 0.1389
+    },
+    {
+     "id": 615,
+     "text": " toys",
+     "p": 0.0958
+    },
+    {
+     "id": 411,
+     "text": " friends",
+     "p": 0.0685
+    },
+    {
+     "id": 1061,
+     "text": " doll",
+     "p": 0.0358
+    }
+   ],
+   "story": ", in a small town, there was a kind boy named Tim. Tim had a big job to do. He loved to play with his toy car",
+   "recall": 0.91,
+   "copy": 0.0017,
+   "induction": [
+    [
+     0.0163,
+     0.0165,
+     0.0123,
+     0.0115
+    ],
+    [
+     0.0,
+     0.0,
+     0.0,
+     0.0
+    ],
+    [
+     0.0019,
+     0.0025,
+     0.0002,
+     0.0034
+    ],
+    [
+     0.0171,
+     0.0034,
+     0.0334,
+     0.0451
+    ]
+   ]
+  },
+  {
+   "step": 10000,
+   "valLoss": 2.0302,
+   "next": [
+    {
+     "id": 615,
+     "text": " toys",
+     "p": 0.1906
+    },
+    {
+     "id": 476,
+     "text": " ball",
+     "p": 0.1193
+    },
+    {
+     "id": 446,
+     "text": " toy",
+     "p": 0.0847
+    },
+    {
+     "id": 1061,
+     "text": " doll",
+     "p": 0.0625
+    },
+    {
+     "id": 387,
+     "text": " mom",
+     "p": 0.0538
+    }
+   ],
+   "story": ", there was a little boy named Tim. Tim had a rare toy. He loved to play with it every day. One day, he went to",
+   "recall": 0.7489,
+   "copy": 0.5245,
+   "induction": [
+    [
+     0.0161,
+     0.0162,
+     0.0128,
+     0.0127
+    ],
+    [
+     0.0,
+     0.0,
+     0.0,
+     0.0
+    ],
+    [
+     0.0009,
+     0.0025,
+     0.0002,
+     0.0022
+    ],
+    [
+     0.0195,
+     0.0038,
+     0.0392,
+     0.0593
+    ]
+   ]
+  },
+  {
+   "step": 25000,
+   "valLoss": 1.8495,
+   "next": [
+    {
+     "id": 476,
+     "text": " ball",
+     "p": 0.1184
+    },
+    {
+     "id": 411,
+     "text": " friends",
+     "p": 0.1075
+    },
+    {
+     "id": 446,
+     "text": " toy",
+     "p": 0.0836
+    },
+    {
+     "id": 1061,
+     "text": " doll",
+     "p": 0.0775
+    },
+    {
+     "id": 544,
+     "text": " new",
+     "p": 0.0651
+    }
+   ],
+   "story": ", in a small town, there was a girl named Sue. Sue liked to play with her ball. One sunny day, she went outside to play",
+   "recall": 0.8248,
+   "copy": 0.182,
+   "induction": [
+    [
+     0.0156,
+     0.0157,
+     0.0101,
+     0.011
+    ],
+    [
+     0.0,
+     0.0,
+     0.0001,
+     0.0
+    ],
+    [
+     0.0011,
+     0.0011,
+     0.0002,
+     0.0018
+    ],
+    [
+     0.0196,
+     0.0053,
+     0.0326,
+     0.0576
+    ]
+   ]
+  }
+ ]
+}
