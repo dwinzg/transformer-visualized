@@ -18,6 +18,8 @@ export interface TrainingData {
     copy: { text: string; answer: string };
   };
   tokensPerStep: number;
+  /** The copying score of a head that spreads its weight evenly. */
+  inductionChance: number;
   snapshots: Snapshot[];
 }
 
