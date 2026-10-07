@@ -2,12 +2,11 @@ name: CI
 
 # A private repo on the free plan has limited Actions minutes, so CI runs once per PR.
 # Main only changes by merging a passing PR, so pushes to main run nothing.
-# Draft PRs and text-only changes skip it too. Run it by hand from the Actions tab if needed.
+# Draft PRs and changes only to docs skip it too. Run it by hand from the Actions tab if needed.
 on:
   pull_request:
     types: [opened, synchronize, reopened, ready_for_review]
     paths-ignore:
-      - '**.md'
       - 'docs/**'
       - 'CITATION.cff'
   workflow_dispatch:
