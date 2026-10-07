@@ -1,0 +1,18 @@
+# Once a month, one grouped PR per kind, so updates cost few Actions minutes.
+# Security fixes still come as soon as GitHub knows of them.
+version: 2
+updates:
+  - package-ecosystem: npm
+    directory: /
+    schedule:
+      interval: monthly
+    groups:
+      npm:
+        patterns: ['*']
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: monthly
+    groups:
+      actions:
+        patterns: ['*']
