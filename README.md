@@ -58,6 +58,10 @@ Pick a layer and a head to see what each token looks at, and the scores behind t
 
 <img src="docs/images/use-7-attention.png" alt="An attention grid where 'her' looks most at 'Lily'" width="600">
 
+### Watch it learn
+
+Slide through the model's training, from blind guessing to whole stories. See the loss fall, the guesses sharpen, and the moment it starts using a name from an earlier sentence.
+
 ### Find your way
 
 Every page is one step away. The Learn menu in the header lists the chapters, the whole model and the quick review. On a phone, it all sits behind one Menu button.
@@ -79,7 +83,7 @@ Every figure has a Start over button, and everything works with a keyboard and a
 - **Sources you can check.** The references page lists every paper with a pinned link, and points to what to read next about today's models. Simplifications are labeled as ours.
 - **Works anywhere.** It runs in the browser with no account, no server and no tracking. Install it and it works offline too.
 
-Coming next: a training playground and a Llama-style model next to GPT-2. The [milestones](https://github.com/dwinzg/transformer-visualized/milestones) show what each release will bring.
+Coming next: a Llama-style model next to GPT-2. The [milestones](https://github.com/dwinzg/transformer-visualized/milestones) show what each release will bring.
 
 ## How to run
 
