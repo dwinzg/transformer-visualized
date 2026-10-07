@@ -174,6 +174,12 @@ test('the step buttons walk through the stages in order, with a line on each', a
   await expect(page.getByRole('radio', { name: 'Residual stream' })).toBeChecked();
   await expect(page.locator('.residual-figure .prob-bar')).toHaveCount(8);
   await expect(page.locator('.residual-summary')).toContainText('adds the most');
+  // The final norm, with the same numbers PyTorch prints for "her".
+  await page.getByText('Then the final norm rescales').click();
+  const norm = page.getByRole('table', { name: /first 4 numbers of .*her/ });
+  await expect(norm.getByRole('row')).toHaveCount(5);
+  await expect(norm.getByRole('row').nth(1)).toContainText('0.8167');
+  await expect(norm.getByRole('row').nth(4)).toContainText('8.8186');
 });
 
 test('a typed special token shows as its name in every figure', async ({ page }) => {

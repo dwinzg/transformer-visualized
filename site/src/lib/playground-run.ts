@@ -1,5 +1,6 @@
 import {
   explainAttentionWeight,
+  explainLayerNorm,
   forward,
   normalizeText,
   rowView,
@@ -20,6 +21,7 @@ export interface ResidualStep {
   length: number;
 }
 
+const r4 = (v: number) => round(v, 4);
 const norm = (row: ArrayLike<number>) => Math.sqrt(Array.from(row).reduce((s, v) => s + v * v, 0));
 
 /** Each token's residual stream, from its embedding through every attention and feed-forward step. */
@@ -42,6 +44,44 @@ function residualView(trace: Trace, count: number): ResidualStep[][] {
       });
     });
     return steps;
+  });
+}
+
+/** How many of a token's numbers the norm view walks through. */
+export const NORM_SHOWN = 4;
+
+/** How the final norm rescales one token's numbers before they become chances. */
+export interface NormStep {
+  mean: number;
+  /** √(variance + eps), what every number is divided by. */
+  spread: number;
+  /** The length of all the numbers before and after. */
+  before: number;
+  after: number;
+  /** The first few numbers, each step by step. */
+  values: { input: number; normalized: number; gamma: number; beta: number; output: number }[];
+}
+
+function normView(model: Model, trace: Trace, count: number): NormStep[] {
+  const input = trace.layers.at(-1)!.output;
+  const eps = model.config.layerNormEps;
+  return Array.from({ length: count }, (_, i) => {
+    const values = Array.from({ length: NORM_SHOWN }, (_, col) =>
+      explainLayerNorm(input, trace.lnFinal, model.lnFinal, eps, i, col),
+    );
+    return {
+      mean: r4(values[0].mean),
+      spread: r4(Math.sqrt(values[0].variance + eps)),
+      before: round(norm(rowView(input, i)), 2),
+      after: round(norm(rowView(trace.lnFinal.out, i)), 2),
+      values: values.map((v) => ({
+        input: r4(v.input),
+        normalized: r4(v.normalized),
+        gamma: r4(v.gamma),
+        beta: r4(v.beta),
+        output: r4(v.output),
+      })),
+    };
   });
 }
 
@@ -83,6 +123,7 @@ export function runPlayground(
       },
       scores: scoresView(tokens, trace, (n) => displayToken(tokenizer, n), model.config.vocabSize),
       residual: residualView(trace, tokens.length),
+      norm: normView(model, trace, tokens.length),
       activations: trace.layers.map((layer) =>
         tokens.map((_, i) => Array.from(rowView(layer.mlpAct, i), (v) => round(v, 2))),
       ),
@@ -122,8 +163,6 @@ export interface AttentionMath {
   expSum: number;
   weight: number;
 }
-
-const r4 = (v: number) => round(v, 4);
 
 /** Explains one attention weight with the engine, rounded to 4 decimals for the page. */
 export function attentionMath(trace: Trace, ask: Ask): AttentionMath {
