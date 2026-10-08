@@ -29,8 +29,9 @@ async function work() {
     try {
       [model, tokenizer] = await Promise.all([MODELS[arch](), loadTokenizer()]);
     } catch {
-      // The download failed. The page offers Try again, which starts a fresh worker.
-      send({ type: 'failed' });
+      // The download failed. The page offers Try again, which starts a fresh worker. The run's
+      // number lets the page ignore a failure for a model it has since switched away from.
+      send({ type: 'failed', seq });
       continue;
     }
     try {
