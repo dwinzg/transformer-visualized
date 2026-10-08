@@ -1108,6 +1108,11 @@ td.is-hidden {
   display: grid;
   gap: var(--space-4);
 }
+/* Grid items grow to fit their content by default, so the heads table would widen the page on a
+   phone instead of scrolling in its own box. */
+.train-figure > * {
+  min-width: 0;
+}
 .train-slider {
   display: grid;
   gap: var(--space-1);
