@@ -155,3 +155,7 @@ Copyright (c) 2026 dwinzg
 - Third-party material keeps its original license.
 - The trained model in `models/` is released under the MIT License, like the code.
 - The dataset it was trained on is credited in [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md).
+
+## Acknowledgements
+
+We built this project with help from [Claude](https://claude.com/claude-code), Anthropic's AI assistant. It helped us write and test the code, lessons and figures, and it made the whole process much faster. Every change still went through the tests and a review before it was merged.
