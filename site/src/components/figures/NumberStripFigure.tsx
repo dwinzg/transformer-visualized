@@ -93,20 +93,22 @@ export default function NumberStripFigure({
         onSelect={setPicked}
       />
       <div className="strip-controls">
-        <fieldset className="segmented">
-          <legend className="visually-hidden">Show the numbers for</legend>
-          {(positions ? (Object.keys(VIEWS) as StripView[]) : (['token'] as const)).map((v) => (
-            <label key={v}>
-              <input
-                type="radio"
-                name={`${id}-view`}
-                checked={view === v}
-                onChange={() => setView(v)}
-              />
-              <span>{VIEWS[v]}</span>
-            </label>
-          ))}
-        </fieldset>
+        {positions && (
+          <fieldset className="segmented">
+            <legend className="visually-hidden">Show the numbers for</legend>
+            {(Object.keys(VIEWS) as StripView[]).map((v) => (
+              <label key={v}>
+                <input
+                  type="radio"
+                  name={`${id}-view`}
+                  checked={view === v}
+                  onChange={() => setView(v)}
+                />
+                <span>{VIEWS[v]}</span>
+              </label>
+            ))}
+          </fieldset>
+        )}
         <button
           type="button"
           className="figure-button press"

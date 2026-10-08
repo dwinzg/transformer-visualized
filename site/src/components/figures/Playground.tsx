@@ -64,6 +64,8 @@ const LLAMA_GUIDES: Partial<Record<Stage, string>> = {
 export default function Playground() {
   const [text, setText] = useState(START);
   const [arch, setArch] = useState<Arch>('gpt2');
+  // Models this page has run, so switching back to one does not say it is downloading.
+  const [loadedArchs, setLoadedArchs] = useState<ReadonlySet<Arch>>(new Set());
   const [stage, setStage] = useState<Stage>('output');
   const [mounted, setMounted] = useState(false);
   const [ready, setReady] = useState(false);
@@ -132,13 +134,16 @@ export default function Playground() {
         return;
       }
       if (message.type === 'ready') setReady(true);
-      else if (message.type === 'failed') setFailed('load');
+      else if (message.type === 'failed') {
+        if (message.seq === undefined || message.seq === seq.current) setFailed('load');
+      }
       // Only the newest text counts. An older run that finishes late is dropped.
       else if (message.seq !== seq.current) return;
       else if (message.type === 'run-failed') setFailed('run');
       else {
         setFailed(null);
         setRun(message.run);
+        setLoadedArchs((done) => new Set(done).add(message.run.arch));
         shownSeq.current = message.seq;
         // New text means new numbers, so an open explanation would no longer match.
         setInspected(null);
@@ -166,7 +171,8 @@ export default function Playground() {
       // The choice still holds for this visit.
     }
   };
-  const guide = (s: Stage) => (arch === 'llama' && LLAMA_GUIDES[s]) || STAGES[s].guide;
+  // The guide follows the run on screen, so its words always match the numbers shown.
+  const guide = (s: Stage) => (run?.arch === 'llama' && LLAMA_GUIDES[s]) || STAGES[s].guide;
 
   const unseen = unsupportedCharacters(text);
 
@@ -263,7 +269,10 @@ export default function Playground() {
             {run.cut > 0 &&
               ` The model reads at most ${run.limit}, so the first ${run.cut} are left out.`}
             {/* The old numbers stay up until the new ones arrive, so say they are on the way. */}
-            {(run.text !== text || run.arch !== arch) && !failed && ' Updating.'}
+            {!failed &&
+              (run.arch !== arch && !loadedArchs.has(arch)
+                ? ` Loading the ${ARCHS[arch]} model, about 5 MB.`
+                : (run.text !== text || run.arch !== arch) && ' Updating.')}
           </p>
 
           <fieldset className="segmented playground-stages">
