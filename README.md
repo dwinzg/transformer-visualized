@@ -88,7 +88,7 @@ Every figure has a Start over button, and everything works with a keyboard and a
 - **Sources you can check.** The references page lists every paper with a pinned link, and points to what to read next about today's models. Simplifications are labeled as ours.
 - **Works anywhere.** It runs in the browser with no account, no server and no tracking. Install it and it works offline too.
 
-The [milestones](https://github.com/dwinzg/transformer-visualized/milestones) and [issues](https://github.com/dwinzg/transformer-visualized/issues) show what comes next.
+The [issues](https://github.com/dwinzg/transformer-visualized/issues) list ideas for what comes next, and contributions are welcome.
 
 ## How to run
 
