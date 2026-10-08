@@ -1,14 +1,10 @@
 name: CI
 
-# Actions minutes are limited, so CI runs once per PR.
-# Main only changes by merging a passing PR, so pushes to main run nothing.
-# Draft PRs and changes only to docs skip it too. Run it by hand from the Actions tab if needed.
+# CI runs once per PR. Main only changes by merging a passing PR, so pushes to main run nothing.
+# Draft PRs skip it. Run it by hand from the Actions tab if needed.
 on:
   pull_request:
     types: [opened, synchronize, reopened, ready_for_review]
-    paths-ignore:
-      - 'docs/**'
-      - 'CITATION.cff'
   workflow_dispatch:
 
 permissions:
@@ -97,3 +93,15 @@ jobs:
           name: playwright-results-${{ matrix.project }}
           path: site/test-results
           retention-days: 7
+
+  # The one check that branch protection requires. It passes when every job above passed or was
+  # skipped, so a PR that skips the browser tests can still merge.
+  all-checks:
+    name: All checks
+    needs: [check, changes, e2e]
+    if: ${{ always() }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - if: ${{ contains(needs.*.result, 'failure') || contains(needs.*.result, 'cancelled') }}
+        run: exit 1
