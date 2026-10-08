@@ -2,12 +2,16 @@ import { existsSync, readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 import {
   forward,
+  forwardLlama,
+  loadLlama,
   loadModel,
   normalizeText,
   probabilities,
   rowView,
   Tokenizer,
   unsupportedCharacters,
+  type LlamaModel,
+  type LlamaTrace,
   type Model,
   type Trace,
 } from '@transformer-visualized/engine';
@@ -33,8 +37,8 @@ export const GUESS_DEPTH = 3;
 // Astro, Vitest and Playwright's build all run with the site workspace as the working directory.
 const MODEL_DIR = resolve(process.cwd(), '../models/tiny');
 
-function modelFile(name: string): Uint8Array {
-  const path = resolve(MODEL_DIR, name);
+function modelFile(name: string, dir = MODEL_DIR): Uint8Array {
+  const path = resolve(dir, name);
   if (!existsSync(path)) {
     throw new Error(`demo-data: ${path} is missing. The site needs the tiny model to build.`);
   }
@@ -200,6 +204,25 @@ export function attentionWeights(text: string): AttentionData {
   assertSupported(text);
   const ids = getTokenizer().encode(normalizeText(text));
   return attentionView(toDisplay(ids), forward(getModel(), ids));
+}
+
+let llama: LlamaModel | undefined;
+
+/** The Llama-style model in models/llama-tiny. It shares the tiny model's tokenizer. */
+function getLlama(): LlamaModel {
+  if (llama === undefined) {
+    const bytes = modelFile('model.safetensors', resolve(process.cwd(), '../models/llama-tiny'));
+    const buffer = new ArrayBuffer(bytes.byteLength);
+    new Uint8Array(buffer).set(bytes);
+    llama = loadLlama(buffer);
+  }
+  return llama;
+}
+
+/** Every value from one forward pass of the Llama-style model over a text. */
+export function llamaTraceOf(text: string): LlamaTrace {
+  assertSupported(text);
+  return forwardLlama(getLlama(), getTokenizer().encode(normalizeText(text)));
 }
 
 /** Every value from one forward pass over a text. */
