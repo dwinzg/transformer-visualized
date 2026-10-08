@@ -33,12 +33,15 @@ export {
   explainDot,
   explainLayerNorm,
   explainProbability,
+  explainRmsNorm,
 } from './explain';
 export type {
   AttentionWeightExplanation,
   DotProductExplanation,
   LayerNormExplanation,
   ProbabilityExplanation,
+  RmsNormExplanation,
+  AttentionTraceLike,
 } from './explain';
 export { bytesToUnicode, Tokenizer } from './tokenizer';
 export type { TokenizerJson } from './tokenizer';
