@@ -13,7 +13,7 @@ import {
   visibleBlocks,
   type Block,
 } from '../../lib/architecture-layout';
-import { isPartId, PARTS, type PartId, type View } from '../../lib/concepts';
+import { isPartId, PARTS, VIEWS, type PartId, type View } from '../../lib/concepts';
 import './figures.css';
 
 interface Props {
@@ -27,6 +27,8 @@ interface Props {
   secondNorm: Article;
   /** The PyTorch setup every snippet needs. */
   setup: string;
+  /** The same for the Llama-style model, run on models/llama-tiny. */
+  llama: { articles: Partial<Record<PartId, Article>>; secondNorm: Article; setup: string };
 }
 
 export interface Article {
@@ -71,6 +73,7 @@ function Code({ code, label, copy = true }: { code: string; label: string; copy?
 const VIEW_LABELS: Record<View, string> = {
   original: 'Original paper',
   gpt2: 'GPT-2 style (our model)',
+  llama: 'Llama style',
 };
 
 const byId = new Map(BLOCKS.map((b) => [b.id, b]));
@@ -92,7 +95,14 @@ function arrows(view: View): [Block, Block][] {
 }
 
 /** A clickable redrawing of Figure 1 of Vaswani et al. 2017, with a guided tour. */
-export default function ArchitectureMap({ formulas, links, articles, secondNorm, setup }: Props) {
+export default function ArchitectureMap({
+  formulas,
+  links,
+  articles: gpt2Articles,
+  secondNorm: gpt2SecondNorm,
+  setup: gpt2Setup,
+  llama,
+}: Props) {
   const [view, setView] = useState<View>('original');
   const [selected, setSelected] = useState<string | null>(null);
   const [target, setTarget] = useState<HTMLElement | null>(null);
@@ -112,16 +122,18 @@ export default function ArchitectureMap({ formulas, links, articles, secondNorm,
     // ?part= picks a part, switching to the view that shows it when the default one hides it.
     const params = new URL(location.href).searchParams;
     const part = params.get('part');
-    const wanted = params.get('view') === 'gpt2' ? 'gpt2' : 'original';
+    const asked = params.get('view');
+    const wanted: View = VIEWS.find((v) => v === asked) ?? 'original';
     if (isPartId(part)) {
-      const other: View = wanted === 'gpt2' ? 'original' : 'gpt2';
-      const block = firstBlockFor(part, wanted) ?? firstBlockFor(part, other);
-      if (block) {
-        setView(block.views.includes(wanted) ? wanted : other);
-        setSelected(block.id);
+      // The asked view first, then GPT-2, then the paper, the first that has the part.
+      const order = [...new Set<View>([wanted, 'gpt2', 'original'])];
+      const shown = order.find((v) => firstBlockFor(part, v));
+      if (shown) {
+        setView(shown);
+        setSelected(firstBlockFor(part, shown)!.id);
       }
-    } else if (wanted === 'gpt2') {
-      setView('gpt2');
+    } else if (wanted !== 'original') {
+      setView(wanted);
     }
   }, []);
 
@@ -182,13 +194,17 @@ export default function ArchitectureMap({ formulas, links, articles, secondNorm,
 
   const rovingId = selected ?? tour[0];
   const visible = visibleBlocks(view);
-  // Faded outlines mark the paper's parts that GPT-2 drops, so the shape of Figure 1 stays.
-  const hidden = view === 'gpt2' ? BLOCKS.filter((b) => !b.views.includes('gpt2')) : [];
+  // Faded outlines mark the paper's parts this view drops, so the shape of Figure 1 stays.
+  const hidden = view === 'original' ? [] : BLOCKS.filter((b) => !b.views.includes(view));
+  const { articles, secondNorm, setup } =
+    view === 'llama'
+      ? llama
+      : { articles: gpt2Articles, secondNorm: gpt2SecondNorm, setup: gpt2Setup };
   const formula = part ? formulas[part.id]?.[view] : undefined;
   const note = (block?.notes ?? part?.notes)?.[view];
   const link = part ? links[part.id] : undefined;
   const article =
-    view === 'gpt2' && block?.id === 'add-norm-3' ? secondNorm : part && articles[part.id];
+    view !== 'original' && block?.id === 'add-norm-3' ? secondNorm : part && articles[part.id];
   // Box names, since GPT-2's two norms share one part.
   const titleAt = (i: number) => blockName(byId.get(tour[i])!, view);
   // The article's own buttons move the reader to the top of the next article.
@@ -203,8 +219,10 @@ export default function ArchitectureMap({ formulas, links, articles, secondNorm,
         <summary>Run the code yourself</summary>
         <p>
           Every part below has a few lines of PyTorch. Run this setup once, next to{' '}
-          <code>model.safetensors</code> from the repository. Then run the parts in the order of the
-          GPT-2 tour, and each one prints the same numbers as our model.
+          <code>model.safetensors</code> from{' '}
+          <code>{view === 'llama' ? 'models/llama-tiny' : 'models/tiny'}</code> in the repository.
+          Then run the parts in the order of the {view === 'llama' ? 'Llama' : 'GPT-2'} tour, and
+          each one prints the same numbers as that model.
         </p>
         <Code code={setup} label="PyTorch setup" />
       </details>
@@ -315,7 +333,7 @@ export default function ArchitectureMap({ formulas, links, articles, secondNorm,
         <div className="arch-controls">
           <fieldset className="arch-views">
             <legend className="visually-hidden">Show</legend>
-            {(['original', 'gpt2'] as const).map((v) => (
+            {VIEWS.map((v) => (
               <label key={v}>
                 <input
                   type="radio"
@@ -433,7 +451,7 @@ export default function ArchitectureMap({ formulas, links, articles, secondNorm,
                 markerEnd="url(#arch-arrow)"
               />
             ))}
-            {view === 'gpt2' &&
+            {view !== 'original' &&
               RESIDUALS.map(({ from, to }) => (
                 <g key={from}>
                   <path

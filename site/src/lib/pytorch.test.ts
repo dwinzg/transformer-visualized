@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
-import { traceOf } from './demo-data';
+import { llamaTraceOf, traceOf } from './demo-data';
 import { BLOCKS, TOUR } from './architecture-layout';
-import { PYTORCH, SECOND_NORM } from './pytorch';
+import { LLAMA_PYTORCH, LLAMA_SECOND_NORM, PYTORCH, SECOND_NORM } from './pytorch';
 
 // These are exactly what the snippets printed when run in PyTorch 2.14 on models/tiny, after SETUP and in
 // GPT-2 tour order. If the model or a snippet changes, run them again and update this list.
@@ -43,5 +43,39 @@ describe('PyTorch snippets', () => {
 
   it('gives every snippet a shape', () => {
     for (const snippet of Object.values(PYTORCH)) expect(snippet.shape).not.toBe('');
+  });
+});
+
+// What the Llama snippets printed in PyTorch 2.14 on models/llama-tiny, after LLAMA_SETUP and in
+// Llama tour order. If the model or a snippet changes, run them again and update this list.
+const LLAMA_PRINTED = {
+  input: 'tensor([665, 408, 266, 324, 329, 336])',
+  embedding: 'tensor([0.0278, 0.0120, 0.0096, 0.0103])',
+  'add-norm': 'tensor([0.1853, 0.1066, 0.0680, 0.0590])',
+  'masked-attn': 'tensor([0.0291, 0.1399, 0.0707, 0.2925, 0.1634, 0.3044])',
+  ffn: 'tensor([ 0.2635, -0.2112, -0.2429, -0.2152])',
+  stack: 'tensor([ 0.3568, -0.2615,  0.3003, -0.1520])',
+  'final-norm': 'tensor([ 1.4549, -1.3055,  1.3374, -0.7040])',
+  linear: 'tensor([-6.5304, -3.3971, -7.6321, -9.7709])',
+  softmax: 'tensor([615, 446, 544])',
+  output: 'tensor(615)',
+} as const;
+
+describe('Llama PyTorch snippets', () => {
+  const trace = llamaTraceOf('Lily wanted to play with her');
+
+  it.each(Object.entries(LLAMA_PRINTED))('%s prints what PyTorch printed', (id, printed) => {
+    expect(LLAMA_PYTORCH[id as keyof typeof LLAMA_PRINTED]!.prints!(trace)).toBe(printed);
+  });
+
+  it('prints norm_2 at the second norm', () => {
+    expect(LLAMA_SECOND_NORM.prints!(trace)).toBe('tensor([0.4416, 0.2726, 0.1475, 0.2157])');
+  });
+
+  it('has numbers to print at every stop of the Llama tour', () => {
+    for (const id of TOUR.llama) {
+      const part = BLOCKS.find((b) => b.id === id)!.part;
+      expect(LLAMA_PYTORCH[part]?.prints, part).toBeTypeOf('function');
+    }
   });
 });

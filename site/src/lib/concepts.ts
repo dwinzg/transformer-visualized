@@ -2,8 +2,8 @@
  * Every part of the transformer, written once. The architecture map, the chapters, the glossary
  * and the introduction's pipeline figure all build their links from this list.
  */
-export type View = 'original' | 'gpt2';
-export const VIEWS: readonly View[] = ['original', 'gpt2'];
+export type View = 'original' | 'gpt2' | 'llama';
+export const VIEWS: readonly View[] = ['original', 'gpt2', 'llama'];
 
 export type PartId =
   | 'input'
@@ -32,8 +32,8 @@ export interface Part {
   notes?: Partial<Record<View, string>>;
   /** Shapes in the tiny model, shown from the Numbers level up. */
   numbers: string;
-  /** TeX, shown from the Formula level up. One string, or one per view. */
-  formula?: string | Record<View, string>;
+  /** TeX, shown from the Formula level up. One string, or one per view. Llama falls back to GPT-2's. */
+  formula?: string | Partial<Record<View, string>>;
   /** One line of engine code, shown at the Code level. */
   code?: string;
   glossary?: string;
@@ -67,6 +67,9 @@ export const PARTS: Record<PartId, Part> = {
     story:
       "Each id picks one row from a table of learned numbers. That row is the token's starting list of numbers.",
     numbers: 'The table has 4,096 rows of 128 numbers. The sentence becomes 6 rows of 128.',
+    notes: {
+      llama: 'In Llama this row goes straight into the first block, with no position added.',
+    },
     formula: String.raw`\mathbf{x}_i = W_E[t_i] \in \mathbb{R}^{128}`,
     code: 'trace.tokenEmbeddings // 6 × 128',
     glossary: 'embedding',
@@ -102,7 +105,15 @@ export const PARTS: Record<PartId, Part> = {
       'Each token looks at itself and the tokens before it, and pulls in what it needs. Masked means it cannot look ahead.',
     numbers:
       'Our model has 4 heads with 32 numbers each. Each head makes a 6 by 6 grid of weights.',
-    formula: String.raw`\mathrm{softmax}\!\left(\frac{QK^\top}{\sqrt{d_k}} + M\right)V, \quad M_{ij} = -\infty \text{ when } j > i`,
+    notes: {
+      llama:
+        'Llama turns each query and key by its position first, called RoPE, so position enters here instead of a table. And pairs of query heads share one key and value head, called grouped-query attention.',
+    },
+    formula: {
+      original: String.raw`\mathrm{softmax}\!\left(\frac{QK^\top}{\sqrt{d_k}} + M\right)V, \quad M_{ij} = -\infty \text{ when } j > i`,
+      gpt2: String.raw`\mathrm{softmax}\!\left(\frac{QK^\top}{\sqrt{d_k}} + M\right)V, \quad M_{ij} = -\infty \text{ when } j > i`,
+      llama: String.raw`\mathrm{softmax}\!\left(\frac{(R\,Q_h)(R\,K_{g(h)})^\top}{\sqrt{d_k}} + M\right)V_{g(h)}, \quad g(h) = \lfloor h/2 \rfloor`,
+    },
     code: 'trace.layers[0].heads[0].weights // 6 × 6, each row sums to 1',
     glossary: 'attention',
     chapter: 'attention',
@@ -127,11 +138,14 @@ export const PARTS: Record<PartId, Part> = {
       "Add, called a residual connection, keeps what came in and puts the new result on top, so earlier numbers are kept. Norm rescales each token's numbers to a steady range.",
     notes: {
       gpt2: 'GPT-2 moves the norm to the start of each step, before attention and before the feed-forward layer.',
+      llama:
+        'Llama also norms first, with RMSNorm. It divides by the root mean square of the numbers and scales them, with no mean taken away and no shift.',
     },
     numbers: "Each token's 128 numbers are handled on their own.",
     formula: {
       original: String.raw`\mathrm{LayerNorm}\big(x + \mathrm{Sublayer}(x)\big)`,
       gpt2: String.raw`x + \mathrm{Sublayer}\big(\mathrm{LayerNorm}(x)\big)`,
+      llama: String.raw`x + \mathrm{Sublayer}\big(\mathrm{RMSNorm}(x)\big), \quad \mathrm{RMSNorm}(x) = \frac{x}{\sqrt{\tfrac{1}{d}\sum_j x_j^2 + \epsilon}} \odot g`,
     },
     code: 'trace.layers[0].ln1.out // 6 × 128, normed before attention',
   },
@@ -151,11 +165,16 @@ export const PARTS: Record<PartId, Part> = {
     color: 'neutral',
     story:
       "Each token's numbers go through a small network on their own, without looking at other tokens.",
-    notes: { original: 'The paper used ReLU and grew 512 numbers to 2,048.' },
+    notes: {
+      original: 'The paper used ReLU and grew 512 numbers to 2,048.',
+      llama:
+        'Llama uses SwiGLU. Two projections make 344 numbers each. One goes through SiLU and opens or closes the other, then a third brings them back to 128. There are no biases.',
+    },
     numbers: '128 numbers grow to 512, pass through GELU, and shrink back to 128.',
     formula: {
       original: String.raw`\max(0,\, xW_1 + b_1)\,W_2 + b_2`,
       gpt2: String.raw`\mathrm{GELU}(xW_1 + b_1)\,W_2 + b_2`,
+      llama: String.raw`\big(\mathrm{SiLU}(xW_g) \odot xW_u\big)\,W_d`,
     },
     code: 'trace.layers[0].mlpOut // 6 × 128',
   },
@@ -175,7 +194,11 @@ export const PARTS: Record<PartId, Part> = {
     color: 'residual',
     story: 'GPT-2 adds one more norm after the last block, before the scores are made.',
     numbers: 'The 6 rows of 128 numbers, rescaled.',
-    formula: String.raw`\mathbf{u} = \mathrm{LayerNorm}\big(h^{(L)}\big)`,
+    notes: { llama: 'Llama does the same, with RMSNorm.' },
+    formula: {
+      gpt2: String.raw`\mathbf{u} = \mathrm{LayerNorm}\big(h^{(L)}\big)`,
+      llama: String.raw`\mathbf{u} = \mathrm{RMSNorm}\big(h^{(L)}\big)`,
+    },
     code: 'trace.lnFinal.out // 6 × 128',
   },
   linear: {
@@ -223,7 +246,8 @@ export function isPartId(value: unknown): value is PartId {
 }
 
 export function formulaFor(part: Part, view: View): string | undefined {
-  return typeof part.formula === 'string' ? part.formula : part.formula?.[view];
+  if (typeof part.formula === 'string') return part.formula;
+  return part.formula?.[view] ?? (view === 'llama' ? part.formula?.gpt2 : undefined);
 }
 
 /**
