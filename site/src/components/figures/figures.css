@@ -611,7 +611,7 @@
   --strip-negative: var(--concept-query);
   --strip-positive: var(--concept-output);
   display: grid;
-  /* ponytail: cells are about 17px wide on a phone, under the 24px tap size. Every number can still be
+  /* A known limit. Cells are about 17px wide on a phone, under the 24px tap size. Every number can still be
      reached with the keyboard and the readout. Switch to 8 columns on phones if taps prove hard. */
   grid-template-columns: repeat(16, 1fr);
   gap: 2px;

@@ -195,7 +195,7 @@ export class Tokenizer {
       if (id === undefined) throw new Error(`BPE produced "${symbol}", which is not in the vocab`);
       return id;
     });
-    // ponytail: clears everything at the limit, an LRU if a long session ever needs it.
+    // A simple limit. Clearing everything is enough here, and an LRU can come if long sessions need it.
     if (this.cache.size >= ENCODE_CACHE_LIMIT) this.cache.clear();
     this.cache.set(piece, ids);
     return ids;
