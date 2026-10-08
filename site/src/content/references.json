@@ -952,6 +952,366 @@
     "topics": ["today"]
   },
   {
+    "id": "touvron2023b",
+    "type": "paper",
+    "authors": [
+      {
+        "family": "Touvron",
+        "given": "Hugo"
+      },
+      {
+        "family": "Martin",
+        "given": "Louis"
+      },
+      {
+        "family": "Stone",
+        "given": "Kevin"
+      },
+      {
+        "family": "Albert",
+        "given": "Peter"
+      },
+      {
+        "family": "Almahairi",
+        "given": "Amjad"
+      },
+      {
+        "family": "Babaei",
+        "given": "Yasmine"
+      },
+      {
+        "family": "Bashlykov",
+        "given": "Nikolay"
+      },
+      {
+        "family": "Batra",
+        "given": "Soumya"
+      },
+      {
+        "family": "Bhargava",
+        "given": "Prajjwal"
+      },
+      {
+        "family": "Bhosale",
+        "given": "Shruti"
+      },
+      {
+        "family": "Bikel",
+        "given": "Dan"
+      },
+      {
+        "family": "Blecher",
+        "given": "Lukas"
+      },
+      {
+        "family": "Canton Ferrer",
+        "given": "Cristian"
+      },
+      {
+        "family": "Chen",
+        "given": "Moya"
+      },
+      {
+        "family": "Cucurull",
+        "given": "Guillem"
+      },
+      {
+        "family": "Esiobu",
+        "given": "David"
+      },
+      {
+        "family": "Fernandes",
+        "given": "Jude"
+      },
+      {
+        "family": "Fu",
+        "given": "Jeremy"
+      },
+      {
+        "family": "Fu",
+        "given": "Wenyin"
+      },
+      {
+        "family": "Fuller",
+        "given": "Brian"
+      },
+      {
+        "family": "Gao",
+        "given": "Cynthia"
+      },
+      {
+        "family": "Goswami",
+        "given": "Vedanuj"
+      },
+      {
+        "family": "Goyal",
+        "given": "Naman"
+      },
+      {
+        "family": "Hartshorn",
+        "given": "Anthony"
+      },
+      {
+        "family": "Hosseini",
+        "given": "Saghar"
+      },
+      {
+        "family": "Hou",
+        "given": "Rui"
+      },
+      {
+        "family": "Inan",
+        "given": "Hakan"
+      },
+      {
+        "family": "Kardas",
+        "given": "Marcin"
+      },
+      {
+        "family": "Kerkez",
+        "given": "Viktor"
+      },
+      {
+        "family": "Khabsa",
+        "given": "Madian"
+      },
+      {
+        "family": "Kloumann",
+        "given": "Isabel"
+      },
+      {
+        "family": "Korenev",
+        "given": "Artem"
+      },
+      {
+        "family": "Koura",
+        "given": "Punit Singh"
+      },
+      {
+        "family": "Lachaux",
+        "given": "Marie-Anne"
+      },
+      {
+        "family": "Lavril",
+        "given": "Thibaut"
+      },
+      {
+        "family": "Lee",
+        "given": "Jenya"
+      },
+      {
+        "family": "Liskovich",
+        "given": "Diana"
+      },
+      {
+        "family": "Lu",
+        "given": "Yinghai"
+      },
+      {
+        "family": "Mao",
+        "given": "Yuning"
+      },
+      {
+        "family": "Martinet",
+        "given": "Xavier"
+      },
+      {
+        "family": "Mihaylov",
+        "given": "Todor"
+      },
+      {
+        "family": "Mishra",
+        "given": "Pushkar"
+      },
+      {
+        "family": "Molybog",
+        "given": "Igor"
+      },
+      {
+        "family": "Nie",
+        "given": "Yixin"
+      },
+      {
+        "family": "Poulton",
+        "given": "Andrew"
+      },
+      {
+        "family": "Reizenstein",
+        "given": "Jeremy"
+      },
+      {
+        "family": "Rungta",
+        "given": "Rashi"
+      },
+      {
+        "family": "Saladi",
+        "given": "Kalyan"
+      },
+      {
+        "family": "Schelten",
+        "given": "Alan"
+      },
+      {
+        "family": "Silva",
+        "given": "Ruan"
+      },
+      {
+        "family": "Smith",
+        "given": "Eric Michael"
+      },
+      {
+        "family": "Subramanian",
+        "given": "Ranjan"
+      },
+      {
+        "family": "Tan",
+        "given": "Xiaoqing Ellen"
+      },
+      {
+        "family": "Tang",
+        "given": "Binh"
+      },
+      {
+        "family": "Taylor",
+        "given": "Ross"
+      },
+      {
+        "family": "Williams",
+        "given": "Adina"
+      },
+      {
+        "family": "Kuan",
+        "given": "Jian Xiang"
+      },
+      {
+        "family": "Xu",
+        "given": "Puxin"
+      },
+      {
+        "family": "Yan",
+        "given": "Zheng"
+      },
+      {
+        "family": "Zarov",
+        "given": "Iliyan"
+      },
+      {
+        "family": "Zhang",
+        "given": "Yuchen"
+      },
+      {
+        "family": "Fan",
+        "given": "Angela"
+      },
+      {
+        "family": "Kambadur",
+        "given": "Melanie"
+      },
+      {
+        "family": "Narang",
+        "given": "Sharan"
+      },
+      {
+        "family": "Rodriguez",
+        "given": "Aurelien"
+      },
+      {
+        "family": "Stojnic",
+        "given": "Robert"
+      },
+      {
+        "family": "Edunov",
+        "given": "Sergey"
+      },
+      {
+        "family": "Scialom",
+        "given": "Thomas"
+      }
+    ],
+    "title": "Llama 2: Open Foundation and Fine-Tuned Chat Models",
+    "year": 2023,
+    "venue": "arXiv preprint",
+    "url": "https://arxiv.org/abs/2307.09288v2",
+    "arxiv": "2307.09288v2",
+    "note": "Llama 2. Its larger models use grouped-query attention, where several query heads share one key and value head.",
+    "topics": ["today"]
+  },
+  {
+    "id": "zhang2019",
+    "type": "paper",
+    "authors": [
+      {
+        "family": "Zhang",
+        "given": "Biao"
+      },
+      {
+        "family": "Sennrich",
+        "given": "Rico"
+      }
+    ],
+    "title": "Root Mean Square Layer Normalization",
+    "year": 2019,
+    "venue": "Advances in Neural Information Processing Systems 32 (NeurIPS 2019)",
+    "url": "https://arxiv.org/abs/1910.07467v1",
+    "arxiv": "1910.07467v1",
+    "note": "RMSNorm. Divides by the root mean square and scales, without taking the mean away.",
+    "topics": ["architecture"]
+  },
+  {
+    "id": "shazeer2020",
+    "type": "paper",
+    "authors": [
+      {
+        "family": "Shazeer",
+        "given": "Noam"
+      }
+    ],
+    "title": "GLU Variants Improve Transformer",
+    "year": 2020,
+    "venue": "arXiv preprint",
+    "url": "https://arxiv.org/abs/2002.05202v1",
+    "arxiv": "2002.05202v1",
+    "note": "Gated feed forwards such as SwiGLU, where one projection opens or closes another.",
+    "topics": ["architecture"]
+  },
+  {
+    "id": "ainslie2023",
+    "type": "paper",
+    "authors": [
+      {
+        "family": "Ainslie",
+        "given": "Joshua"
+      },
+      {
+        "family": "Lee-Thorp",
+        "given": "James"
+      },
+      {
+        "family": "de Jong",
+        "given": "Michiel"
+      },
+      {
+        "family": "Zemlyanskiy",
+        "given": "Yury"
+      },
+      {
+        "family": "Lebrón",
+        "given": "Federico"
+      },
+      {
+        "family": "Sanghai",
+        "given": "Sumit"
+      }
+    ],
+    "title": "GQA: Training Generalized Multi-Query Transformer Models from Multi-Head Checkpoints",
+    "year": 2023,
+    "venue": "Proceedings of EMNLP 2023",
+    "url": "https://arxiv.org/abs/2305.13245v3",
+    "arxiv": "2305.13245v3",
+    "note": "Grouped-query attention. Groups of query heads share one key and value head, which saves memory when writing.",
+    "topics": ["attention"]
+  },
+  {
     "id": "su2024",
     "type": "paper",
     "authors": [
