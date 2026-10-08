@@ -178,7 +178,8 @@ export type PlaygroundRun = ReturnType<typeof runPlayground>;
 /** Messages from the playground worker. */
 export type WorkerMessage =
   | { type: 'ready' }
-  | { type: 'failed' }
+  /** A download failed. A model download carries the run it was for. */
+  | { type: 'failed'; seq?: number }
   | { type: 'run-failed'; seq: number }
   | { type: 'run'; seq: number; run: PlaygroundRun }
   | { type: 'explained'; seq: number; ask: Ask; math: AttentionMath | null };
