@@ -1,11 +1,12 @@
 """Llama-style decoder-only transformer, the reference for the engine's second architecture.
 
-Keeps GPT-2's plan and changes four parts, as LLaMA (Touvron et al., 2023) and most models since
-do: RMSNorm instead of LayerNorm, rotary position embeddings (RoPE) instead of a learned position
-table, a SwiGLU feed forward instead of GELU, and grouped-query attention, where several query
-heads share one key and value head. There are no biases. The output stays tied to the token
-embedding, as in our GPT-2, so the two models have about the same size. Like gpt.py, every step
-is written out so it can be recorded and compared with the TypeScript engine.
+Keeps GPT-2's plan and changes four parts: RMSNorm instead of LayerNorm, rotary position
+embeddings (RoPE) instead of a learned position table, a SwiGLU feed forward instead of GELU, and
+grouped-query attention, where several query heads share one key and value head. LLaMA (Touvron
+et al., 2023a) brought the first three, and Llama 2's larger models added the fourth (Touvron et
+al., 2023b). There are no biases. The output stays tied to the token embedding, as in our GPT-2,
+so the two models have about the same size. Like gpt.py, every step is written out so it can be
+recorded and compared with the TypeScript engine.
 """
 
 from __future__ import annotations

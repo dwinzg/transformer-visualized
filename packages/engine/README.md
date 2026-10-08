@@ -17,7 +17,7 @@ const next = nextTokenDistribution(rowView(trace.logits, 2), { temperature: 0.8,
 ## What it provides
 
 - `loadModel` reads a safetensors file written by `model/tv_model/io.py` and checks every weight name and shape.
-- `loadLlama` and `forwardLlama` do the same for the Llama-style model in `models/llama-tiny`, with RMSNorm, rotary positions, a SwiGLU feed forward and grouped-query attention. Its `LlamaTrace` has the same names where the parts are the same, plus the query and key before rotation and the feed forward's gate and up projections.
+- `loadLlama` reads, and `forwardLlama` runs, the Llama-style model in `models/llama-tiny`, with RMSNorm, rotary positions, a SwiGLU feed forward and grouped-query attention. Its `LlamaTrace` has the same names where the parts are the same, plus the query and key before rotation and the feed forward's gate and up projections.
 - `forward` runs the model and returns a `Trace` with the embeddings, every head's queries, keys, values, scores and weights, the feed-forward activations, the residual stream after each step, and the logits.
 - `nextTokenDistribution`, `sample` and `generate` turn logits into next tokens with temperature, top-k and top-p. `generate` reuses earlier keys and values (a KV cache).
 - The `explain*` functions return the terms behind a single value, such as one attention weight or one probability.

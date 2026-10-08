@@ -32,6 +32,7 @@ def test_rope_scores_depend_only_on_the_distance_between_tokens():
     assert at(5, 2) == pytest.approx(at(7, 4), abs=1e-5)
 
 
+@torch.no_grad()
 def test_grouped_heads_share_keys_and_values():
     torch.manual_seed(0)
     model = Llama(LLAMA_MICRO).eval()
@@ -44,6 +45,7 @@ def test_grouped_heads_share_keys_and_values():
     assert not torch.equal(heads[0]["q"], heads[1]["q"])
 
 
+@torch.no_grad()
 def test_the_trace_matches_the_logits():
     torch.manual_seed(0)
     model = Llama(LLAMA_MICRO).eval()
@@ -85,6 +87,7 @@ def test_bad_llama_configs_are_refused():
         ModelConfig(64, 16, 16, 2, 4, 48, arch="llama", n_kv_heads=3)
 
 
+@torch.no_grad()
 def test_a_llama_trace_has_exactly_the_expected_names():
     from tv_model.trace import expected_trace_names, flatten_trace
 
