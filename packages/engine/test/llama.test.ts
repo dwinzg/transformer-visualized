@@ -8,6 +8,7 @@ import {
   rope,
   silu,
 } from '../src/llama';
+import { explainAttentionWeight, explainRmsNorm } from '../src/explain';
 import { loadModel } from '../src/model';
 import { parseSafetensors } from '../src/safetensors';
 import { matrixFromRows, rowView } from '../src/tensor';
@@ -132,5 +133,23 @@ describe('the trained Llama-style tiny model matches PyTorch', () => {
         0,
       );
     expect(count).toBe(1_250_432);
+  });
+});
+
+describe('explaining the Llama-style model', () => {
+  it('explains an RMSNorm output number by number, matching the trace', () => {
+    const trace = forwardLlama(tinyModel, [665, 408, 266]);
+    const input = trace.layers.at(-1)!.output;
+    for (const col of [0, 5, 127]) {
+      const e = explainRmsNorm(input, trace.lnFinal.meanSquare, tinyModel.normFinal, 1e-5, 2, col);
+      expect(e.output).toBeCloseTo(trace.lnFinal.out.data[2 * 128 + col], 5);
+    }
+  });
+
+  it('explains an attention weight from a Llama trace, using the turned query and key', () => {
+    const trace = forwardLlama(tinyModel, [665, 408, 266]);
+    const e = explainAttentionWeight(trace, 0, 1, 2, 0);
+    expect(e.weight).toBeCloseTo(trace.layers[0].heads[1].weights.data[2 * 3 + 0], 6);
+    expect([...e.query]).toEqual([...trace.layers[0].heads[1].q.data.subarray(64, 96)]);
   });
 });
