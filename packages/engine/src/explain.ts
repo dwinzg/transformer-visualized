@@ -2,7 +2,13 @@ import type { LayerNormWeights } from './model';
 import type { NormTrace } from './ops';
 import { assertTemperature } from './sampling';
 import { rowView, valueAt, type Matrix } from './tensor';
-import type { Trace } from './trace';
+import type { HeadTrace, Trace } from './trace';
+
+/** What explaining an attention weight needs. A GPT-2 or a Llama-style trace both have it. */
+export type AttentionTraceLike = Pick<Trace, 'tokenIds'> & {
+  readonly config: { readonly dHead: number };
+  readonly layers: readonly { readonly heads: readonly HeadTrace[] }[];
+};
 
 export interface DotProductExplanation {
   /** a[i] × b[i] for every i, kept at full precision so the terms add up to `sum` exactly. */
@@ -53,7 +59,7 @@ export interface AttentionWeightExplanation {
 
 /** Explains how token `queryIndex` came to give weight to token `keyIndex` in one head. */
 export function explainAttentionWeight(
-  trace: Trace,
+  trace: AttentionTraceLike,
   layer: number,
   head: number,
   queryIndex: number,
@@ -189,5 +195,43 @@ export function explainLayerNorm(
     gamma,
     beta,
     output: normalized * gamma + beta,
+  };
+}
+
+export interface RmsNormExplanation {
+  readonly input: number;
+  /** The mean of the row's squared numbers. */
+  readonly meanSquare: number;
+  readonly eps: number;
+  /** input / √(meanSquare + eps) */
+  readonly normalized: number;
+  readonly gamma: number;
+  readonly output: number;
+}
+
+/** How one number of an RMSNorm output is made: divided by the row's root mean square, then scaled. */
+export function explainRmsNorm(
+  input: Matrix,
+  meanSquare: Float32Array,
+  gamma: Float32Array,
+  eps: number,
+  row: number,
+  col: number,
+): RmsNormExplanation {
+  if (!Number.isInteger(row) || row < 0 || row >= input.rows) {
+    throw new RangeError(`explainRmsNorm: row ${row} is outside 0..${input.rows - 1}`);
+  }
+  if (!Number.isInteger(col) || col < 0 || col >= input.cols) {
+    throw new RangeError(`explainRmsNorm: column ${col} is outside 0..${input.cols - 1}`);
+  }
+  const x = valueAt(input, row, col);
+  const normalized = x / Math.sqrt(meanSquare[row] + eps);
+  return {
+    input: x,
+    meanSquare: meanSquare[row],
+    eps,
+    normalized,
+    gamma: gamma[col],
+    output: normalized * gamma[col],
   };
 }
