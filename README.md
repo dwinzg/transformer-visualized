@@ -40,6 +40,8 @@ The later chapters show how the same model is used today. Slide a note out of th
 
 The diagram from the paper, Figure 1 of "Attention Is All You Need", redrawn so you can tap every box. Each part has a short article with its sizes, the formula and a few lines of PyTorch. The code runs on our real model and prints the same numbers you see on the page. Switch to the Llama style to see what newer models changed, part by part, with code that runs on our second model.
 
+<img src="docs/images/use-14-llama.png" alt="The map in the Llama style view, with grouped-query attention and RoPE picked, and the position table shown as a faded outline" width="600">
+
 <img src="docs/images/use-9-article.png" alt="The article for masked attention, with sizes, the formula, PyTorch code and what it prints" width="600">
 
 ### Review it all on one page
