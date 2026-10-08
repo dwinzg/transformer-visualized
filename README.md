@@ -38,7 +38,7 @@ The later chapters show how the same model is used today. Slide a note out of th
 
 ### See the whole model
 
-The diagram from the paper, Figure 1 of "Attention Is All You Need", redrawn so you can tap every box. Each part has a short article with its sizes, the formula and a few lines of PyTorch. The code runs on our real model and prints the same numbers you see on the page.
+The diagram from the paper, Figure 1 of "Attention Is All You Need", redrawn so you can tap every box. Each part has a short article with its sizes, the formula and a few lines of PyTorch. The code runs on our real model and prints the same numbers you see on the page. Switch to the Llama style to see what newer models changed, part by part, with code that runs on our second model.
 
 <img src="docs/images/use-9-article.png" alt="The article for masked attention, with sizes, the formula, PyTorch code and what it prints" width="600">
 
@@ -81,11 +81,12 @@ Every figure has a Start over button, and everything works with a keyboard and a
 - **Eight chapters.** What a language model does, tokens, embeddings and position, attention, and prediction. Then context and prompts, retrieval and tools, and thinking step by step.
 - **Search and answers.** Search the whole site, or read short answers to common questions, each linked to its step and source.
 - **A tiny real model.** A GPT-2 style model, trained on short children's stories, runs right in your browser. You can inspect every number it produces.
+- **Two designs side by side.** A second tiny model in the Llama style, with RMSNorm, rotary positions, a gated feed forward and grouped-query attention. Switch between them on the map and in the playground.
 - **Toy examples.** Small enough to work out by hand before you meet the real thing.
 - **Sources you can check.** The references page lists every paper with a pinned link, and points to what to read next about today's models. Simplifications are labeled as ours.
 - **Works anywhere.** It runs in the browser with no account, no server and no tracking. Install it and it works offline too.
 
-Coming next: a Llama-style model next to GPT-2. The [milestones](https://github.com/dwinzg/transformer-visualized/milestones) show what each release will bring.
+The [milestones](https://github.com/dwinzg/transformer-visualized/milestones) and [issues](https://github.com/dwinzg/transformer-visualized/issues) show what comes next.
 
 ## How to run
 
