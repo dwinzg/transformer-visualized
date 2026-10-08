@@ -96,3 +96,41 @@ describe('Llama-style parts', () => {
     expect(() => loadLlama(readFixture('micro/model.safetensors'))).toThrow(/format/);
   });
 });
+
+interface TinyIndex {
+  model: string;
+  cases: { name: string; text: string; tokenIds: number[]; file: string }[];
+}
+
+const tinyIndex = readFixtureJson<TinyIndex>('llama-tiny/cases.json');
+const tinyModel = loadLlama(readFixture(`llama-tiny/${tinyIndex.model}`));
+
+describe('the trained Llama-style tiny model matches PyTorch', () => {
+  it.each(tinyIndex.cases)('$name', ({ tokenIds, file }) => {
+    const expected = parseSafetensors(readFixture(`llama-tiny/${file}`)).tensors;
+    const actual = flattenLlamaTrace(forwardLlama(tinyModel, tokenIds));
+    expect([...actual.keys()].sort()).toEqual([...expected.keys()].sort());
+    for (const [name, want] of expected) {
+      const got = actual.get(name)!;
+      expect(got.shape, `${name} shape`).toEqual(want.shape);
+      expectAllClose(name, got.data, want.data);
+    }
+  });
+
+  it('has the documented shape and size', () => {
+    const { config } = tinyModel;
+    expect([config.nLayers, config.nHeads, config.nKvHeads, config.dMlp]).toEqual([4, 4, 2, 344]);
+    const count =
+      tinyModel.wte.data.length +
+      tinyModel.normFinal.length +
+      tinyModel.blocks.reduce(
+        (sum, b) =>
+          sum +
+          b.norm1.length +
+          b.norm2.length +
+          [b.wq, b.wk, b.wv, b.wo, b.wGate, b.wUp, b.wDown].reduce((s, m) => s + m.data.length, 0),
+        0,
+      );
+    expect(count).toBe(1_250_432);
+  });
+});
