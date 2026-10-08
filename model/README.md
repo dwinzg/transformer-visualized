@@ -32,7 +32,6 @@ The engine's parity tests compare every intermediate value with this model. Rege
 
 The same steps train the Llama-style model in `models/llama-tiny` with `--preset llama-tiny`. Its model card lists the commands.
 
-
 Text fed to the tiny model needs the same cleaning the training data went through; see the
 "Input text" section in `models/tiny/README.md`.
 

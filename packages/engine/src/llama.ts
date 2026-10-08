@@ -115,7 +115,8 @@ export function rope(x: Matrix, base: number): Matrix {
   const out = createMatrix(x.rows, x.cols);
   for (let p = 0; p < x.rows; p++) {
     for (let i = 0; i < x.cols; i += 2) {
-      // Math.fround matches the float32 angles of the PyTorch reference.
+      // Math.fround keeps the angles within one float32 step of PyTorch's, and exact when dHead
+      // is a power of two, as in both our models.
       const angle = Math.fround(p * Math.fround(base ** (-i / x.cols)));
       const cos = Math.cos(angle);
       const sin = Math.sin(angle);
