@@ -1308,7 +1308,7 @@
     "venue": "Proceedings of EMNLP 2023",
     "url": "https://arxiv.org/abs/2305.13245v3",
     "arxiv": "2305.13245v3",
-    "note": "Grouped-query attention. Groups of query heads share one key and value head, which saves memory when writing.",
+    "note": "Grouped-query attention. Groups of query heads share one key and value head, which saves memory while the model generates text.",
     "topics": ["attention"]
   },
   {

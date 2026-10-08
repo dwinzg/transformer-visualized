@@ -32,6 +32,8 @@ export interface Part {
   notes?: Partial<Record<View, string>>;
   /** Shapes in the tiny model, shown from the Numbers level up. */
   numbers: string;
+  /** Shapes in the Llama-style model, where they differ. */
+  llamaNumbers?: string;
   /** TeX, shown from the Formula level up. One string, or one per view. Llama falls back to GPT-2's. */
   formula?: string | Partial<Record<View, string>>;
   /** One line of engine code, shown at the Code level. */
@@ -105,14 +107,16 @@ export const PARTS: Record<PartId, Part> = {
       'Each token looks at itself and the tokens before it, and pulls in what it needs. Masked means it cannot look ahead.',
     numbers:
       'Our model has 4 heads with 32 numbers each. Each head makes a 6 by 6 grid of weights.',
+    llamaNumbers:
+      'Our Llama-style model has 4 query heads of 32 numbers, sharing 2 key and value heads. Each head makes a 6 by 6 grid of weights.',
     notes: {
       llama:
-        'Llama turns each query and key by its position first, called RoPE, so position enters here instead of a table. And pairs of query heads share one key and value head, called grouped-query attention.',
+        'Llama turns each query and key by its position first, called RoPE, so position enters here instead of a table. And groups of query heads share one key and value head, called grouped-query attention. In our model each pair of heads shares one. Larger Llamas share across bigger groups.',
     },
     formula: {
       original: String.raw`\mathrm{softmax}\!\left(\frac{QK^\top}{\sqrt{d_k}} + M\right)V, \quad M_{ij} = -\infty \text{ when } j > i`,
       gpt2: String.raw`\mathrm{softmax}\!\left(\frac{QK^\top}{\sqrt{d_k}} + M\right)V, \quad M_{ij} = -\infty \text{ when } j > i`,
-      llama: String.raw`\mathrm{softmax}\!\left(\frac{(R\,Q_h)(R\,K_{g(h)})^\top}{\sqrt{d_k}} + M\right)V_{g(h)}, \quad g(h) = \lfloor h/2 \rfloor`,
+      llama: String.raw`w_{ij} = \mathrm{softmax}_j\!\left(\frac{(R_i\,q_i)^\top (R_j\,k_j)}{\sqrt{d_k}} + M_{ij}\right), \quad R_i \text{ turns by position } i, \quad k, v \text{ from head } \lfloor h/2 \rfloor`,
     },
     code: 'trace.layers[0].heads[0].weights // 6 × 6, each row sums to 1',
     glossary: 'attention',
@@ -171,6 +175,8 @@ export const PARTS: Record<PartId, Part> = {
         'Llama uses SwiGLU. Two projections make 344 numbers each. One goes through SiLU and opens or closes the other, then a third brings them back to 128. There are no biases.',
     },
     numbers: '128 numbers grow to 512, pass through GELU, and shrink back to 128.',
+    llamaNumbers:
+      '128 numbers become two sets of 344. One goes through SiLU and gates the other, and they shrink back to 128.',
     formula: {
       original: String.raw`\max(0,\, xW_1 + b_1)\,W_2 + b_2`,
       gpt2: String.raw`\mathrm{GELU}(xW_1 + b_1)\,W_2 + b_2`,
@@ -192,9 +198,12 @@ export const PARTS: Record<PartId, Part> = {
     id: 'final-norm',
     title: 'Final norm',
     color: 'residual',
-    story: 'GPT-2 adds one more norm after the last block, before the scores are made.',
+    story: 'One more norm after the last block, before the scores are made.',
     numbers: 'The 6 rows of 128 numbers, rescaled.',
-    notes: { llama: 'Llama does the same, with RMSNorm.' },
+    notes: {
+      gpt2: 'GPT-2 added it. The paper has none.',
+      llama: 'Llama keeps it, as an RMSNorm.',
+    },
     formula: {
       gpt2: String.raw`\mathbf{u} = \mathrm{LayerNorm}\big(h^{(L)}\big)`,
       llama: String.raw`\mathbf{u} = \mathrm{RMSNorm}\big(h^{(L)}\big)`,
