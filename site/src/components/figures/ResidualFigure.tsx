@@ -66,21 +66,34 @@ export default function ResidualFigure({
           Before the numbers become chances, they go through one last norm. It takes their length
           from {n.before.toFixed(2)} to {n.after.toFixed(2)}.
         </p>
-        <ol className="inspector-steps">
-          <li>
-            Take the average of all the numbers. For {name} it is{' '}
-            <strong>{n.mean.toFixed(4)}</strong>.
-          </li>
-          <li>
-            Measure how spread out they are, add a tiny amount to their variance and take the square
-            root. That is <strong>{n.spread.toFixed(4)}</strong>.
-          </li>
-          <li>
-            Subtract the average and divide by the spread. Now every token&apos;s numbers sit on the
-            same scale.
-          </li>
-          <li>Multiply each number by a learned scale and add a learned shift.</li>
-        </ol>
+        {n.kind === 'rms' ? (
+          <ol className="inspector-steps">
+            <li>
+              Square every number, take the average, add a tiny amount and take the square root.
+              This is the root mean square. For {name} it is <strong>{n.spread.toFixed(4)}</strong>.
+            </li>
+            <li>
+              Divide every number by it. Nothing is taken away first, unlike GPT-2&apos;s norm.
+            </li>
+            <li>Multiply each number by a learned scale. There is no shift.</li>
+          </ol>
+        ) : (
+          <ol className="inspector-steps">
+            <li>
+              Take the average of all the numbers. For {name} it is{' '}
+              <strong>{n.mean.toFixed(4)}</strong>.
+            </li>
+            <li>
+              Measure how spread out they are, add a tiny amount to their variance and take the
+              square root. That is <strong>{n.spread.toFixed(4)}</strong>.
+            </li>
+            <li>
+              Subtract the average and divide by the spread. Now every token&apos;s numbers sit on
+              the same scale.
+            </li>
+            <li>Multiply each number by a learned scale and add a learned shift.</li>
+          </ol>
+        )}
         <div className="attn-score-scroll" tabIndex={0} role="group" aria-label="First numbers">
           <table className="attn-score-table">
             <caption className="visually-hidden">
@@ -92,7 +105,7 @@ export default function ResidualFigure({
                 <th scope="col">In</th>
                 <th scope="col">Normed</th>
                 <th scope="col">Scale</th>
-                <th scope="col">Shift</th>
+                {n.kind === 'layer' && <th scope="col">Shift</th>}
                 <th scope="col">Out</th>
               </tr>
             </thead>
@@ -103,7 +116,7 @@ export default function ResidualFigure({
                   <td>{v.input.toFixed(4)}</td>
                   <td>{v.normalized.toFixed(4)}</td>
                   <td>{v.gamma.toFixed(4)}</td>
-                  <td>{v.beta.toFixed(4)}</td>
+                  {n.kind === 'layer' && <td>{v.beta.toFixed(4)}</td>}
                   <td>{v.output.toFixed(4)}</td>
                 </tr>
               ))}
@@ -111,9 +124,10 @@ export default function ResidualFigure({
           </table>
         </div>
         <p className="residual-note">
-          Each block uses the same recipe, with its own scale and shift, on the way into its
-          attention and again into its feed forward. Inside the blocks the stream itself is never
-          normed, only the copy each step reads.
+          Each block uses the same recipe, with its own{' '}
+          {n.kind === 'rms' ? 'scale' : 'scale and shift'}, on the way into its attention and again
+          into its feed forward. Inside the blocks the stream itself is never normed, only the copy
+          each step reads.
         </p>
       </details>
     </div>

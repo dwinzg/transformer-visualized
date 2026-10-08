@@ -1,4 +1,4 @@
-import { rowView, type Trace } from '@transformer-visualized/engine';
+import { rowView, type AttentionTraceLike, type Trace } from '@transformer-visualized/engine';
 import { round, type EmbeddedToken } from './embeddings';
 import type { DisplayToken } from './guess-tree';
 import type { NextScores } from './prediction';
@@ -9,10 +9,18 @@ import type { NextScores } from './prediction';
  */
 
 /** Each token with its token row, position row and their sum, rounded to 3 decimals. */
-export function embeddingView(tokens: DisplayToken[], trace: Trace): EmbeddedToken[] {
+export function embeddingView(
+  tokens: DisplayToken[],
+  trace: Pick<Trace, 'tokenEmbeddings'> & {
+    positionEmbeddings: Trace['positionEmbeddings'] | null;
+  },
+): EmbeddedToken[] {
   return tokens.map((token, i) => {
     const tokenRow = Array.from(rowView(trace.tokenEmbeddings, i));
-    const positionRow = Array.from(rowView(trace.positionEmbeddings, i));
+    // A model with no position table, like the Llama-style one, adds nothing here.
+    const positionRow = trace.positionEmbeddings
+      ? Array.from(rowView(trace.positionEmbeddings, i))
+      : tokenRow.map(() => 0);
     return {
       token,
       tokenRow: tokenRow.map((v) => round(v, 3)),
@@ -38,7 +46,7 @@ export interface AttentionData {
 
 export function attentionView(
   tokens: DisplayToken[],
-  trace: Trace,
+  trace: Pick<Trace, 'layers'> | AttentionTraceLike,
   withScores = false,
 ): AttentionData {
   return {
@@ -67,7 +75,7 @@ export function attentionView(
  */
 export function scoresView(
   tokens: DisplayToken[],
-  trace: Trace,
+  trace: Pick<Trace, 'logits'>,
   display: (id: number) => DisplayToken,
   keep = 50,
 ): NextScores {
