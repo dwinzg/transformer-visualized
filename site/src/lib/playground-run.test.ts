@@ -1,7 +1,7 @@
 import { readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { describe, expect, it } from 'vitest';
-import { loadModel, Tokenizer } from '@transformer-visualized/engine';
+import { loadLlama, loadModel, Tokenizer } from '@transformer-visualized/engine';
 import { forward, normalizeText } from '@transformer-visualized/engine';
 import { attentionMath, GRID_TOKENS, runPlayground } from './playground-run';
 
@@ -111,5 +111,45 @@ describe('runPlayground', () => {
       expect(v.normalized).toBeCloseTo((v.input - her.mean) / her.spread, 3);
       expect(v.output).toBeCloseTo(v.normalized * v.gamma + v.beta, 3);
     }
+  });
+});
+
+describe('runPlayground with the Llama-style model', () => {
+  const llamaBytes = readFileSync(resolve(process.cwd(), '../models/llama-tiny/model.safetensors'));
+  const llama = loadLlama(
+    llamaBytes.buffer.slice(llamaBytes.byteOffset, llamaBytes.byteOffset + llamaBytes.byteLength),
+  );
+  const run = runPlayground(llama, tokenizer, 'Lily wanted to play with her');
+
+  it('says which model ran, and gives real chances', () => {
+    expect(run.arch).toBe('llama');
+    expect(runPlayground(model, tokenizer, 'Lily').arch).toBe('gpt2');
+    // Token 615, as PyTorch's top pick for the Llama tour.
+    expect(run.views!.scores.top[0].token.id).toBe(615);
+  });
+
+  it('adds no position numbers to the embeddings', () => {
+    const [first] = run.views!.embeddings;
+    expect(first.positionRow.every((v) => v === 0)).toBe(true);
+    expect(first.sum).toEqual(first.tokenRow);
+  });
+
+  it('explains the final RMSNorm, which divides by the root mean square and only scales', () => {
+    const n = run.views!.norm[5];
+    expect(n.kind).toBe('rms');
+    // Matches the Llama tour's final norm in PyTorch, for "her".
+    expect(n.values.map((v) => v.output)).toEqual([1.4549, -1.3055, 1.3374, -0.704]);
+    for (const v of n.values) {
+      expect(v.normalized).toBeCloseTo(v.input / n.spread, 3);
+      expect(v.output).toBeCloseTo(v.normalized * v.gamma, 3);
+    }
+  });
+
+  it('explains an attention weight with the turned query and key', () => {
+    let kept;
+    runPlayground(llama, tokenizer, 'Lily wanted to play with her', (t) => (kept = t));
+    const math = attentionMath(kept!, { layer: 0, head: 0, row: 5, column: 5 });
+    // The Llama tour prints head 1's weights for "her", the last of which is 0.3044.
+    expect(math.weight).toBeCloseTo(0.3044, 4);
   });
 });

@@ -7,6 +7,7 @@ import {
   type PlaygroundRun,
   type WorkerMessage,
 } from '../../lib/playground-run';
+import type { Arch } from '../../lib/model-loader';
 import AttentionInspector from './AttentionInspector';
 import AttentionGridFigure from './AttentionGridFigure';
 import FeedForwardFigure from './FeedForwardFigure';
@@ -48,9 +49,21 @@ const STAGES: Record<Stage, { label: string; guide: string }> = {
 };
 const ORDER = Object.keys(STAGES) as Stage[];
 
+const ARCHS: Record<Arch, string> = { gpt2: 'GPT-2 style', llama: 'Llama style' };
+const ARCH_KEY = 'tv-model';
+/** What changes in a stage's guide for the Llama-style model. */
+const LLAMA_GUIDES: Partial<Record<Stage, string>> = {
+  embeddings:
+    'Each token becomes its 128 token numbers. This model adds no position here. It turns queries and keys by position inside attention instead.',
+  ffn: "Then each token's numbers go through a small gated network on their own.",
+  residual:
+    "Every step adds its result to the token's numbers, so earlier numbers are kept. An RMSNorm rescales them at the end.",
+};
+
 /** Run the real tiny model on any text, in the browser, and look at each stage. */
 export default function Playground() {
   const [text, setText] = useState(START);
+  const [arch, setArch] = useState<Arch>('gpt2');
   const [stage, setStage] = useState<Stage>('output');
   const [mounted, setMounted] = useState(false);
   const [ready, setReady] = useState(false);
@@ -76,11 +89,21 @@ export default function Playground() {
 
   // A link like playground/?text=Once%20upon opens with that text.
   useEffect(() => {
-    const shared = new URLSearchParams(location.search).get('text');
+    const params = new URLSearchParams(location.search);
+    const shared = params.get('text');
     if (shared !== null) {
       setText(shared.slice(0, MAX_LENGTH));
       setInput(shared.slice(0, MAX_LENGTH));
     }
+    // A link's model wins, then the one this reader picked last time.
+    let saved: string | null = null;
+    try {
+      saved = localStorage.getItem(ARCH_KEY);
+    } catch {
+      // Storage can be blocked. Then the default model is used.
+    }
+    const asked = params.get('model') ?? saved;
+    if (asked === 'llama' || asked === 'gpt2') setArch(asked);
     setMounted(true);
   }, []);
   // The address keeps up with the text, so it can be shared or bookmarked.
@@ -89,9 +112,11 @@ export default function Playground() {
     const url = new URL(location.href);
     if (input === START) url.searchParams.delete('text');
     else url.searchParams.set('text', input);
+    if (arch === 'gpt2') url.searchParams.delete('model');
+    else url.searchParams.set('model', arch);
     history.replaceState(history.state, '', url);
     setCopied(false);
-  }, [mounted, input]);
+  }, [mounted, input, arch]);
   // The model loads and runs in a worker. Try again starts a fresh one.
   useEffect(() => {
     setFailed(null);
@@ -130,8 +155,18 @@ export default function Playground() {
   useEffect(() => {
     if (!ready) return;
     seq.current += 1;
-    worker.current?.postMessage({ seq: seq.current, text: input });
-  }, [ready, input]);
+    worker.current?.postMessage({ seq: seq.current, text: input, arch });
+  }, [ready, input, arch]);
+
+  const pickArch = (next: Arch) => {
+    setArch(next);
+    try {
+      localStorage.setItem(ARCH_KEY, next);
+    } catch {
+      // The choice still holds for this visit.
+    }
+  };
+  const guide = (s: Stage) => (arch === 'llama' && LLAMA_GUIDES[s]) || STAGES[s].guide;
 
   const unseen = unsupportedCharacters(text);
 
@@ -173,6 +208,21 @@ export default function Playground() {
         value={text}
         onChange={(event) => setText(event.target.value)}
       />
+      <fieldset className="segmented playground-model">
+        <legend>Model</legend>
+        {(Object.keys(ARCHS) as Arch[]).map((a) => (
+          <label key={a}>
+            <input
+              type="radio"
+              name={`${id}-model`}
+              checked={arch === a}
+              disabled={!mounted}
+              onChange={() => pickArch(a)}
+            />
+            <span>{ARCHS[a]}</span>
+          </label>
+        ))}
+      </fieldset>
       {unseen.length > 0 && (
         <p className="tokenizer-unseen">
           The model never saw {unseen.join(' ')}, so it reads them as rare byte pieces.
@@ -199,7 +249,7 @@ export default function Playground() {
               </button>
             </>
           ) : (
-            'Loading the model, about 5 MB. This happens once.'
+            `Loading the ${ARCHS[arch]} model, about 5 MB. This happens once.`
           )}
         </div>
       )}
@@ -213,7 +263,7 @@ export default function Playground() {
             {run.cut > 0 &&
               ` The model reads at most ${run.limit}, so the first ${run.cut} are left out.`}
             {/* The old numbers stay up until the new ones arrive, so say they are on the way. */}
-            {run.text !== text && !failed && ' Updating.'}
+            {(run.text !== text || run.arch !== arch) && !failed && ' Updating.'}
           </p>
 
           <fieldset className="segmented playground-stages">
@@ -232,7 +282,7 @@ export default function Playground() {
           </fieldset>
           <div className="playground-guide">
             <p aria-live="polite">
-              Step {ORDER.indexOf(stage) + 1} of {ORDER.length}. {STAGES[stage].guide}
+              Step {ORDER.indexOf(stage) + 1} of {ORDER.length}. {guide(stage)}
             </p>
             <div className="loop-controls">
               <button
@@ -256,7 +306,13 @@ export default function Playground() {
 
           <section className="playground-panel" aria-label={STAGES[stage].label}>
             {stage === 'embeddings' && (
-              <NumberStripFigure tokens={run.views.embeddings} token={run.tokens.length - 1} />
+              <NumberStripFigure
+                // A new strip for the other model, since it has no position views.
+                key={run.arch}
+                tokens={run.views.embeddings}
+                token={run.tokens.length - 1}
+                positions={run.arch === 'gpt2'}
+              />
             )}
             {stage === 'attention' && (
               <>
@@ -325,7 +381,7 @@ export default function Playground() {
                 inspect
                 // No Add while the model catches up with the text, or once the box is full.
                 onAdd={
-                  text === run.text && text.length < MAX_LENGTH
+                  text === run.text && arch === run.arch && text.length < MAX_LENGTH
                     ? (token) => setText((t) => (t + token.text).slice(0, MAX_LENGTH))
                     : undefined
                 }

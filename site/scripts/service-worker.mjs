@@ -24,8 +24,8 @@ const { count, size, warnings } = await generateSW({
     {
       urlPattern: /\.(safetensors|json)$/,
       handler: 'CacheFirst',
-      // One model and one tokenizer. A retrained model gets a new name and pushes the old one out.
-      options: { cacheName: 'model', expiration: { maxEntries: 2 } },
+      // Two models and one tokenizer. A retrained model gets a new name and pushes the old one out.
+      options: { cacheName: 'model', expiration: { maxEntries: 3 } },
     },
   ],
 });
