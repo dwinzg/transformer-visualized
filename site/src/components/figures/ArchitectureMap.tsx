@@ -239,7 +239,7 @@ export default function ArchitectureMap({
           <p>{part.story}</p>
           {note && <p>{note}</p>}
           <h3>Sizes</h3>
-          <p>{part.numbers}</p>
+          <p>{(view === 'llama' && part.llamaNumbers) || part.numbers}</p>
           {article && (
             <p>
               <code>{article.shape}</code>
