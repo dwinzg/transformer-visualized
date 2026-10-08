@@ -1,4 +1,4 @@
-import type { Trace } from '@transformer-visualized/engine';
+import type { LlamaTrace, Trace } from '@transformer-visualized/engine';
 import type { PartId } from './concepts';
 
 /**
@@ -32,7 +32,7 @@ export interface Snippet {
   shape: string;
   code: string;
   /** What the last line prints, from the engine's trace. Missing when the numbers are random. */
-  prints?: (trace: Trace) => string;
+  prints?: (trace: Trace | LlamaTrace) => string;
   /** The paper's version, shown in the original view. A sketch has no Copy button. */
   paper?: { code: string; prints?: string; sketch?: boolean };
 }
@@ -214,4 +214,117 @@ print(greedy)`,
       return `tensor(${best})`;
     },
   },
+};
+
+/** The same tour for the Llama-style model in models/llama-tiny. Run LLAMA_SETUP first. */
+export const LLAMA_SETUP = `import math, torch
+import torch.nn.functional as F
+from safetensors.torch import load_file
+
+torch.set_printoptions(precision=4, sci_mode=False)
+w = load_file("model.safetensors")  # models/llama-tiny in this repo
+# "Lily wanted to play with her"
+ids = torch.tensor([665, 408, 266, 324, 329, 336])
+T, d, heads, kv_heads = len(ids), 128, 4, 2
+dh = d // heads
+mask = torch.ones(T, T).tril().bool()
+
+def linear(x, name):
+    return x @ w[name + ".weight"].T  # no biases
+
+def rms_norm(x, name):
+    return x / torch.sqrt(x.pow(2).mean(-1, keepdim=True) + 1e-5) * w[name + ".weight"]
+
+def rope(x):  # x is heads × T × 32
+    i = torch.arange(0, dh, 2)
+    angle = torch.arange(T)[:, None] * 10000 ** (-i / dh)  # T × 16
+    cos, sin = angle.cos(), angle.sin()
+    even, odd = x[..., 0::2], x[..., 1::2]
+    out = torch.empty_like(x)
+    out[..., 0::2] = even * cos - odd * sin
+    out[..., 1::2] = even * sin + odd * cos
+    return out`;
+
+export const LLAMA_SECOND_NORM: Snippet = {
+  shape: '6 × 128 → 6 × 128',
+  code: `b = rms_norm(x, "h.0.norm_2")  # norm again, before feed forward
+print(b[-1, :4])`,
+  prints: (t) => head4(t.layers[0].ln2.out),
+};
+
+export const LLAMA_PYTORCH: Partial<Record<PartId, Snippet>> = {
+  input: PYTORCH.input,
+  embedding: {
+    shape: '6 ids → 6 × 128',
+    code: `# One row of 128 numbers per token, and no position table.
+x = w["wte.weight"][ids]
+print(x[-1, :4])  # the first four numbers of "her"`,
+    prints: (t) => head4(t.tokenEmbeddings),
+  },
+  'add-norm': {
+    shape: '6 × 128 → 6 × 128',
+    code: `a = rms_norm(x, "h.0.norm_1")  # scale only, no mean, no shift
+print(a[-1, :4])`,
+    prints: (t) => head4(t.layers[0].ln1.out),
+  },
+  'masked-attn': {
+    shape: '6 × 128 → 4 heads of 6 × 6 weights → 6 × 128',
+    code: `# 4 query heads, but only 2 key and value heads, each 6 × 32.
+q = linear(a, "h.0.attn.wq").view(T, heads, dh).transpose(0, 1)
+k = linear(a, "h.0.attn.wk").view(T, kv_heads, dh).transpose(0, 1)
+v = linear(a, "h.0.attn.wv").view(T, kv_heads, dh).transpose(0, 1)
+q, k = rope(q), rope(k)  # turn each pair by its position
+# Heads 1 and 2 share key and value head 1, heads 3 and 4 share head 2.
+k, v = k.repeat_interleave(2, 0), v.repeat_interleave(2, 0)
+scores = q @ k.transpose(1, 2) / math.sqrt(dh)
+weights = scores.masked_fill(~mask, float("-inf")).softmax(-1)
+out = (weights @ v).transpose(0, 1).reshape(T, d)
+x = x + linear(out, "h.0.attn.wo")  # add it back
+print(weights[0, -1])  # where "her" looks in head 1`,
+    prints: (t) => {
+      const w = t.layers[0].heads[0].weights;
+      return fmt(w.data.subarray(LAST * w.cols, (LAST + 1) * w.cols));
+    },
+  },
+  ffn: {
+    shape: '6 × 128 → 2 × 6 × 344 → 6 × 128',
+    code: `gate, up = linear(b, "h.0.mlp.w_gate"), linear(b, "h.0.mlp.w_up")
+hidden = F.silu(gate) * up  # the gate opens or closes each number
+x = x + linear(hidden, "h.0.mlp.w_down")  # back to 6 × 128, then add
+print(x[-1, :4])  # what leaves block 1`,
+    prints: (t) => head4(t.layers[0].output),
+  },
+  stack: {
+    shape: '6 × 128 → 6 × 128, 4 times',
+    code: `# The same steps as above, for block n.
+def block(x, n):
+    p = f"h.{n}."
+    a = rms_norm(x, p + "norm_1")
+    q = linear(a, p + "attn.wq").view(T, heads, dh).transpose(0, 1)
+    k = linear(a, p + "attn.wk").view(T, kv_heads, dh).transpose(0, 1)
+    v = linear(a, p + "attn.wv").view(T, kv_heads, dh).transpose(0, 1)
+    q, k = rope(q), rope(k)
+    k, v = k.repeat_interleave(2, 0), v.repeat_interleave(2, 0)
+    scores = q @ k.transpose(1, 2) / math.sqrt(dh)
+    weights = scores.masked_fill(~mask, float("-inf")).softmax(-1)
+    x = x + linear((weights @ v).transpose(0, 1).reshape(T, d), p + "attn.wo")
+    b = rms_norm(x, p + "norm_2")
+    hidden = F.silu(linear(b, p + "mlp.w_gate")) * linear(b, p + "mlp.w_up")
+    return x + linear(hidden, p + "mlp.w_down")
+
+x = w["wte.weight"][ids]
+for n in range(4):
+    x = block(x, n)
+print(x[-1, :4])`,
+    prints: (t) => head4(t.layers[t.layers.length - 1].output),
+  },
+  'final-norm': {
+    shape: '6 × 128 → 6 × 128',
+    code: `u = rms_norm(x, "norm_f")
+print(u[-1, :4])`,
+    prints: (t) => head4(t.lnFinal.out),
+  },
+  linear: PYTORCH.linear,
+  softmax: PYTORCH.softmax,
+  output: PYTORCH.output,
 };

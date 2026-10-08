@@ -17,9 +17,11 @@ export interface Block {
 }
 
 export const BOX = { width: 640, height: 800 } as const;
-const BOTH: readonly View[] = ['original', 'gpt2'];
+const BOTH: readonly View[] = ['original', 'gpt2', 'llama'];
 const ORIGINAL: readonly View[] = ['original'];
-const GPT2: readonly View[] = ['gpt2'];
+const GPT2: readonly View[] = ['gpt2', 'llama'];
+// Llama has no position table, since position enters inside attention.
+const NO_LLAMA: readonly View[] = ['original', 'gpt2'];
 const D = { x: 340, w: 220 };
 const E = { x: 40, w: 220 };
 
@@ -96,7 +98,7 @@ export const BLOCKS: readonly Block[] = [
   {
     id: 'input',
     part: 'input',
-    label: { original: 'Outputs (shifted right)', gpt2: 'Inputs' },
+    label: { original: 'Outputs (shifted right)', gpt2: 'Inputs', llama: 'Inputs' },
     views: BOTH,
     ...D,
     y: 746,
@@ -105,7 +107,7 @@ export const BLOCKS: readonly Block[] = [
   {
     id: 'embedding',
     part: 'embedding',
-    label: { original: 'Output embedding', gpt2: 'Token embedding' },
+    label: { original: 'Output embedding', gpt2: 'Token embedding', llama: 'Token embedding' },
     views: BOTH,
     ...D,
     y: 686,
@@ -114,8 +116,12 @@ export const BLOCKS: readonly Block[] = [
   {
     id: 'position',
     part: 'position',
-    label: { original: 'Positional encoding', gpt2: 'Position embedding' },
-    views: BOTH,
+    label: {
+      original: 'Positional encoding',
+      gpt2: 'Position embedding',
+      llama: 'Position embedding',
+    },
+    views: NO_LLAMA,
     ...D,
     y: 630,
     h: 40,
@@ -123,20 +129,28 @@ export const BLOCKS: readonly Block[] = [
   {
     id: 'masked-attn',
     part: 'masked-attn',
-    label: 'Masked multi-head attention',
+    label: {
+      original: 'Masked multi-head attention',
+      gpt2: 'Masked multi-head attention',
+      llama: 'Grouped-query attention, RoPE',
+    },
     views: BOTH,
     ...D,
-    y: { original: 546, gpt2: 500 },
+    y: { original: 546, gpt2: 500, llama: 500 },
     h: 44,
   },
   {
     id: 'add-norm-1',
     part: 'add-norm',
-    label: { original: 'Add and norm', gpt2: 'Norm' },
-    name: { original: 'Add and norm, after masked attention', gpt2: 'Norm, before attention' },
+    label: { original: 'Add and norm', gpt2: 'Norm', llama: 'RMSNorm' },
+    name: {
+      original: 'Add and norm, after masked attention',
+      gpt2: 'Norm, before attention',
+      llama: 'RMSNorm, before attention',
+    },
     views: BOTH,
     ...D,
-    y: { original: 500, gpt2: 558 },
+    y: { original: 500, gpt2: 558, llama: 558 },
     h: 32,
   },
   {
@@ -161,20 +175,24 @@ export const BLOCKS: readonly Block[] = [
   {
     id: 'ffn',
     part: 'ffn',
-    label: 'Feed forward',
+    label: { original: 'Feed forward', gpt2: 'Feed forward', llama: 'SwiGLU feed forward' },
     views: BOTH,
     ...D,
-    y: { original: 316, gpt2: 270 },
+    y: { original: 316, gpt2: 270, llama: 270 },
     h: 44,
   },
   {
     id: 'add-norm-3',
     part: 'add-norm',
-    label: { original: 'Add and norm', gpt2: 'Norm' },
-    name: { original: 'Add and norm, after feed forward', gpt2: 'Norm, before feed forward' },
+    label: { original: 'Add and norm', gpt2: 'Norm', llama: 'RMSNorm' },
+    name: {
+      original: 'Add and norm, after feed forward',
+      gpt2: 'Norm, before feed forward',
+      llama: 'RMSNorm, before feed forward',
+    },
     views: BOTH,
     ...D,
-    y: { original: 270, gpt2: 328 },
+    y: { original: 270, gpt2: 328, llama: 328 },
     h: 32,
   },
   {
@@ -188,7 +206,15 @@ export const BLOCKS: readonly Block[] = [
     w: 48,
     h: 44,
   },
-  { id: 'final-norm', part: 'final-norm', label: 'Final norm', views: GPT2, ...D, y: 206, h: 32 },
+  {
+    id: 'final-norm',
+    part: 'final-norm',
+    label: { original: 'Final norm', gpt2: 'Final norm', llama: 'Final RMSNorm' },
+    views: GPT2,
+    ...D,
+    y: 206,
+    h: 32,
+  },
   { id: 'linear', part: 'linear', label: 'Linear', views: BOTH, ...D, y: 150, h: 36 },
   { id: 'softmax', part: 'softmax', label: 'Softmax', views: BOTH, ...D, y: 96, h: 36 },
   { id: 'output', part: 'output', label: 'Output probabilities', views: BOTH, ...D, y: 40, h: 36 },
@@ -225,6 +251,20 @@ export const TOUR: Record<View, readonly string[]> = {
   // GPT-2 norms before each sublayer, so each norm comes first.
   gpt2: [
     ...DECODER_INPUT,
+    'add-norm-1',
+    'masked-attn',
+    'add-norm-3',
+    'ffn',
+    'stack',
+    'final-norm',
+    'linear',
+    'softmax',
+    'output',
+  ],
+  // The same as GPT-2, without the position table.
+  llama: [
+    'input',
+    'embedding',
     'add-norm-1',
     'masked-attn',
     'add-norm-3',

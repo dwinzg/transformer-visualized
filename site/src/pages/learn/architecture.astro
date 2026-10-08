@@ -2,14 +2,24 @@
 import 'katex/dist/katex.min.css';
 import { getCollection } from 'astro:content';
 import katex from 'katex';
+import type { LlamaTrace, Trace } from '@transformer-visualized/engine';
 import Figure from '../../components/Figure.astro';
 import ArchitectureMap, { type Article } from '../../components/figures/ArchitectureMap.tsx';
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import { TOUR, BLOCKS } from '../../lib/architecture-layout';
 import { formulaFor, PARTS, VIEWS, type PartId, type View } from '../../lib/concepts';
-import { traceOf } from '../../lib/demo-data';
+import { llamaTraceOf, traceOf } from '../../lib/demo-data';
 import { withBase } from '../../lib/paths';
-import { PYTORCH, SECOND_NORM, SETUP, type Snippet } from '../../lib/pytorch';
+import Ref from '../../components/mdx/Ref.astro';
+import {
+  LLAMA_PYTORCH,
+  LLAMA_SECOND_NORM,
+  LLAMA_SETUP,
+  PYTORCH,
+  SECOND_NORM,
+  SETUP,
+  type Snippet,
+} from '../../lib/pytorch';
 
 // Draft chapters get no page, so they count as missing.
 const chapters = new Set(
@@ -45,16 +55,29 @@ for (const part of Object.values(PARTS)) {
 
 // What each snippet prints comes from one run of our engine, so the page and PyTorch agree.
 const trace = traceOf('Lily wanted to play with her');
-const toArticle = (snippet: Snippet): Article => ({
+const llamaTrace = llamaTraceOf('Lily wanted to play with her');
+const toArticle = (snippet: Snippet, from: Trace | LlamaTrace = trace): Article => ({
   shape: snippet.shape,
   code: snippet.code,
-  prints: snippet.prints?.(trace),
+  prints: snippet.prints?.(from),
   paper: snippet.paper,
 });
-const articles: Partial<Record<PartId, Article>> = {};
-for (const [id, snippet] of Object.entries(PYTORCH) as [PartId, Snippet][]) {
-  articles[id] = toArticle(snippet);
-}
+const articlesFrom = (
+  snippets: Partial<Record<PartId, Snippet>>,
+  from: Trace | LlamaTrace = trace,
+) => {
+  const out: Partial<Record<PartId, Article>> = {};
+  for (const [id, snippet] of Object.entries(snippets) as [PartId, Snippet][]) {
+    out[id] = toArticle(snippet, from);
+  }
+  return out;
+};
+const articles = articlesFrom(PYTORCH);
+const llama = {
+  articles: articlesFrom(LLAMA_PYTORCH, llamaTrace),
+  secondNorm: toArticle(LLAMA_SECOND_NORM, llamaTrace),
+  setup: LLAMA_SETUP,
+};
 
 // The text version follows the paper's tour, then adds the part only GPT-2 has.
 const outline = [
@@ -87,11 +110,16 @@ const outline = [
         articles={articles}
         secondNorm={toArticle(SECOND_NORM)}
         setup={SETUP}
+        llama={llama}
       />
     </Figure>
     <p class="credit">
       The paper is listed on the <a href={withBase('references/#vaswani2017')}>references page</a>.
       GPT-2 keeps only the right-hand side, because it continues text instead of translating it.
+    </p>
+    <!-- prettier-ignore -->
+    <p class="credit">
+      The Llama style view shows our second model, with the changes most models since have made. LLaMA brought RMSNorm, rotary positions and the SwiGLU feed forward (<Ref id="touvron2023" />), and Llama 2's larger models added grouped-query attention (<Ref id="touvron2023b" />).
     </p>
     <p class="credit">
       Prompts, retrieval, tools and reasoning all use this same model. See how in{' '}
