@@ -158,4 +158,4 @@ Copyright (c) 2026 dwinzg
 
 ## Acknowledgements
 
-We built this project with help from [Claude](https://claude.com/claude-code), Anthropic's AI assistant. It helped us write and test the code, lessons and figures, and it made the whole process much faster. Every change still went through the tests and a review before it was merged.
+We built this project with help from [Claude](https://claude.com/claude-code) and [Gemini](https://gemini.google.com), AI assistants from Anthropic and Google. They helped us write and test the code, lessons and figures, and made the whole process much faster. Every change still went through the tests and a review before it was merged.
