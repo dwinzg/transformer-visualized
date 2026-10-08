@@ -33,7 +33,7 @@ npm run check
 
 ## Releases
 
-Versions follow [Semantic Versioning](https://semver.org/). Until the site goes public, versions start with 0. Each feature that readers notice, such as a new page or chapter, gets a minor version, and fixes get a patch version.
+Versions follow [Semantic Versioning](https://semver.org/). Each feature that readers notice, such as a new page or chapter, gets a minor version, and fixes get a patch version. A change that breaks how the engine or the model files are used gets a major version.
 
 Each release has a milestone that collects its issues. To make a release, a maintainer:
 
