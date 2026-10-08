@@ -1,4 +1,12 @@
-import { loadModel, normalizeText, Tokenizer, type Model } from '@transformer-visualized/engine';
+import {
+  loadLlama,
+  loadModel,
+  normalizeText,
+  Tokenizer,
+  type LlamaModel,
+  type Model,
+} from '@transformer-visualized/engine';
+import llamaUrl from '../../../models/llama-tiny/model.safetensors?url';
 import modelUrl from '../../../models/tiny/model.safetensors?url';
 import tokenizerUrl from '../../../models/tiny/tokenizer.json?url';
 import type { DisplayToken } from './guess-tree';
@@ -30,7 +38,15 @@ export const loadTinyModel = once(async () =>
   loadModel(await (await fetchOk(modelUrl)).arrayBuffer()),
 );
 
-export type { Model };
+/** The Llama-style model, loaded only when the playground switches to it. */
+export const loadLlamaModel = once(async () =>
+  loadLlama(await (await fetchOk(llamaUrl)).arrayBuffer()),
+);
+
+/** Which of the two models to run. */
+export type Arch = 'gpt2' | 'llama';
+
+export type { LlamaModel, Model };
 
 const END_OF_STORY = '<|endoftext|>';
 

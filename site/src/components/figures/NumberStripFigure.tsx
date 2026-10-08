@@ -45,10 +45,13 @@ export default function NumberStripFigure({
   tokens,
   view: initialView = 'token',
   token: initialToken = 0,
+  positions = true,
 }: {
   tokens: EmbeddedToken[];
   view?: StripView;
   token?: number;
+  /** False for a model with no position table, which then shows only the token numbers. */
+  positions?: boolean;
 }) {
   // Until a token is picked, the start token is used, so it follows the end as the playground text grows.
   const [picked, setPicked] = useState<number | null>(null);
@@ -92,7 +95,7 @@ export default function NumberStripFigure({
       <div className="strip-controls">
         <fieldset className="segmented">
           <legend className="visually-hidden">Show the numbers for</legend>
-          {(Object.keys(VIEWS) as StripView[]).map((v) => (
+          {(positions ? (Object.keys(VIEWS) as StripView[]) : (['token'] as const)).map((v) => (
             <label key={v}>
               <input
                 type="radio"
@@ -149,13 +152,20 @@ export default function NumberStripFigure({
         Number {active + 1} of {size}.{' '}
         <span className={view === 'token' ? 'is-current' : undefined}>
           Token {fmt(token.tokenRow[active])}
-        </span>{' '}
-        +{' '}
-        <span className={view === 'position' ? 'is-current' : undefined}>
-          position {fmt(token.positionRow[active])}
-        </span>{' '}
-        ={' '}
-        <span className={view === 'sum' ? 'is-current' : undefined}>{fmt(token.sum[active])}</span>
+        </span>
+        {positions && (
+          <>
+            {' '}
+            +{' '}
+            <span className={view === 'position' ? 'is-current' : undefined}>
+              position {fmt(token.positionRow[active])}
+            </span>{' '}
+            ={' '}
+            <span className={view === 'sum' ? 'is-current' : undefined}>
+              {fmt(token.sum[active])}
+            </span>
+          </>
+        )}
       </p>
       <p className="strip-summary" aria-live="polite">
         Blue is below zero and orange is above, and paler means closer to zero. {describe(row)}
