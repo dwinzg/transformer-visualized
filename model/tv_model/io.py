@@ -9,9 +9,9 @@ from pathlib import Path
 import torch
 from safetensors import safe_open
 from safetensors.torch import save_file
+from torch import nn
 
 from .config import config_from_engine_json
-from .gpt import GPT
 from .llama import build_model
 
 FORMAT_ID = "transformer-visualized/gpt2/1"
@@ -52,7 +52,9 @@ def _sort_metadata_header(path: Path) -> None:
     path.write_bytes(bytes(data))
 
 
-def save_model(model: GPT, path: Path, extra_metadata: Mapping[str, str] | None = None) -> None:
+def save_model(
+    model: nn.Module, path: Path, extra_metadata: Mapping[str, str] | None = None
+) -> None:
     metadata = {"format": format_for(model.cfg), "config": json.dumps(model.cfg.to_engine_json())}
     if extra_metadata:
         reserved = sorted(set(extra_metadata) & set(metadata))
@@ -68,7 +70,8 @@ def save_model(model: GPT, path: Path, extra_metadata: Mapping[str, str] | None 
     _sort_metadata_header(path)
 
 
-def load_model(path: Path) -> GPT:  # or a Llama, with the same interface
+def load_model(path: Path) -> nn.Module:
+    """A GPT or a Llama, by the file's arch. Both take token ids and an optional trace."""
     with safe_open(str(path), framework="pt") as f:
         metadata = f.metadata() or {}
         if metadata.get("format") not in (FORMAT_ID, LLAMA_FORMAT_ID):

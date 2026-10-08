@@ -1,6 +1,6 @@
 # Tiny Llama-style model
 
-A second small model, trained the same way as [`../tiny`](../tiny/README.md), with the four changes most language models since LLaMA have made. It lets the site compare the two designs part by part.
+A second small model, trained the same way as [`../tiny`](../tiny/README.md), with four changes that most language models since have made. LLaMA (Touvron et al. 2023a) brought RMSNorm, rotary positions and SwiGLU, and Llama 2's larger models added grouped-query attention (Touvron et al. 2023b). It lets the site compare the two designs part by part.
 
 ## What changes from the GPT-2 style model
 
@@ -12,7 +12,7 @@ A second small model, trained the same way as [`../tiny`](../tiny/README.md), wi
 | Attention | 4 heads, each with its own keys and values | 4 query heads sharing 2 key and value heads (Ainslie et al. 2023) |
 | Biases | In every linear layer and norm | None |
 
-Both models tie the output to the token embedding table. Real LLaMA models do not tie it. We kept it so the two tiny models are about the same size.
+Both models tie the output to the token embedding table. LLaMA 1 and 2 and the larger Llama 3 models do not tie it, while the smallest Llama 3.2 models do. We kept it so the two tiny models are about the same size.
 
 ## Shape
 
@@ -28,7 +28,7 @@ Both models tie the output to the token embedding table. Real LLaMA models do no
 
 ## Training
 
-The same data, tokenizer, schedule and seed as `tiny`. 25,000 steps of 64 sequences of 128 tokens (204,800,000 tokens seen), AdamW, learning rate 2e-3 with warmup and cosine decay, on an Apple M4, in about 70 minutes.
+The same data, tokenizer, schedule and seed as `tiny`. 25,000 steps of 64 sequences of 128 tokens (204,800,000 tokens seen), AdamW, learning rate 2e-3 with warmup and cosine decay, on an Apple M4, in about 70 minutes. The shipped weights are the best checkpoint, at step 24,500.
 
 Validation loss 1.8281, against 1.8494 for `tiny`, on the same 40 fixed batches. With 6% fewer parameters it predicts slightly better. One run of each is not enough to say how much of that is the design and how much is chance.
 

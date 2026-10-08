@@ -30,6 +30,10 @@ class ModelConfig:
             raise ValueError(
                 f"n_heads {self.n_heads} is not a multiple of n_kv_heads {self.n_kv_heads}"
             )
+        if self.arch == "llama" and not self.rope_base > 1:
+            raise ValueError(f"rope_base must be above 1, got {self.rope_base}")
+        if self.arch == "gpt2" and self.n_kv_heads != 0:
+            raise ValueError("n_kv_heads is only for the llama arch")
         if self.arch == "llama" and self.d_head % 2:
             raise ValueError(f"rotary positions need an even d_head, got {self.d_head}")
 
